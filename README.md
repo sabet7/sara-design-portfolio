@@ -2,8 +2,9 @@
 ## Catch all document for all things related to this design portfolio
 
 # Change log
-![Status] (https://img.shields.io/github/commit-activity/w/badge%20/sara-design-portfolio
-) 
+[![Last commit] (https://shields.io/github/last-commit/sabet7/sara-design/portfolio)](https://github.com.sabet7/sara-design-portfolio/commits/main)
+
+
 ![Version] 1
 # Description
 
