@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ==========================================================================
+   DESIGN TOKENS — confirmed values, not approximations. Update here once,
+   applies everywhere via var(). Font: Clash Grotesk Variable — not wired in
+   yet, needs the actual font file from Sara before next/font/local can use it.
+   ========================================================================== */
+:root {
+  --color-text: #161717;
+  --color-text-muted: #717171;
+  --color-text-light-muted: #898989;
+  --color-brand-orange: #ff8000;
+  --color-brand-blue: #63c6ff;
+}
+
+/* Dimmer stages — structural mechanism ported from the Webflow spec (Light
+   -> Warm -> Dusk -> Charcoal -> Near-black). Refine these
+   during the design-system pass; the mechanism (data attribute + localStorage
+   + CSS custom properties) is what matters right now, not these exact values. */
+:root[data-dimmer-stage="light"] {
+  --bg: 255 255 255;
+  --fg: 22 23 23; /* #161717 — confirmed */
+  --fg-muted: 113 113 113; /* #717171 — confirmed */
+}
+:root[data-dimmer-stage="warm"] {
+  --bg: 250 244 235;
+  --fg: 30 26 20;
+  --fg-muted: 120 110 95;
+}
+:root[data-dimmer-stage="dusk"] {
+  --bg: 60 55 65;
+  --fg: 235 230 235;
+  --fg-muted: 170 165 175;
+}
+:root[data-dimmer-stage="charcoal"] {
+  --bg: 35 35 38;
+  --fg: 230 230 230;
+  --fg-muted: 150 150 155;
+}
+:root[data-dimmer-stage="near-black"] {
+  --bg: 8 8 9;
+  --fg: 220 220 220;
+  --fg-muted: 120 120 125;
+}
+
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--fg));
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.project-card-media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.project-card-media:hover {
+  border-color: rgb(var(--accent));
+  box-shadow: 0 0 24px rgb(var(--accent) / 0.35);
+}
+
+.sara-float-nav {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px) saturate(160%) contrast(108%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%) contrast(108%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.1),
+    0 1px 0 rgba(255, 255, 255, 0.7) inset;
+
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+
+  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.float-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--color-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, font-weight 0.2s ease;
+  white-space: nowrap;
+}
+
+.float-nav-item:hover,
+.float-nav-item.active {
+  background: rgba(0, 0, 0, 0.07);
+  font-weight: 600;
+}
+
+.float-nav-item.active {
+  animation: nav-bounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes nav-bounce {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12); }
+  70% { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
+.project-card-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #999;
+  font-size: 11px;
+  background: repeating-linear-gradient(
+    45deg,
+    #eee,
+    #eee 10px,
+    #e4e4e4 10px,
+    #e4e4e4 20px
+  );
+}
