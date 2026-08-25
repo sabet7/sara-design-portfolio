@@ -4,7 +4,7 @@ import "./globals.css";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 import Dimmer from "@/components/Dimmer";
 import Header from "@/components/Header";
-import SaElie from "@/components/SaElie";
+import Elie from "@/components/Elie";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -31,7 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Dimmer />
         </div>
         <Header />
-        <SaElie />
+        <Elie />
         {children}
         <Analytics />
       </body>
