@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MDXRemote } from "next-mdx-remote/rsc";
 import { getAllCaseStudies, getCaseStudyBySlug } from "@/lib/content";
+import CaseStudyDetail from "@/components/CaseStudyDetail";
 
 export function generateStaticParams() {
   return getAllCaseStudies().map((cs) => ({ slug: cs.frontmatter.slug }));
@@ -43,24 +44,14 @@ export default async function CaseStudyPage({
   const caseStudy = getCaseStudyBySlug(slug);
   if (!caseStudy) notFound();
 
-  const { frontmatter, content } = caseStudy;
-
   return (
-    <main style={{ padding: "3rem", fontFamily: "sans-serif" }}>
-      <p style={{ opacity: 0.6 }}>
-        {frontmatter.year} · {frontmatter.status}
-      </p>
-      <h1>{frontmatter.projectTitle}</h1>
-      <p>{frontmatter.oneLiner}</p>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={frontmatter.heroImage}
-        alt={frontmatter.projectTitle}
-        style={{ maxWidth: "100%" }}
-      />
-      <article>
-        <MDXRemote source={content} />
-      </article>
-    </main>
+    <div className="detail-overlay">
+      <div className="detail-card">
+        <Link href="/" className="detail-close" aria-label="Close">
+          ×
+        </Link>
+        <CaseStudyDetail caseStudy={caseStudy} />
+      </div>
+    </div>
   );
 }

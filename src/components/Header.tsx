@@ -50,14 +50,15 @@ export default function Header() {
         alignItems: "flex-start",
         justifyContent: "space-between",
         padding: "1.5rem 2rem",
-        fontSize: 14,
+        fontSize: 18,
+        fontWeight: 500,
         flexWrap: "wrap",
         gap: "1rem",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
-          <strong>SV</strong>
+        <strong style={{ fontSize: 20, fontWeight: 800 }}>SV</strong>
         </Link>
         {now && (
           <span>
@@ -67,7 +68,7 @@ export default function Header() {
         )}
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 6, paddingTop: 2 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 7, paddingTop: 3 }}>
         <span
           style={{
             width: 8,
@@ -89,7 +90,7 @@ export default function Header() {
 
       <nav style={{ display: "flex", gap: "1.25rem", paddingTop: 2 }}>
         <a href="/resume.pdf">Resume</a>
-        <a href="mailto:hello@saravillar.com">Connect</a>
+        <a href="mailto:sedelvillar104@gmail.com">Connect</a>
         <a href="https://github.com/sabet7" target="_blank" rel="noreferrer">
           Github
         </a>
@@ -98,7 +99,7 @@ export default function Header() {
         </a>
       </nav>
 
-      <Button href="mailto:hello@saravillar.com">Connect</Button>
+      <Button href="mailto:sedelvillar104@gmail.com">Connect</Button>
     </header>
   );
 }

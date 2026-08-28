@@ -22,7 +22,11 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* ACTIVE FONT — uncomment ONE line below, comment out the rest.
+     Also update --font-sans above (@theme inline block) to match. */
+  font-family: var(--font-space-grotesk), sans-serif;   /* Space Grotesk — ACTIVE */
+  /* font-family: var(--font-bricolage), sans-serif; */ /* Bricolage Grotesque */
+  /* font-family: var(--font-clash), sans-serif; */     /* Clash Grotesk — needs .woff2 file, see lib/fonts.ts */
 }
 
 /* ==========================================================================
@@ -74,6 +78,9 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Project card hover — glow color set per-card via the --accent custom
+   property (see ProjectCard.tsx), orange for case studies, blue for
+   explorations. */
 .project-card-media {
   position: relative;
   aspect-ratio: 4 / 3;
@@ -83,17 +90,22 @@ body {
   border: 2px solid transparent;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-.project-card-media:hover {
-  border-color: rgb(var(--accent));
-  box-shadow: 0 0 24px rgb(var(--accent) / 0.35);
-}
+/* Hover glow intentionally removed — Sara's finding a different way to
+   indicate selection. The --accent custom property and border are still
+   set up in .project-card-media above, ready to reuse for whatever
+   replaces this. */
 
+/* Liquid glass floating pill nav — ported from the Webflow build's tested
+   recipe, not reinvented. Bottom-center, filters the project grid. */
 .sara-float-nav {
   position: fixed;
   bottom: 28px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
+  max-width: calc(100vw - 2rem);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 
   background: rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(10px) saturate(160%) contrast(108%);
@@ -140,12 +152,22 @@ body {
 }
 
 @keyframes nav-bounce {
-  0% { transform: scale(1); }
-  40% { transform: scale(1.12); }
-  70% { transform: scale(0.96); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.12);
+  }
+  70% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
+/* Placeholder pattern behind every project card image — visible until a
+   real photo covers it, so the grid never looks blank/broken. */
 .project-card-placeholder {
   position: absolute;
   inset: 0;
@@ -164,3 +186,326 @@ body {
     #e4e4e4 20px
   );
 }
+
+/* True modal overlay (intercepting routes) — sits fixed on top of the
+   grid, which stays mounted and visible behind it. Reuses .detail-card
+   and everything inside it from the full-page version. */
+.detail-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+/* Only inside the modal — the full-page (.detail-overlay) version keeps
+   normal document scroll, since it behaves like a real page, not a window. */
+.detail-modal-backdrop .detail-card {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.detail-overlay {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.detail-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  max-width: 85vw;
+  width: 100%;
+  padding: 3rem;
+  position: relative;
+}
+
+.detail-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--color-text);
+  font-size: 20px;
+  text-decoration: none;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-right: 3rem;
+  margin-bottom: 1.5rem;
+}
+
+.detail-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.detail-subtitle {
+  color: var(--color-text-muted);
+  margin: 0 0 12px;
+}
+
+.detail-tags-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.detail-tag {
+  display: inline-block;
+  background: var(--color-brand-orange);
+  color: #111;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.detail-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--color-text-light-muted);
+  white-space: nowrap;
+}
+
+.detail-meta-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--color-text-light-muted);
+  margin-bottom: 1.5rem;
+}
+
+.detail-hero {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  display: block;
+}
+
+.detail-body {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 2.5rem;
+}
+
+.detail-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: sticky;
+  top: 2rem;
+  align-self: start;
+  font-size: 14px;
+}
+
+.detail-sidebar a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.detail-sidebar a:hover {
+  color: var(--color-text);
+}
+
+.detail-sidebar a.active {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.detail-content {
+  min-width: 0;
+}
+
+.detail-section-heading {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-light-muted);
+  margin-top: 3rem;
+  margin-bottom: 0.75 rem;
+  scroll-margin-top: 2rem;
+}
+
+.detail-section-heading:first-child {
+  margin-top: 0;
+}
+
+.detail-subheading {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.detail-paragraph {
+  line-height: 1.6;
+  color: var(--color-text);
+  margin: 0 0 1rem;
+}
+
+.detail-list-section {
+  margin-top: 2rem;
+}
+
+.detail-list-section h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.detail-list-section ul {
+  padding-left: 1.25rem;
+  line-height: 1.6;
+}
+
+.exploration-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 2rem;
+}
+
+.exploration-gallery img {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .detail-body {
+    grid-template-columns: 1fr;
+  }
+  .detail-sidebar {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .detail-card {
+    padding: 1.5rem;
+    max-height: 90vh;
+  }
+  .detail-header {
+    flex-direction: column;
+  }
+  .detail-meta {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+  .exploration-gallery {
+    grid-template-columns: 1fr;
+  }
+}
+/* ===== LIQUID GLASS NAV — matches LiquidNav.tsx's existing classNames ===== */
+.sara-float-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 9100;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: calc(100vw - 160px);
+
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(7px) saturate(200%) contrast(115%);
+  -webkit-backdrop-filter: blur(7px) saturate(200%) contrast(115%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.1),
+    0 1px 0 rgba(255, 255, 255, 0.75) inset,
+    -0.5px 0 0 rgba(255, 0, 60, 0.05),
+    0.5px 0 0 rgba(0, 140, 255, 0.05);
+}
+
+.sara-float-nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.08) 22%, rgba(255,255,255,0) 45%);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.float-nav-item {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  color: #111;
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease, font-weight 0.2s ease;
+}
+.float-nav-item:hover:not(.active) {
+  background: rgba(0, 0, 0, 0.07);
+  font-weight: 500;
+}
+.float-nav-item.active {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(6px) saturate(160%);
+  -webkit-backdrop-filter: blur(6px) saturate(160%);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.6) inset;
+  font-weight: 600;
+  color: #f46e27;
+}
+
+/* ===== CARD TAGS ===== */
+.tag {
+  padding: 3.2px 6px;
+  border-radius: 3.2px;
+  font-size: 10.24px;
+  font-weight: 600;
+  color: #000;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.tag.case-study { background: #ff9900; }
+.tag.exploration { background: #00a6ff; }
+
+.home-intro {
+  max-width: 710px;
+  font-size: clamp(14px, 1.1vw, 20px);
+  font-weight: 500;
+  line-height: 1.4;
+  padding: 1.5rem 0 2.5rem;
+}
+

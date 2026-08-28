@@ -55,9 +55,9 @@ export function getAllCaseStudies(): CaseStudy[] {
     }
 
     for (const section of REQUIRED_CASE_STUDY_SECTIONS) {
-      if (!content.includes(`## ${section}`)) {
+      if (!content.includes(`###### ${section}`)) {
         throw new Error(
-          `Case study "${file}" is missing the "## ${section}" section heading. ` +
+          `Case study "${file}" is missing the "###### ${section}" section heading. ` +
             `Every case study needs all six: ${REQUIRED_CASE_STUDY_SECTIONS.join(", ")}.`
         );
       }

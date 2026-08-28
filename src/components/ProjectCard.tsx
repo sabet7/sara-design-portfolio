@@ -65,33 +65,22 @@ export default function ProjectCard({
         )}
 
         <div
-          style={{
-            position: "absolute",
-            top: 8,
-            right: 8,
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-          }}
-        >
-          {types.map((t) => (
-            <span
-              key={t}
-              style={{
-                background: `rgb(${ACCENT[variant]})`,
-                color: "#111",
-                fontSize: 11,
-                fontWeight: 700,
-                padding: "3px 8px",
-                borderRadius: 4,
-                textTransform: "uppercase",
-                letterSpacing: 0.5,
-              }}
-            >
-              {t}
-            </span>
-          ))}
-        </div>
+  style={{
+    position: "absolute",
+    top: 8,
+    right: 8,
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+  }}
+>
+  {types.map((t) => (
+    <span key={t} className={`tag ${variant}`}>
+      {t}
+    </span>
+  ))}
+</div>
+
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 14 }}>
         <span>{title}</span>

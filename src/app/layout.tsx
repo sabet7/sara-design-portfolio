@@ -5,6 +5,7 @@ import { SITE_URL, SITE_NAME } from "@/lib/site";
 import Dimmer from "@/components/Dimmer";
 import Header from "@/components/Header";
 import Elie from "@/components/Elie";
+import { spaceGrotesk, bricolageGrotesque } from "@/lib/fonts";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -23,9 +24,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+  modal,
+}: {
+  children: React.ReactNode;
+  modal: React.ReactNode;
+}) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html
+    lang="en"
+    className={`h-full antialiased ${spaceGrotesk.variable} ${bricolageGrotesque.variable}`}
+    >
       <body className="min-h-full flex flex-col">
         <div style={{ position: "fixed", bottom: "1.5rem", right: "1.5rem", zIndex: 50 }}>
           <Dimmer />
@@ -33,6 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Header />
         <Elie />
         {children}
+        {modal}
         <Analytics />
       </body>
     </html>
