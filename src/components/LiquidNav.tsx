@@ -1,5 +1,8 @@
 "use client";
 
+import Dimmer from "./Dimmer";
+import Elie from "./Elie";
+
 const FILTERS = ["All", "Product", "Web", "Brand", "Creative"] as const;
 export type Filter = (typeof FILTERS)[number];
 
@@ -20,6 +23,10 @@ export default function LiquidNav({ active, onChange }: LiquidNavProps) {
           {f}
         </button>
       ))}
+      <div className="float-nav-divider" />
+      <Elie />
+      <Dimmer />
     </nav>
   );
 }
+

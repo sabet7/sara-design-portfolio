@@ -38,8 +38,8 @@ export default function Dimmer() {
       onClick={cycle}
       aria-label={`Dimmer: ${stage}. Click to cycle to the next stage.`}
       style={{
-        width: 52,
-        height: 52,
+        width: 44,
+        height: 44,
         borderRadius: "50%",
         display: "flex",
         alignItems: "center",

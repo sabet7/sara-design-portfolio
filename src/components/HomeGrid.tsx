@@ -16,15 +16,15 @@ export interface CardData {
   href: string;
 }
 
+function matchesFilter(item: CardData, filter: Filter): boolean {
+  if (filter === "All") return true;
+  const target = filter.toLowerCase();
+  return item.types.some((t) => t.toLowerCase().includes(target));
+}
+
 export default function HomeGrid({ items }: { items: CardData[] }) {
   const [filter, setFilter] = useState<Filter>("All");
-
-  const visible =
-    filter === "All"
-      ? items
-      : items.filter((item) =>
-          item.types.some((t) => t.toLowerCase() === filter.toLowerCase())
-        );
+  const visible = items.filter((item) => matchesFilter(item, filter));
 
   return (
     <>
