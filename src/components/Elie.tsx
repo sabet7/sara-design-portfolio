@@ -64,7 +64,7 @@ export default function Elie() {
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 200,
+        zIndex: 9500,
         background: "rgba(0,0,0,0.4)",
         display: "flex",
         alignItems: "center",
@@ -73,6 +73,7 @@ export default function Elie() {
       }}
     >
       <div
+        className="elie-modal-card"
         onClick={(e) => e.stopPropagation()}
         style={{
           background: "#fff",

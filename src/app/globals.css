@@ -78,6 +78,17 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+#grainCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 30;
+}
+
+
 /* Project card hover — glow color set per-card via the --accent custom
    property (see ProjectCard.tsx), orange for case studies, blue for
    explorations. */
@@ -164,6 +175,21 @@ body {
   100% {
     transform: scale(1);
   }
+}
+
+@keyframes elieModalRise {
+  from {
+    opacity: 0;
+    transform: translateY(48px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.elie-modal-card {
+  animation: elieModalRise 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Placeholder pattern behind every project card image — visible until a

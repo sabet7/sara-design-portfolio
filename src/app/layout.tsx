@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 import Header from "@/components/Header";
+import GrainOverlay from "@/components/GrainOverlay";
 import { spaceGrotesk, bricolageGrotesque } from "@/lib/fonts";
 
 export const metadata: Metadata = {
@@ -35,6 +36,7 @@ export default function RootLayout({
     className={`h-full antialiased ${spaceGrotesk.variable} ${bricolageGrotesque.variable}`}
     >
       <body className="min-h-full flex flex-col">
+        <GrainOverlay />
         <Header />
         {children}
         {modal}
