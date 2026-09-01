@@ -11,10 +11,30 @@ export default function Elie() {
   const [customAnswer, setCustomAnswer] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [visibleWordCount, setVisibleWordCount] = useState(0);
+  const [thinkingImgFailed, setThinkingImgFailed] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
   const activeNode = activeId ? QA_TREE[activeId] : null;
+  const fullText = activeNode ? activeNode.answer : customAnswer;
+  const words = fullText ? fullText.split(" ") : [];
+
+  useEffect(() => {
+    if (!fullText) {
+      setVisibleWordCount(0);
+      return;
+    }
+    let i = 0;
+    setVisibleWordCount(0);
+    const interval = setInterval(() => {
+      i++;
+      setVisibleWordCount(i);
+      if (i >= words.length) clearInterval(interval);
+    }, 70);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeNode, customAnswer]);
 
   function ask(id: string) {
     setActiveId(id);
@@ -27,6 +47,7 @@ export default function Elie() {
     setCustomAnswer(null);
     setCustomQuestion("");
     setLoading(false);
+    setThinkingImgFailed(false);
   }
 
   async function askCustom(e: React.FormEvent) {
@@ -67,11 +88,32 @@ export default function Elie() {
         zIndex: 9500,
         background: "rgba(0,0,0,0.4)",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         padding: "1.5rem",
       }}
     >
+      {loading && (
+        <div style={{ marginBottom: "16px", pointerEvents: "none" }}>
+          {!thinkingImgFailed ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src="/media/elie/elie-thinking.webp"
+              alt=""
+              style={{ width: 160, display: "block" }}
+              onError={() => setThinkingImgFailed(true)}
+            />
+          ) : (
+            <div style={{ display: "flex", gap: 6, justifyContent: "center", padding: "12px 0" }}>
+              <span className="elie-thinking-dot" style={{ animationDelay: "0s" }} />
+              <span className="elie-thinking-dot" style={{ animationDelay: "0.15s" }} />
+              <span className="elie-thinking-dot" style={{ animationDelay: "0.3s" }} />
+            </div>
+          )}
+        </div>
+      )}
+
       <div
         className="elie-modal-card"
         onClick={(e) => e.stopPropagation()}
@@ -105,16 +147,14 @@ export default function Elie() {
           Hello, I&apos;m Elie. What would you like to know about Sara?
         </h2>
 
-        {loading && (
-          <p style={{ color: "var(--color-text-muted)", marginBottom: "1.5rem" }}>
-            Thinking…
-          </p>
-        )}
-
         {!loading && (activeNode || customAnswer) && (
           <div style={{ marginBottom: "1.5rem" }}>
             <p style={{ color: "var(--color-text-muted)", lineHeight: 1.5 }}>
-              {activeNode ? activeNode.answer : customAnswer}
+              {words.slice(0, visibleWordCount).map((word, i) => (
+                <span key={i} className="elie-word">
+                  {word}{" "}
+                </span>
+              ))}
             </p>
             <button
               onClick={() => {

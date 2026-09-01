@@ -2,15 +2,14 @@
 
 import { useEffect, useRef } from "react";
 
-// Density and alpha values are intentionally lower than the old Webflow
-// version — Sara asked for a more subtle grain in this rebuild.
 const GRAIN_CONFIG = {
-  density: 0.06,
-  light: { shadowAlpha: 0.04, highlightAlpha: 0.13 },
-  dark: { shadowAlpha: 0.03, highlightAlpha: 0.17 },
+  density: 0.12,
+  light: { shadowAlpha: 0.08, highlightAlpha: 0.22 },
+  dark: { shadowAlpha: 0.06, highlightAlpha: 0.28 },
 };
 
 const DARK_STAGES = ["charcoal", "near-black"];
+const FLICKER_INTERVAL_MS = 90;
 
 export default function GrainOverlay() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -30,6 +29,7 @@ export default function GrainOverlay() {
     if (!noiseCtx) return;
 
     let lastIsDark = false;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     function generateNoise(isDark: boolean) {
       const dpr = window.devicePixelRatio || 1;
@@ -66,8 +66,6 @@ export default function GrainOverlay() {
       noiseCtx!.putImageData(imgData, 0, 0);
     }
 
-    // Same "punch holes over real photos" logic as the old script — the
-    // grain never sits on top of an <img>, <video>, or a background-image.
     function clearMediaRegions() {
       const dpr = window.devicePixelRatio || 1;
       const vw = window.innerWidth;
@@ -106,8 +104,6 @@ export default function GrainOverlay() {
 
     paintGrain(getIsDark());
 
-    // Dimmer.tsx sets data-dimmer-stage independently — this observer is
-    // how grain reacts to it without any direct wiring between components.
     const observer = new MutationObserver(() => paintGrain(getIsDark()));
     observer.observe(document.documentElement, {
       attributes: true,
@@ -132,11 +128,19 @@ export default function GrainOverlay() {
     }
     window.addEventListener("scroll", handleScroll, { passive: true });
 
+    let flickerInterval: ReturnType<typeof setInterval> | null = null;
+    if (!prefersReducedMotion) {
+      flickerInterval = setInterval(() => {
+        paintGrain(lastIsDark);
+      }, FLICKER_INTERVAL_MS);
+    }
+
     return () => {
       observer.disconnect();
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll);
       clearTimeout(resizeTimer);
+      if (flickerInterval) clearInterval(flickerInterval);
     };
   }, []);
 

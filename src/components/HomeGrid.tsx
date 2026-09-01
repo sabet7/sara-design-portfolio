@@ -13,6 +13,7 @@ export interface CardData {
   thumbnailSrc: string;
   gifSrc?: string;
   variant: "case-study" | "exploration";
+  featured?: boolean;
   href: string;
 }
 
@@ -49,6 +50,7 @@ export default function HomeGrid({ items }: { items: CardData[] }) {
               thumbnailSrc={item.thumbnailSrc}
               gifSrc={item.gifSrc}
               variant={item.variant}
+              featured={item.featured}
             />
           </Link>
         ))}

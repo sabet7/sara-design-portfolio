@@ -22,34 +22,22 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  /* ACTIVE FONT — uncomment ONE line below, comment out the rest.
-     Also update --font-sans above (@theme inline block) to match. */
-  font-family: var(--font-space-grotesk), sans-serif;   /* Space Grotesk — ACTIVE */
-  /* font-family: var(--font-bricolage), sans-serif; */ /* Bricolage Grotesque */
-  /* font-family: var(--font-clash), sans-serif; */     /* Clash Grotesk — needs .woff2 file, see lib/fonts.ts */
+  font-family: var(--font-space-grotesk), sans-serif;
 }
 
-/* ==========================================================================
-   DESIGN TOKENS — confirmed values, not approximations. Update here once,
-   applies everywhere via var(). Font: Clash Grotesk Variable — not wired in
-   yet, needs the actual font file from Sara before next/font/local can use it.
-   ========================================================================== */
 :root {
   --color-text: #161717;
   --color-text-muted: #717171;
   --color-text-light-muted: #898989;
   --color-brand-orange: #ff8000;
   --color-brand-blue: #63c6ff;
+  --color-featured: #fcba03;
 }
 
-/* Dimmer stages — structural mechanism ported from the Webflow spec (Light
-   -> Warm -> Dusk -> Charcoal -> Near-black). Refine these
-   during the design-system pass; the mechanism (data attribute + localStorage
-   + CSS custom properties) is what matters right now, not these exact values. */
 :root[data-dimmer-stage="light"] {
   --bg: 255 255 255;
-  --fg: 22 23 23; /* #161717 — confirmed */
-  --fg-muted: 113 113 113; /* #717171 — confirmed */
+  --fg: 22 23 23;
+  --fg-muted: 113 113 113;
 }
 :root[data-dimmer-stage="warm"] {
   --bg: 250 244 235;
@@ -57,7 +45,7 @@ body {
   --fg-muted: 120 110 95;
 }
 :root[data-dimmer-stage="dusk"] {
-  --bg: 60 55 65;
+  --bg: 87 87 87;
   --fg: 235 230 235;
   --fg-muted: 170 165 175;
 }
@@ -88,10 +76,6 @@ body {
   z-index: 30;
 }
 
-
-/* Project card hover — glow color set per-card via the --accent custom
-   property (see ProjectCard.tsx), orange for case studies, blue for
-   explorations. */
 .project-card-media {
   position: relative;
   aspect-ratio: 4 / 3;
@@ -99,101 +83,51 @@ body {
   border-radius: 4px;
   overflow: hidden;
   border: 2px solid transparent;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  filter: brightness(0.92) saturate(0.96);
+  transition: filter 0.35s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
-/* Hover glow intentionally removed — Sara's finding a different way to
-   indicate selection. The --accent custom property and border are still
-   set up in .project-card-media above, ready to reuse for whatever
-   replaces this. */
-
-/* Liquid glass floating pill nav — ported from the Webflow build's tested
-   recipe, not reinvented. Bottom-center, filters the project grid. */
-.sara-float-nav {
-  position: fixed;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 100;
-  max-width: calc(100vw - 2rem);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-
-  background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(10px) saturate(160%) contrast(108%);
-  -webkit-backdrop-filter: blur(10px) saturate(160%) contrast(108%);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.1),
-    0 1px 0 rgba(255, 255, 255, 0.7) inset;
-
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 10px 14px;
-
-  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.float-nav-item {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  border-radius: 999px;
-  font-size: 15px;
-  font-weight: 400;
-  color: var(--color-text);
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, font-weight 0.2s ease;
-  white-space: nowrap;
-}
-
-.float-nav-item:hover,
-.float-nav-item.active {
-  background: rgba(0, 0, 0, 0.07);
-  font-weight: 600;
-}
-
-.float-nav-item.active {
-  animation: nav-bounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+.project-card-media:hover {
+  filter: brightness(1.08) saturate(1.05);
 }
 
 @keyframes nav-bounce {
-  0% {
-    transform: scale(1);
-  }
-  40% {
-    transform: scale(1.12);
-  }
-  70% {
-    transform: scale(0.96);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12); }
+  70% { transform: scale(0.96); }
+  100% { transform: scale(1); }
 }
 
 @keyframes elieModalRise {
-  from {
-    opacity: 0;
-    transform: translateY(48px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(48px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .elie-modal-card {
-  animation: elieModalRise 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: elieModalRise 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Placeholder pattern behind every project card image — visible until a
-   real photo covers it, so the grid never looks blank/broken. */
+@keyframes elieWordFade {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.elie-word {
+  display: inline-block;
+  animation: elieWordFade 0.25s ease-out;
+}
+
+@keyframes elieDotPulse {
+  0%, 80%, 100% { opacity: 0.3; }
+  40% { opacity: 1; }
+}
+.elie-thinking-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-brand-orange);
+  display: inline-block;
+  animation: elieDotPulse 1.1s ease-in-out infinite;
+}
+
 .project-card-placeholder {
   position: absolute;
   inset: 0;
@@ -204,18 +138,9 @@ body {
   gap: 6px;
   color: #999;
   font-size: 11px;
-  background: repeating-linear-gradient(
-    45deg,
-    #eee,
-    #eee 10px,
-    #e4e4e4 10px,
-    #e4e4e4 20px
-  );
+  background: repeating-linear-gradient(45deg, #eee, #eee 10px, #e4e4e4 10px, #e4e4e4 20px);
 }
 
-/* True modal overlay (intercepting routes) — sits fixed on top of the
-   grid, which stays mounted and visible behind it. Reuses .detail-card
-   and everything inside it from the full-page version. */
 .detail-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -227,8 +152,6 @@ body {
   padding: 1.5rem;
 }
 
-/* Only inside the modal — the full-page (.detail-overlay) version keeps
-   normal document scroll, since it behaves like a real page, not a window. */
 .detail-modal-backdrop .detail-card {
   max-height: 85vh;
   overflow-y: auto;
@@ -281,6 +204,7 @@ body {
   font-size: 28px;
   font-weight: 700;
   margin: 0 0 4px;
+  color: var(--color-text);
 }
 
 .detail-subtitle {
@@ -371,7 +295,7 @@ body {
   letter-spacing: 0.5px;
   color: var(--color-text-light-muted);
   margin-top: 3rem;
-  margin-bottom: 0.75 rem;
+  margin-bottom: 0.75rem;
   scroll-margin-top: 2rem;
 }
 
@@ -385,6 +309,7 @@ body {
   line-height: 1.25;
   margin-top: 2rem;
   margin-bottom: 0.75rem;
+  color: var(--color-text);
 }
 
 .detail-paragraph {
@@ -421,32 +346,14 @@ body {
 }
 
 @media (max-width: 640px) {
-  .detail-body {
-    grid-template-columns: 1fr;
-  }
-  .detail-sidebar {
-    position: static;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-  .detail-card {
-    padding: 1.5rem;
-    max-height: 90vh;
-  }
-  .detail-header {
-    flex-direction: column;
-  }
-  .detail-meta {
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
-  }
-  .exploration-gallery {
-    grid-template-columns: 1fr;
-  }
+  .detail-body { grid-template-columns: 1fr; }
+  .detail-sidebar { position: static; flex-direction: row; flex-wrap: wrap; gap: 16px; }
+  .detail-card { padding: 1.5rem; max-height: 90vh; }
+  .detail-header { flex-direction: column; }
+  .detail-meta { flex-direction: row; align-items: center; gap: 12px; }
+  .exploration-gallery { grid-template-columns: 1fr; }
 }
-/* ===== LIQUID GLASS NAV — matches LiquidNav.tsx's existing classNames ===== */
+
 .sara-float-nav {
   position: fixed;
   left: 50%;
@@ -461,7 +368,6 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   max-width: calc(100vw - 160px);
-
   background: rgba(255, 255, 255, 0.14);
   backdrop-filter: blur(7px) saturate(200%) contrast(115%);
   -webkit-backdrop-filter: blur(7px) saturate(200%) contrast(115%);
@@ -471,16 +377,6 @@ body {
     0 1px 0 rgba(255, 255, 255, 0.75) inset,
     -0.5px 0 0 rgba(255, 0, 60, 0.05),
     0.5px 0 0 rgba(0, 140, 255, 0.05);
-}
-
-.sara-float-nav::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(115deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.08) 22%, rgba(255,255,255,0) 45%);
-  mix-blend-mode: overlay;
-  pointer-events: none;
 }
 
 .float-nav-item {
@@ -496,7 +392,7 @@ body {
   font-family: inherit;
   font-size: 15px;
   font-weight: 400;
-  color: #111;
+  color: var(--color-text);
   white-space: nowrap;
   transition: background 0.2s ease, color 0.2s ease, font-weight 0.2s ease;
 }
@@ -511,9 +407,9 @@ body {
   box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.6) inset;
   font-weight: 600;
   color: #f46e27;
+  animation: nav-bounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ===== CARD TAGS ===== */
 .tag {
   padding: 3.2px 6px;
   border-radius: 3.2px;
@@ -533,5 +429,53 @@ body {
   font-weight: 500;
   line-height: 1.4;
   padding: 1.5rem 0 2.5rem;
+}
+
+.hover-circle {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.project-card-media:hover .hover-circle {
+  opacity: 1;
+}
+.hover-circle-dark { display: none; }
+:root[data-dimmer-stage="charcoal"] .hover-circle-light,
+:root[data-dimmer-stage="near-black"] .hover-circle-light {
+  display: none;
+}
+:root[data-dimmer-stage="charcoal"] .hover-circle-dark,
+:root[data-dimmer-stage="near-black"] .hover-circle-dark {
+  display: block;
+}
+
+.hover-circle {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.project-card-media:hover .hover-circle {
+  opacity: 1;
+}
+.hover-circle-dark { display: none; }
+:root[data-dimmer-stage="charcoal"] .hover-circle-light,
+:root[data-dimmer-stage="near-black"] .hover-circle-light {
+  display: none;
+}
+:root[data-dimmer-stage="charcoal"] .hover-circle-dark,
+:root[data-dimmer-stage="near-black"] .hover-circle-dark {
+  display: block;
 }
 

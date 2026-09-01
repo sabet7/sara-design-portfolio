@@ -5,24 +5,25 @@ interface ButtonProps {
   href?: string;
   onClick?: () => void;
   icon?: ReactNode;
+  fontSize?: number;
 }
 
-const pillStyle: React.CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 6,
-  background: "var(--color-brand-orange)",
-  color: "var(--color-text)",
-  fontWeight: 700,
-  fontSize: 14,
-  padding: "8px 18px",
-  borderRadius: 999,
-  border: "none",
-  cursor: "pointer",
-  textDecoration: "none",
-};
+export default function Button({ children, href, onClick, icon, fontSize = 14 }: ButtonProps) {
+  const pillStyle: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    background: "var(--color-brand-orange)",
+    color: "var(--color-text)",
+    fontWeight: 700,
+    fontSize,
+    padding: "8px 18px",
+    borderRadius: 999,
+    border: "none",
+    cursor: "pointer",
+    textDecoration: "none",
+  };
 
-export default function Button({ children, href, onClick, icon }: ButtonProps) {
   if (href) {
     return (
       <a href={href} style={pillStyle}>

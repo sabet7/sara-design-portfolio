@@ -10,6 +10,7 @@ interface ProjectCardProps {
   thumbnailSrc: string;
   gifSrc?: string;
   variant: "case-study" | "exploration";
+  featured?: boolean;
   onClick?: () => void;
 }
 
@@ -25,6 +26,7 @@ export default function ProjectCard({
   thumbnailSrc,
   gifSrc,
   variant,
+  featured,
   onClick,
 }: ProjectCardProps) {
   const [hovering, setHovering] = useState(false);
@@ -65,25 +67,53 @@ export default function ProjectCard({
         )}
 
         <div
-  style={{
-    position: "absolute",
-    top: 8,
-    right: 8,
-    display: "flex",
-    flexDirection: "column",
-    gap: 4,
-  }}
->
-  {types.map((t) => (
-    <span key={t} className={`tag ${variant}`}>
-      {t}
-    </span>
-  ))}
-</div>
+          style={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+          }}
+        >
+          {types.map((t) => (
+            <span key={t} className={`tag ${variant}`}>
+              {t}
+            </span>
+          ))}
+        </div>
 
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/media/effects/hover-circle-light.webp"
+          alt=""
+          aria-hidden="true"
+          className="hover-circle hover-circle-light"
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/media/effects/hover-circle-dark.webp"
+          alt=""
+          aria-hidden="true"
+          className="hover-circle hover-circle-dark"
+        />
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 14 }}>
-        <span>{title}</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700 }}>
+          {featured && (
+            <span
+              aria-hidden="true"
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: "var(--color-featured)",
+                flexShrink: 0,
+              }}
+            />
+          )}
+          {title}
+        </span>
         <span style={{ opacity: 0.6 }}>{year}</span>
       </div>
     </div>

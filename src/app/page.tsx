@@ -14,6 +14,7 @@ export default function Home() {
       thumbnailSrc: cs.frontmatter.thumbnailImage,
       gifSrc: cs.frontmatter.gifImage,
       variant: "case-study" as const,
+      featured: cs.frontmatter.featured,
       href: `/case-studies/${cs.frontmatter.slug}`,
     })),
     ...explorations.map((ex) => ({
