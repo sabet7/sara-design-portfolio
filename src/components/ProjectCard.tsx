@@ -39,12 +39,15 @@ export default function ProjectCard({
   const showGif = canHover && hovering && Boolean(gifSrc);
 
   return (
-    <div onClick={onClick} style={{ cursor: onClick ? "pointer" : undefined }}>
+    <div
+      onClick={onClick}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+      style={{ cursor: onClick ? "pointer" : undefined, position: "relative" }}
+    >
       <div
         className="project-card-media"
         style={{ "--accent": ACCENT[variant] } as React.CSSProperties}
-        onMouseEnter={() => setHovering(true)}
-        onMouseLeave={() => setHovering(false)}
       >
         <div className="project-card-placeholder">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -82,22 +85,23 @@ export default function ProjectCard({
             </span>
           ))}
         </div>
-
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/media/effects/hover-circle-light.webp"
-          alt=""
-          aria-hidden="true"
-          className="hover-circle hover-circle-light"
-        />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/media/effects/hover-circle-dark.webp"
-          alt=""
-          aria-hidden="true"
-          className="hover-circle hover-circle-dark"
-        />
       </div>
+
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/media/effects/hover-circle-light.webp"
+        alt=""
+        aria-hidden="true"
+        className={`hover-circle hover-circle-light${hovering ? " active" : ""}`}
+      />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/media/effects/hover-circle-dark.webp"
+        alt=""
+        aria-hidden="true"
+        className={`hover-circle hover-circle-dark${hovering ? " active" : ""}`}
+      />
+
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 14 }}>
         <span style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700 }}>
           {featured && (

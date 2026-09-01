@@ -58,6 +58,9 @@ export default function Elie() {
     setCustomAnswer(null);
     setLoading(true);
 
+    const MIN_LOADING_MS = 900;
+    const startedAt = Date.now();
+
     try {
       const res = await fetch("/api/elie", {
         method: "POST",
@@ -65,10 +68,18 @@ export default function Elie() {
         body: JSON.stringify({ question: customQuestion }),
       });
       const data = await res.json();
+      const elapsed = Date.now() - startedAt;
+      if (elapsed < MIN_LOADING_MS) {
+        await new Promise((r) => setTimeout(r, MIN_LOADING_MS - elapsed));
+      }
       setCustomAnswer(
         res.ok ? data.answer : "Something went wrong on my end — try again in a moment."
       );
     } catch {
+      const elapsed = Date.now() - startedAt;
+      if (elapsed < MIN_LOADING_MS) {
+        await new Promise((r) => setTimeout(r, MIN_LOADING_MS - elapsed));
+      }
       setCustomAnswer("Something went wrong on my end — try again in a moment.");
     } finally {
       setLoading(false);
@@ -152,7 +163,7 @@ export default function Elie() {
             <p style={{ color: "var(--color-text-muted)", lineHeight: 1.5 }}>
               {words.slice(0, visibleWordCount).map((word, i) => (
                 <span key={i} className="elie-word">
-                  {word}{" "}
+                  {word}
                 </span>
               ))}
             </p>
