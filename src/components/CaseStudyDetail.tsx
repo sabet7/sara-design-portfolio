@@ -3,6 +3,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import { REQUIRED_CASE_STUDY_SECTIONS } from "@/content/types";
 import type { CaseStudy } from "@/lib/content";
 import DetailSidebar from "@/components/DetailSidebar";
+import VoiceNote from "@/components/voice-note/VoiceNote";
 
 function slugify(text: string): string {
   return text
@@ -26,6 +27,7 @@ const mdxComponents = {
   h2: (props: React.ComponentProps<"h2">) => (<h2 className="detail-subheading" {...props} />),
   
   p: (props: React.ComponentProps<"p">) => <p className="detail-paragraph" {...props} />,
+  VoiceNote,
 };
 
 export default function CaseStudyDetail({ caseStudy }: { caseStudy: CaseStudy }) {

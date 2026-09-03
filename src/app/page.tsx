@@ -31,10 +31,9 @@ export default function Home() {
   return (
     <main style={{ padding: "0 3rem 3rem" }}>
       <p className="home-intro">
-        Welcome to the digital garden of Sara Del Villar, a multidisciplinary
+        Welcome to the digital archive of Sara Del Villar, a multidisciplinary
         product designer and developer; exploring the space between
-        storytelling, data, and craft. Working across product design, design
-        systems, and code to build and shape experiences for future digital
+        storytelling, data, and craft. Working across product design,systems, and code to build and shape experiences for future digital
         products.
       </p>
       <HomeGrid items={items} />

@@ -9,13 +9,13 @@ export const QA_TREE: Record<string, QANode> = {
   "design-process": {
     id: "design-process",
     question: "Tell me about your design process.",
-    answer: "My design process begins with understanding who I am building for and in what circumstances. Over the years, as a freelance designer, I have learned that no design lives in a vaccum. It comes with constraints, goals, and objectives. After I have scoped out the project, I begin working to creating a workable prototype as soon as possible, iterating and implementing feedback to refine each iteration.",
+    answer: " Over the years, as a freelance designer, I have learned that no design lives in a vaccum. Therefore, I begin begin by  understanding: what am I tyring to solve, for who, and in what system? After I have scoped out the project, I begin ideating and testing, refining the design with each round to arrive at the best design solution possible.",
     followUps: ["design-thinking", "product-strategy", "new-projects"],
   },
   "design-thinking": {
     id: "design-thinking",
     question: "What does design thinking mean to you?",
-    answer: "Design thinking must always come from a place of empathy— understanding user needs and finding a way to address them effectively.",
+    answer: "Design thinking means balance— balancing between user needs, business goals, and technical feasibility while crafting a joyful and memorable experience for users.",
     followUps: ["design-process", "product-strategy", "new-projects"],
   },
   "product-strategy": {

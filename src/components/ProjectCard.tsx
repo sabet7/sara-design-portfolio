@@ -31,6 +31,10 @@ export default function ProjectCard({
 }: ProjectCardProps) {
   const [hovering, setHovering] = useState(false);
   const [canHover, setCanHover] = useState(false);
+  // Bumped on every hover-in so the two <img> tags below remount and the
+  // browser decodes and plays the animated WebP from frame 0 again, instead
+  // of showing whatever frame it froze on after its first play-through.
+  const [animKey, setAnimKey] = useState(0);
 
   useEffect(() => {
     setCanHover(window.matchMedia("(hover: hover)").matches);
@@ -38,11 +42,20 @@ export default function ProjectCard({
 
   const showGif = canHover && hovering && Boolean(gifSrc);
 
+  function handleMouseEnter() {
+    setHovering(true);
+    setAnimKey((k) => k + 1);
+  }
+
+  function handleMouseLeave() {
+    setHovering(false);
+  }
+
   return (
     <div
       onClick={onClick}
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       style={{ cursor: onClick ? "pointer" : undefined, position: "relative" }}
     >
       <div
@@ -89,6 +102,7 @@ export default function ProjectCard({
 
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        key={`light-${animKey}`}
         src="/media/effects/hover-circle-light.webp"
         alt=""
         aria-hidden="true"
@@ -96,6 +110,7 @@ export default function ProjectCard({
       />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        key={`dark-${animKey}`}
         src="/media/effects/hover-circle-dark.webp"
         alt=""
         aria-hidden="true"
@@ -123,3 +138,4 @@ export default function ProjectCard({
     </div>
   );
 }
+

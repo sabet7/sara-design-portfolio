@@ -63,9 +63,15 @@ Part of the tailoring process is getting fittings, but not every customer who en
 
 ![Workflow of operations](/media/case-studies/alterations-rc-sst/content/alterations-workflow.png)
 
+However, in desiging and building this system, one question persisted: how would I handle data storage? Not only was I introducing a new system to how the tailors worked but I also had to consider the data system working behind the scenes. 
+
 ## Linking the self-service kiosk to operations.
 
-The kiosk now allowed for customer pick-ups, another task that tailors needed to attend to. Creating the pick-up flow was tricky.  How can I create something that keeps a history of picked-up items for the business owner, but clears out every week? This was more of a developer note, but throughout the design process and since I (with the help of Claude) was developing the MVP, I had to keep in mind the types of data structures I was going to use to keep track of orders. The business owners needed a history of fulfilled tickets, but on the customer-facing side, the kiosk needed clean “lockers”, an array from 1 through however many high-priority tickets were being fulfilled that week, to sort finished garments. This functionality of input data via new tickets and cleared data via picked-up garments helped create the backend. 
+The kiosk now allowed for customer pick-ups, another task that tailors needed to attend to. Creating the pick-up flow was tricky.  How can I create something that keeps a history of picked-up items for the business owner, but clears out every week? 
+
+This was more of a developer note, but throughout the design process and since I (with the help of Claude) was developing the MVP, I had to keep in mind the types of data structures I was going to use to keep track of orders. The business owners needed a history of fulfilled tickets, but on the customer-facing side, the kiosk needed clean “lockers”, an array from 1 through however many high-priority tickets were being fulfilled that week, to sort finished garments. This functionality of input data via new tickets and cleared data via picked-up garments helped create the backend. 
+
+After asking the tailors and owner a few questions and bouncing a ideas around in Claude, figured that a clean array every week would work. It was a risky move, but it made the new digitized work order system feasible to manage given that there was no compliance or data officers among the staff. 
 
 ### Employee dashboards
 
