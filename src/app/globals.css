@@ -106,6 +106,22 @@ body {
   animation: elieModalRise 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+@keyframes elieModalFall {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(48px); }
+}
+.elie-modal-closing {
+  animation: elieModalFall 0.5s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes elieCharacterDrop {
+  from { opacity: 0; transform: translateY(-24px) scale(0.85); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.elie-modal-character {
+  animation: elieCharacterDrop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @keyframes elieWordFade {
   from { opacity: 0; transform: translateY(2px); }
   to { opacity: 1; transform: translateY(0); }
@@ -393,7 +409,7 @@ body {
   font-family: inherit;
   font-size: 15px;
   font-weight: 400;
-  color: var(--color-text);
+  color: rgb(var(--fg));
   white-space: nowrap;
   transition: background 0.2s ease, color 0.2s ease, font-weight 0.2s ease;
 }

@@ -10,11 +10,20 @@ import styles from './DoodleLayer.module.css';
 
 const WEIGHTS = [2, 4, 7, 11];
 
+interface Point {
+  x: number;
+  y: number;
+  pressure: number;
+}
+
 export default function DoodleLayer() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const drawing = useRef(false);
-  const lastPoint = useRef<{ x: number; y: number } | null>(null);
+  // Buffers the last couple of raw pointer samples so each new segment is
+  // drawn as a smooth curve through them, rather than a straight line to
+  // the newest (often jagged) sample.
+  const pointsRef = useRef<Point[]>([]);
 
   const [active, setActive] = useState(false);
   const [hue, setHue] = useState(18); // starts near studio-orange
@@ -45,37 +54,78 @@ export default function DoodleLayer() {
     return () => window.removeEventListener('resize', resize);
   }, []);
 
-  function getPoint(e: ReactPointerEvent<HTMLCanvasElement>) {
+  function getPoint(e: ReactPointerEvent<HTMLCanvasElement>): Point {
     return { x: e.clientX, y: e.clientY, pressure: e.pressure || 0.5 };
+  }
+
+  function midpoint(a: Point, b: Point) {
+    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
   }
 
   function handlePointerDown(e: ReactPointerEvent<HTMLCanvasElement>) {
     if (!active) return;
     canvasRef.current?.setPointerCapture(e.pointerId);
     drawing.current = true;
-    lastPoint.current = getPoint(e);
+    pointsRef.current = [getPoint(e)];
   }
 
   function handlePointerMove(e: ReactPointerEvent<HTMLCanvasElement>) {
     if (!active || !drawing.current) return;
     const ctx = ctxRef.current;
-    const last = lastPoint.current;
-    if (!ctx || !last) return;
+    if (!ctx) return;
 
-    const point = getPoint(e);
+    const points = pointsRef.current;
+    points.push(getPoint(e));
+
+    // Need three samples to curve through the middle one — with fewer,
+    // just wait for the next pointer-move event.
+    if (points.length < 3) return;
+
+    const [p0, p1, p2] = points.slice(-3);
+    const start = midpoint(p0, p1);
+    const end = midpoint(p1, p2);
+
     ctx.strokeStyle = `hsl(${hue}, 85%, 55%)`;
-    ctx.lineWidth = weight * Math.max(point.pressure * 1.6, 0.5);
+    ctx.lineWidth = weight * Math.max(((p0.pressure + p1.pressure) / 2) * 1.6, 0.5);
     ctx.beginPath();
-    ctx.moveTo(last.x, last.y);
-    ctx.lineTo(point.x, point.y);
+    ctx.moveTo(start.x, start.y);
+    ctx.quadraticCurveTo(p1.x, p1.y, end.x, end.y);
     ctx.stroke();
 
-    lastPoint.current = point;
+    // Keep the last two points — the new segment continues from where
+    // this one ended, so the curve stays unbroken.
+    pointsRef.current = points.slice(-2);
   }
 
   function handlePointerUp() {
+    const ctx = ctxRef.current;
+    const points = pointsRef.current;
+
+    if (ctx && points.length >= 2) {
+      // Close out with a short plain segment to the final raw sample, so
+      // the stroke doesn't stop just short of where the pointer actually
+      // left off.
+      const [p0, p1] = points.slice(-2);
+      ctx.strokeStyle = `hsl(${hue}, 85%, 55%)`;
+      ctx.lineWidth = weight * Math.max(p1.pressure * 1.6, 0.5);
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(p1.x, p1.y);
+      ctx.stroke();
+    } else if (ctx && points.length === 1) {
+      // A tap with no drag — leave a small round dot (the round line cap
+      // renders a zero-length stroke as a dot).
+      const p = points[0];
+      ctx.strokeStyle = `hsl(${hue}, 85%, 55%)`;
+      ctx.lineWidth = weight * Math.max(p.pressure * 1.6, 0.5);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+    }
+
     drawing.current = false;
-    lastPoint.current = null;
+    pointsRef.current = [];
   }
 
   function handleClear() {
@@ -152,10 +202,26 @@ export default function DoodleLayer() {
           aria-pressed={active}
           aria-label={active ? 'Turn off doodling' : 'Turn on doodling'}
         >
-          <BrushIcon />
+          {active ? <CloseIcon /> : <BrushIcon />}
         </button>
       </div>
     </>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.25}
+      strokeLinecap="round"
+    >
+      <path d="M6 6l12 12M18 6L6 18" />
+    </svg>
   );
 }
 

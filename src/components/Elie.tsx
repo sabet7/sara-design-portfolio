@@ -4,21 +4,93 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { QA_TREE, ROOT_QUESTIONS } from "@/lib/elieQA";
 
+type Mood = "waiting" | "thinking" | "answered";
+
+// Same public/media/elie/ folder as the existing thinking art. Waiting and
+// answered art aren't uploaded yet — MoodArt below falls back to a simple
+// placeholder per mood until each file actually exists, so this just starts
+// working the moment the real files land with these exact names, no code
+// changes needed.
+const MOOD_SRC: Record<Mood, string> = {
+  waiting: "/media/elie/elie-waiting.webp",
+  thinking: "/media/elie/elie-thinking.webp",
+  answered: "/media/elie/elie-answered.webp",
+};
+
+const MOOD_PLACEHOLDER_EMOJI: Record<Mood, string> = {
+  waiting: "🙂",
+  thinking: "🤔",
+  answered: "✨",
+};
+
+function MoodArt({
+  mood,
+  size,
+  failed,
+  onFail,
+}: {
+  mood: Mood;
+  size: number;
+  failed: boolean;
+  onFail: () => void;
+}) {
+  if (failed) {
+    return (
+      <div
+        aria-hidden="true"
+        style={{
+          width: size,
+          height: size,
+          borderRadius: "50%",
+          background: "var(--color-brand-orange)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: size * 0.45,
+          flexShrink: 0,
+        }}
+      >
+        {MOOD_PLACEHOLDER_EMOJI[mood]}
+      </div>
+    );
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={MOOD_SRC[mood]}
+      alt=""
+      style={{ width: size, display: "block" }}
+      onError={onFail}
+    />
+  );
+}
+
 export default function Elie() {
   const [open, setOpen] = useState(false);
+  const [closing, setClosing] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [customQuestion, setCustomQuestion] = useState("");
   const [customAnswer, setCustomAnswer] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [visibleWordCount, setVisibleWordCount] = useState(0);
-  const [thinkingImgFailed, setThinkingImgFailed] = useState(false);
+  const [failedMoods, setFailedMoods] = useState<Record<Mood, boolean>>({
+    waiting: false,
+    thinking: false,
+    answered: false,
+  });
 
   useEffect(() => setMounted(true), []);
 
   const activeNode = activeId ? QA_TREE[activeId] : null;
   const fullText = activeNode ? activeNode.answer : customAnswer;
   const words = fullText ? fullText.split(" ") : [];
+
+  const mood: Mood = loading ? "thinking" : activeNode || customAnswer ? "answered" : "waiting";
+
+  function markFailed(m: Mood) {
+    setFailedMoods((prev) => ({ ...prev, [m]: true }));
+  }
 
   useEffect(() => {
     if (!fullText) {
@@ -41,13 +113,20 @@ export default function Elie() {
     setCustomAnswer(null);
   }
 
+  function handleClose() {
+    setClosing(true);
+    setTimeout(() => {
+      setOpen(false);
+      setClosing(false);
+    }, 500); // matches elieModalFall's duration below
+  }
+
   function reset() {
     setOpen(true);
     setActiveId(null);
     setCustomAnswer(null);
     setCustomQuestion("");
     setLoading(false);
-    setThinkingImgFailed(false);
   }
 
   async function askCustom(e: React.FormEvent) {
@@ -92,7 +171,7 @@ export default function Elie() {
     <div
       role="dialog"
       aria-modal="true"
-      onClick={() => setOpen(false)}
+      onClick={handleClose}
       style={{
         position: "fixed",
         inset: 0,
@@ -101,32 +180,33 @@ export default function Elie() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "flex-end",
         padding: "1.5rem",
+        // .sara-float-nav sits at bottom: 24px with ~50-60px of its own
+        // height, so this lands the modal's bottom edge roughly 20-50px
+        // above it. Nudge this number directly if the gap looks off —
+        // I can't measure the nav's actual rendered height from here.
+        paddingBottom: 100,
+        opacity: closing ? 0 : 1,
+        transition: "opacity 0.5s ease",
+        pointerEvents: closing ? "none" : "auto",
       }}
     >
-      {loading && (
-        <div style={{ marginBottom: "16px", pointerEvents: "none" }}>
-          {!thinkingImgFailed ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src="/media/elie/elie-thinking.webp"
-              alt=""
-              style={{ width: 160, display: "block" }}
-              onError={() => setThinkingImgFailed(true)}
-            />
-          ) : (
-            <div style={{ display: "flex", gap: 6, justifyContent: "center", padding: "12px 0" }}>
-              <span className="elie-thinking-dot" style={{ animationDelay: "0s" }} />
-              <span className="elie-thinking-dot" style={{ animationDelay: "0.15s" }} />
-              <span className="elie-thinking-dot" style={{ animationDelay: "0.3s" }} />
-            </div>
-          )}
-        </div>
-      )}
+      <div
+        key={mood}
+        className="elie-modal-character"
+        style={{ marginBottom: 16, pointerEvents: "none" }}
+      >
+        <MoodArt
+          mood={mood}
+          size={140}
+          failed={failedMoods[mood]}
+          onFail={() => markFailed(mood)}
+        />
+      </div>
 
       <div
-        className="elie-modal-card"
+        className={`elie-modal-card${closing ? " elie-modal-closing" : ""}`}
         onClick={(e) => e.stopPropagation()}
         style={{
           background: "#fff",
@@ -140,7 +220,7 @@ export default function Elie() {
         }}
       >
         <button
-          onClick={() => setOpen(false)}
+          onClick={handleClose}
           aria-label="Close"
           style={{
             float: "right",
@@ -247,21 +327,23 @@ export default function Elie() {
         onClick={reset}
         aria-label="Ask Elie about Sara"
         style={{
-          width: 44,
-          height: 44,
-          borderRadius: "50%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "var(--color-brand-orange)",
           border: "none",
+          background: "none",
           cursor: "pointer",
-          boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
-          fontSize: 18,
+          padding: 0,
           flexShrink: 0,
+          opacity: open ? 0 : 1,
+          transform: open ? "translateY(-10px) scale(0.7)" : "translateY(0) scale(1)",
+          transition: "opacity 0.3s ease, transform 0.3s ease",
+          pointerEvents: open ? "none" : "auto",
         }}
       >
-        ✨
+        <MoodArt
+          mood="waiting"
+          size={56}
+          failed={failedMoods.waiting}
+          onFail={() => markFailed("waiting")}
+        />
       </button>
 
       {mounted && modal && createPortal(modal, document.body)}

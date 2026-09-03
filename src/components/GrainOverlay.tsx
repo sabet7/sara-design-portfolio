@@ -78,10 +78,25 @@ export default function GrainOverlay() {
         ctx!.clearRect(rect.left * dpr, rect.top * dpr, rect.width * dpr, rect.height * dpr);
       }
 
-      document.querySelectorAll("img, video").forEach(clearEl);
+      // Only real, successfully-loaded media counts — an <img> from
+      // next/image still exists in the DOM even when its src hasn't
+      // resolved to a real photo yet (as with your still-placeholder
+      // project thumbnails), and naturalWidth stays 0 until it has.
+      // Without this check, every still-empty thumbnail's full-size
+      // <img> tag was getting its grain cleared as if it were a photo —
+      // that rectangle is what you were seeing.
+      document.querySelectorAll("img, video").forEach((el) => {
+        if (el instanceof HTMLImageElement && el.naturalWidth === 0) return;
+        if (el instanceof HTMLVideoElement && el.videoWidth === 0) return;
+        clearEl(el);
+      });
       document.querySelectorAll("div, a, section, figure").forEach((el) => {
         const bg = getComputedStyle(el).backgroundImage;
-        if (bg && bg !== "none") clearEl(el);
+        // Only real photo backgrounds (url(...)) count — a CSS gradient
+        // (like the diagonal-stripe placeholder pattern) is technically a
+        // background-image too, and was punching a grain-free rectangle
+        // over every still-empty project card.
+        if (bg && bg !== "none" && bg.includes("url(")) clearEl(el);
       });
     }
 
@@ -146,4 +161,3 @@ export default function GrainOverlay() {
 
   return <canvas ref={canvasRef} id="grainCanvas" aria-hidden="true" />;
 }
-

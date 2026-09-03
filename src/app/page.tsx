@@ -1,5 +1,6 @@
 import { getAllCaseStudies, getAllExplorations } from "@/lib/content";
 import HomeGrid, { CardData } from "@/components/HomeGrid";
+import Elie from "@/components/Elie";
 
 export default function Home() {
   const caseStudies = getAllCaseStudies();
@@ -30,12 +31,15 @@ export default function Home() {
 
   return (
     <main style={{ padding: "0 3rem 3rem" }}>
-      <p className="home-intro">
-        Welcome to the digital archive of Sara Del Villar, a multidisciplinary
-        product designer and developer; exploring the space between
-        storytelling, data, and craft. Working across product design,systems, and code to build and shape experiences for future digital
-        products.
-      </p>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "1.5rem" }}>
+        <p className="home-intro">
+          Welcome to the digital archive of Sara Del Villar, a multidisciplinary
+          product designer and developer; exploring the space between
+          storytelling, data, and craft. Working across product design,systems, and code to build and shape experiences for future digital
+          products.
+        </p>
+        <Elie />
+      </div>
       <HomeGrid items={items} />
     </main>
   );

@@ -109,13 +109,22 @@ export default function Header() {
         <span style={{ opacity: 0.75 }}>Interaction design</span>
       </div>
 
-      <nav style={{ display: "flex", gap: "1.25rem", paddingTop: 2 }}>
-        <a href="/resume.pdf">Resume</a>
-        <a href="mailto:sedelvillar104@gmail.com">Connect</a>
-        <a href="https://github.com/sabet7" target="_blank" rel="noreferrer">
+      <nav style={{ display: "flex", gap: "1.25rem", paddingTop: 2, color: "inherit" }}>
+        <a href="/resume.pdf" style={{ color: "inherit" }}>
+          Resume
+        </a>
+        <a href="mailto:sedelvillar104@gmail.com" style={{ color: "inherit" }}>
+          Connect
+        </a>
+        <a
+          href="https://github.com/sabet7"
+          target="_blank"
+          rel="noreferrer"
+          style={{ color: "inherit" }}
+        >
           Github
         </a>
-        <a href="https://x.com/" target="_blank" rel="noreferrer">
+        <a href="https://x.com/" target="_blank" rel="noreferrer" style={{ color: "inherit" }}>
           X
         </a>
       </nav>
