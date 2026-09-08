@@ -459,7 +459,17 @@ body {
   pointer-events: none;
   z-index: 5;
   opacity: 0;
-  transition: opacity 0.35s ease;
+  /* Ramps 0% to 100% opacity across the draw, so the stroke looks like
+     it's gaining ink as it's drawn rather than snapping fully solid.
+     linear (not ease) keeps the opacity climb steady rather than
+     front- or back-loaded, assuming the underlying WebP draws at a
+     roughly constant rate. 0.6s is a starting guess for how long the
+     draw actually takes — I can't measure your asset's real playback
+     timing from here, so nudge this to match what you see live: if
+     it's still visibly drawing after it's already fully opaque,
+     lengthen it; if it reaches full opacity well after the drawing
+     has finished, shorten it. */
+  transition: opacity 0.6s linear;
 }
 .hover-circle.active {
   opacity: 1;

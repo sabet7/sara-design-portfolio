@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ViewTransition } from "react";
 import Image from "next/image";
 
 interface ProjectCardProps {
+  slug: string;
   title: string;
   year: string;
   types: string[];
@@ -20,6 +22,7 @@ const ACCENT: Record<ProjectCardProps["variant"], string> = {
 };
 
 export default function ProjectCard({
+  slug,
   title,
   year,
   types,
@@ -71,16 +74,18 @@ export default function ProjectCard({
           <span>Image</span>
         </div>
 
-        {showGif ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={gifSrc}
-            alt=""
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-          />
-        ) : (
-          <Image src={thumbnailSrc} alt={title} fill style={{ objectFit: "cover" }} />
-        )}
+        <ViewTransition name={`project-media-${slug}`}>
+          {showGif ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={gifSrc}
+              alt=""
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          ) : (
+            <Image src={thumbnailSrc} alt={title} fill style={{ objectFit: "cover" }} />
+          )}
+        </ViewTransition>
 
         <div
           style={{
@@ -138,4 +143,3 @@ export default function ProjectCard({
     </div>
   );
 }
-

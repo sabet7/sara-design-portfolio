@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ViewTransition } from "react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { REQUIRED_CASE_STUDY_SECTIONS } from "@/content/types";
 import type { CaseStudy } from "@/lib/content";
@@ -55,8 +56,10 @@ export default function CaseStudyDetail({ caseStudy }: { caseStudy: CaseStudy })
         </div>
       </div>
 
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={frontmatter.heroImage} alt={frontmatter.projectTitle} className="detail-hero" />
+      <ViewTransition name={`project-media-${frontmatter.slug}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={frontmatter.heroImage} alt={frontmatter.projectTitle} className="detail-hero" />
+      </ViewTransition>
 
       <div className="detail-body">
         <DetailSidebar

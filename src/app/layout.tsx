@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { ViewTransition } from "react";
 import "./globals.css";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 import Header from "@/components/Header";
@@ -41,8 +42,10 @@ export default function RootLayout({
         <GrainOverlay />
         <DoodleLayer />
         <Header />
-        {children}
-        {modal}
+        <ViewTransition>
+          {children}
+          {modal}
+        </ViewTransition>
         <Analytics />
       </body>
     </html>

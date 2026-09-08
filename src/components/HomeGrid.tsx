@@ -44,6 +44,7 @@ export default function HomeGrid({ items }: { items: CardData[] }) {
             style={{ textDecoration: "none", color: "inherit" }}
           >
             <ProjectCard
+              slug={item.slug}
               title={item.title}
               year={item.year}
               types={item.types}
