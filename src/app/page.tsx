@@ -1,6 +1,6 @@
 import { getAllCaseStudies, getAllExplorations } from "@/lib/content";
 import HomeGrid, { CardData } from "@/components/HomeGrid";
-import Elie from "@/components/Elie";
+import FrostedReveal from "@/components/frosted-reveal/FrostedReveal";
 
 export default function Home() {
   const caseStudies = getAllCaseStudies();
@@ -31,14 +31,21 @@ export default function Home() {
 
   return (
     <main style={{ padding: "0 3rem 3rem" }}>
-      <div style={{ display: "flex", alignItems: "flex-start", gap: "1.5rem" }}>
-        <p className="home-intro">
-          Welcome to the digital archive of Sara Del Villar, a multidisciplinary
-          product designer and developer; exploring the space between
-          storytelling, data, and craft. Working across product design,systems, and code to build and shape experiences for future digital
-          products.
-        </p>
-        <Elie />
+      <div style={{ marginBottom: "4rem" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "3rem" }}>
+          <p className="home-intro">
+            Welcome to the digital archive of Sara Del Villar, a multidisciplinary
+            product designer and developer working across web, brand, and product design to build unique and delighful experiences that connect businesses with their users.
+          </p>
+          <div style={{ width: 220, flexShrink: 0 }}>
+            <FrostedReveal
+              src="/media/personal/portrait-placeholder.png"
+              alt="Sara Del Villar"
+              width={220}
+              height={220}
+            />
+          </div>
+        </div>
       </div>
       <HomeGrid items={items} />
     </main>

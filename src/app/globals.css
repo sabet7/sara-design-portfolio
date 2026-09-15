@@ -83,11 +83,11 @@ body {
   border-radius: 4px;
   overflow: hidden;
   border: 2px solid transparent;
-  filter: brightness(0.92) saturate(0.96);
+  filter: brightness(1.05) saturate(0.96);
   transition: filter 0.35s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .project-card-media:hover {
-  filter: brightness(1.08) saturate(1.05);
+  filter: brightness(1.21) saturate(1.05);
 }
 
 @keyframes nav-bounce {
@@ -122,6 +122,17 @@ body {
   animation: elieCharacterDrop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Mood art is drawn white-on-transparent (correct as-is against the
+   modal's dark backdrop). Inverting flips it to black for the lighter
+   dimmer stages, where white lines would wash out. Same charcoal/
+   near-black threshold already used for .hover-circle-light/-dark. */
+.elie-mood-art-img {
+  filter: invert(1);
+}
+:root[data-dimmer-stage="charcoal"] .elie-mood-art-img,
+:root[data-dimmer-stage="near-black"] .elie-mood-art-img {
+  filter: none;
+}
 @keyframes elieWordFade {
   from { opacity: 0; transform: translateY(2px); }
   to { opacity: 1; transform: translateY(0); }
@@ -389,6 +400,9 @@ body {
   backdrop-filter: blur(7px) saturate(200%) contrast(115%);
   -webkit-backdrop-filter: blur(7px) saturate(200%) contrast(115%);
   border: 1px solid rgba(255, 255, 255, 0.4);
+  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow:
     0 6px 18px rgba(0, 0, 0, 0.1),
     0 1px 0 rgba(255, 255, 255, 0.75) inset,
@@ -396,9 +410,41 @@ body {
     0.5px 0 0 rgba(0, 140, 255, 0.05);
 }
 
+/* Curved-glass sheen — a soft diagonal highlight standing in for real
+   refraction, so the pill reads as glass rather than flat frosted
+   plastic. Without this the backdrop-filter/box-shadow alone still
+   look correct on paper but flatter in practice. border-radius:
+   inherit clips it to the pill's own shape automatically. */
+.sara-float-nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.08) 22%, rgba(255, 255, 255, 0) 45%);
+  mix-blend-mode: overlay;
+  opacity: var(--sv-sheen-o, 1);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Dark-stage glass tint — ported from Webflow's .invert variant, using
+   this rebuild's actual 5-stage dimmer attribute instead of a binary
+   class, so it participates in the same transition as everything else. */
+:root[data-dimmer-stage="charcoal"] .sara-float-nav,
+:root[data-dimmer-stage="near-black"] .sara-float-nav {
+  background: rgba(20, 20, 20, 0.34);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.35),
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    -0.5px 0 0 rgba(255, 0, 60, 0.07),
+    0.5px 0 0 rgba(0, 140, 255, 0.07);
+  --sv-sheen-o: 0.4;
+}
+
 .float-nav-item {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   display: flex;
   align-items: center;
   padding: 12px 20px;

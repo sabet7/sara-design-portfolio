@@ -23,6 +23,12 @@ const MOOD_PLACEHOLDER_EMOJI: Record<Mood, string> = {
   answered: "✨",
 };
 
+// The navbar trigger icon — a static hand-drawn image, not part of the
+// mood system. It's Elie's "click to chat" identity mark, always the
+// same regardless of chat state; only the modal's internal art cycles
+// through thinking/waiting/answered once it's actually open.
+const ELIE_ICON_SRC = "/media/elie/elie-icon.webp";
+
 function MoodArt({
   mood,
   size,
@@ -59,7 +65,8 @@ function MoodArt({
     <img
       src={MOOD_SRC[mood]}
       alt=""
-      style={{ width: size, display: "block" }}
+      className="elie-mood-art-img"
+      style={{ width: size, height: "auto", minHeight: size * 0.2, display: "block" }}
       onError={onFail}
     />
   );
@@ -73,6 +80,7 @@ export default function Elie() {
   const [customAnswer, setCustomAnswer] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [iconFailed, setIconFailed] = useState(false);
   const [visibleWordCount, setVisibleWordCount] = useState(0);
   const [failedMoods, setFailedMoods] = useState<Record<Mood, boolean>>({
     waiting: false,
@@ -109,8 +117,13 @@ export default function Elie() {
   }, [activeNode, customAnswer]);
 
   function ask(id: string) {
-    setActiveId(id);
+    setLoading(true);
+    setActiveId(null);
     setCustomAnswer(null);
+    setTimeout(() => {
+      setActiveId(id);
+      setLoading(false);
+    }, 700); // brief thinking beat before revealing the canned answer
   }
 
   function handleClose() {
@@ -327,6 +340,8 @@ export default function Elie() {
         onClick={reset}
         aria-label="Ask Elie about Sara"
         style={{
+          position: "relative",
+          zIndex: 40,
           border: "none",
           background: "none",
           cursor: "pointer",
@@ -338,12 +353,32 @@ export default function Elie() {
           pointerEvents: open ? "none" : "auto",
         }}
       >
-        <MoodArt
-          mood="waiting"
-          size={56}
-          failed={failedMoods.waiting}
-          onFail={() => markFailed("waiting")}
-        />
+        {iconFailed ? (
+          <div
+            aria-hidden="true"
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: "50%",
+              background: "var(--color-brand-orange)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 26,
+              flexShrink: 0,
+            }}
+          >
+            ✨
+          </div>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={ELIE_ICON_SRC}
+            alt=""
+            style={{ width: 56, height: 56, display: "block" }}
+            onError={() => setIconFailed(true)}
+          />
+        )}
       </button>
 
       {mounted && modal && createPortal(modal, document.body)}
