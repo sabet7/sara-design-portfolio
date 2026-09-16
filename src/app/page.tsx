@@ -16,6 +16,7 @@ export default function Home() {
       gifSrc: cs.frontmatter.gifImage,
       variant: "case-study" as const,
       featured: cs.frontmatter.featured,
+      timeline: (cs.frontmatter as { timeline?: string }).timeline,
       href: `/case-studies/${cs.frontmatter.slug}`,
     })),
     ...explorations.map((ex) => ({

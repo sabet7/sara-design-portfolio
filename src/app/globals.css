@@ -22,11 +22,11 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-space-grotesk), sans-serif;
+  font-family: var(--font-clash-grotesk), var(--font-space-grotesk), sans-serif;
 }
 
 :root {
-  --color-text: #161717;
+  --color-text: #191D25;
   --color-text-muted: #717171;
   --color-text-light-muted: #898989;
   --color-brand-orange: #f65009;
@@ -36,7 +36,7 @@ body {
 
 :root[data-dimmer-stage="light"] {
   --bg: 255 255 255;
-  --fg: 22 23 23;
+  --fg: 25 29 37;
   --fg-muted: 113 113 113;
 }
 :root[data-dimmer-stage="warm"] {

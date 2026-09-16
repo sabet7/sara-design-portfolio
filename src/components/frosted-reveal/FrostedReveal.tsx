@@ -40,6 +40,7 @@ export default function FrostedReveal({
   const imgRef = useRef<HTMLImageElement | null>(null);
   const [ready, setReady] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgFailed, setImgFailed] = useState(false);
 
   const paintFrost = useCallback(() => {
     const canvas = canvasRef.current;
@@ -77,6 +78,16 @@ export default function FrostedReveal({
     ctx.fillRect(0, 0, rect.width, rect.height);
 
     setReady(true);
+  }, []);
+
+  useEffect(() => {
+    // If the image loaded from cache before this handler was attached,
+    // its onLoad event already fired and was missed — this catches that
+    // case by checking the already-loaded state directly.
+    const img = imgRef.current;
+    if (img?.complete && img.naturalWidth > 0) {
+      setImgLoaded(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -133,7 +144,26 @@ export default function FrostedReveal({
         className={styles.image}
         draggable={false}
         onLoad={() => setImgLoaded(true)}
+        onError={() => setImgFailed(true)}
       />
+      {imgFailed && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            fontSize: 12,
+            color: "#b91c1c",
+            background: "#fee2e2",
+            padding: 8,
+          }}
+        >
+          Image failed to load: {src}
+        </div>
+      )}
       <canvas
         ref={canvasRef}
         className={styles.frost}

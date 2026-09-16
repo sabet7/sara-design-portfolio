@@ -19,6 +19,52 @@ function weatherIcon(code: number | null, isDay: boolean): string {
   return "☀️";
 }
 
+// Cycles between the two lines, fading each word out and back in with a
+// slight per-word stagger rather than a flat block cross-fade.
+const SUBTEXT_PHRASES = [
+  "Product designer (and developer)",
+  "Connecting businesses to users with design",
+];
+const HOLD_MS = 2600;
+const FADE_MS = 450;
+
+function RotatingSubtext() {
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIndex((i) => (i + 1) % SUBTEXT_PHRASES.length);
+        setVisible(true);
+      }, FADE_MS);
+    }, HOLD_MS + FADE_MS);
+    return () => clearInterval(interval);
+  }, []);
+
+  const words = SUBTEXT_PHRASES[index].split(" ");
+
+  return (
+    <span style={{ fontSize: 13, fontWeight: 500, opacity: 0.65, minHeight: "1.3em", width: 280, display: "block" }}>
+      {words.map((word, i) => (
+        <span
+          key={`${index}-${i}`}
+          style={{
+            display: "inline-block",
+            marginRight: "0.28em",
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(3px)",
+            transition: `opacity ${FADE_MS}ms ease ${i * 25}ms, transform ${FADE_MS}ms ease ${i * 25}ms`,
+          }}
+        >
+          {word}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export default function Header() {
   const [now, setNow] = useState<Date | null>(null);
   const [tempF, setTempF] = useState<number | null>(null);
@@ -64,84 +110,87 @@ export default function Header() {
     : "";
 
   return (
-    <header
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "space-between",
-        padding: "1.5rem 2rem",
-        fontSize: 18,
-        fontWeight: 500,
-        flexWrap: "wrap",
-        gap: "1rem",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
-          <strong style={{ fontSize: 20, fontWeight: 800 }}>Sara Del Villar</strong>
-        </Link>
+    <>
+      <header
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          padding: "1.5rem 2rem",
+          fontSize: 18,
+          fontWeight: 500,
+          flexWrap: "wrap",
+          gap: "1rem",
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.15, marginRight: "2.5rem" }}>
+          <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
+            <strong style={{ fontSize: 20, fontWeight: 800 }}>Sara Del Villar</strong>
+          </Link>
+          <RotatingSubtext />
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 7, paddingTop: 3 }}>
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: "#03C000",
+              display: "inline-block",
+            }}
+          />
+          <span>Available September 2026</span>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+          <span>Services</span>
+          <span style={{ color: "#777777", fontSize: 13, lineHeight: 1.5 }}>Product design</span>
+          <span style={{ color: "#777777", fontSize: 13, lineHeight: 1.5 }}>Web design</span>
+          <span style={{ color: "#777777", fontSize: 13, lineHeight: 1.5 }}>Interaction design</span>
+        </div>
+
+        <nav style={{ display: "flex", alignItems: "center", gap: "1.25rem", color: "inherit" }}>
+          <a href="/resume.pdf" style={{ color: "inherit" }}>
+            Resume
+          </a>
+          <Button href="mailto:sedelvillar104@gmail.com" fontSize={16}>
+            Connect
+          </Button>
+          <a
+            href="https://github.com/sabet7"
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: "inherit" }}
+          >
+            Github
+          </a>
+          <a href="https://x.com/" target="_blank" rel="noreferrer" style={{ color: "inherit" }}>
+            X
+          </a>
+        </nav>
+
         {now && (
-          <span>
+          <span style={{ paddingTop: 3 }}>
             {dateString} {timeString} EST - New York{" "}
             {tempF !== null ? `${weatherIcon(weatherCode, isDay)} ${tempF}°F` : ""}
           </span>
         )}
-      </div>
+      </header>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 7, paddingTop: 3 }}>
-        <span
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            background: "#22c55e",
-            display: "inline-block",
-          }}
-        />
-        <span>Available September 2026</span>
-      </div>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <span>Services</span>
-        <span style={{ opacity: 0.75 }}>Product design</span>
-        <span style={{ opacity: 0.75 }}>Web design</span>
-        <span style={{ opacity: 0.75 }}>Interaction design</span>
-      </div>
-
-      <nav style={{ display: "flex", gap: "1.25rem", paddingTop: 2, color: "inherit" }}>
-        <a href="/resume.pdf" style={{ color: "inherit" }}>
-          Resume
-        </a>
-        <a href="mailto:sedelvillar104@gmail.com" style={{ color: "inherit" }}>
-          Connect
-        </a>
-        <a
-          href="https://github.com/sabet7"
-          target="_blank"
-          rel="noreferrer"
-          style={{ color: "inherit" }}
-        >
-          Github
-        </a>
-        <a href="https://x.com/" target="_blank" rel="noreferrer" style={{ color: "inherit" }}>
-          X
-        </a>
-      </nav>
-
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <Button href="mailto:sedelvillar104@gmail.com" fontSize={20}>
-          Connect
-        </Button>
-        <span
-          style={{
-            fontSize: 10,
-            color: "#b3b3b3",
-            fontWeight: 400,
-          }}
-        >
-          v5
-        </span>
-      </div>
-    </header>
+      <span
+        style={{
+          position: "fixed",
+          bottom: 16,
+          right: 16,
+          fontSize: 10,
+          color: "#b3b3b3",
+          fontWeight: 400,
+          zIndex: 50,
+        }}
+      >
+        v5
+      </span>
+    </>
   );
 }

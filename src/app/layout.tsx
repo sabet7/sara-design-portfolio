@@ -5,7 +5,7 @@ import "./globals.css";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 import Header from "@/components/Header";
 import GrainOverlay from "@/components/GrainOverlay";
-import { spaceGrotesk, bricolageGrotesque } from "@/lib/fonts";
+import { spaceGrotesk, bricolageGrotesque, clashGrotesk } from "@/lib/fonts";
 import DoodleLayer from '@/components/doodle-layer/DoodleLayer';
 
 
@@ -36,7 +36,7 @@ export default function RootLayout({
   return (
     <html
     lang="en"
-    className={`h-full antialiased ${spaceGrotesk.variable} ${bricolageGrotesque.variable}`}
+    className={`h-full antialiased ${spaceGrotesk.variable} ${bricolageGrotesque.variable} ${clashGrotesk.variable}`}
     >
       <body className="min-h-full flex flex-col">
         <GrainOverlay />

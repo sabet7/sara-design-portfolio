@@ -14,11 +14,22 @@ export interface CardData {
   gifSrc?: string;
   variant: "case-study" | "exploration";
   featured?: boolean;
+  timeline?: string;
   href: string;
 }
 
+const NAMED_FILTERS = ["Product", "Web", "Brand"] as const;
+
 function matchesFilter(item: CardData, filter: Filter): boolean {
   if (filter === "All") return true;
+  if (filter === "Creative") {
+    // Creative is a catch-all — anything that doesn't match one of the
+    // three named categories, rather than needing a literal "Creative"
+    // tag that nothing in the content actually has.
+    return !NAMED_FILTERS.some((named) =>
+      item.types.some((t) => t.toLowerCase().includes(named.toLowerCase()))
+    );
+  }
   const target = filter.toLowerCase();
   return item.types.some((t) => t.toLowerCase().includes(target));
 }
@@ -32,7 +43,7 @@ export default function HomeGrid({ items }: { items: CardData[] }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+          gridTemplateColumns: "repeat(5, 1fr)",
           gap: "1.5rem",
           paddingBottom: "6rem",
         }}
@@ -52,6 +63,7 @@ export default function HomeGrid({ items }: { items: CardData[] }) {
               gifSrc={item.gifSrc}
               variant={item.variant}
               featured={item.featured}
+              timeline={item.timeline}
             />
           </Link>
         ))}
