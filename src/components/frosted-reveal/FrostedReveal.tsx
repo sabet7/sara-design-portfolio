@@ -20,6 +20,13 @@ interface FrostedRevealProps {
   resetOnLeave?: boolean;
 }
 
+// Baked directly into the canvas now (see paintFrost) rather than via
+// backdrop-filter, since backdrop-filter blurs the whole element's
+// backdrop as one operation — it isn't modulated by the canvas's own
+// alpha, so erasing the canvas could never reveal a sharp image, only
+// remove the white tint sitting on top of an unchanged blur.
+const BLUR_PX = 14;
+
 export default function FrostedReveal({
   src,
   alt,
@@ -30,12 +37,16 @@ export default function FrostedReveal({
 }: FrostedRevealProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null);
   const [ready, setReady] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   const paintFrost = useCallback(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
-    if (!canvas || !container) return;
+    const img = imgRef.current;
+    if (!canvas || !container || !img) return;
+    if (!img.complete || img.naturalWidth === 0) return; // image not ready yet
 
     const dpr = window.devicePixelRatio || 1;
     const rect = container.getBoundingClientRect();
@@ -48,15 +59,20 @@ export default function FrostedReveal({
     if (!ctx) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, rect.width, rect.height);
 
-    // The "frost" is a soft translucent fill — the actual blur comes from
-    // backdrop-filter on this canvas element, which is genuinely blurring
-    // the sharp image sitting behind it. Where the canvas alpha drops to 0
-    // (wiped), backdrop-filter contributes nothing and the sharp image
-    // shows straight through.
+    // Bake a blurred copy of the actual image into the canvas — this is
+    // the pixel content that erasing will reveal a hole in, so a wipe
+    // uncovers the sharp <img> underneath instead of a blur that was
+    // never really part of the canvas to begin with.
+    ctx.filter = `blur(${BLUR_PX}px)`;
+    ctx.drawImage(img, 0, 0, rect.width, rect.height);
+    ctx.filter = 'none';
+
+    // Frost tint on top of the baked blur.
     const gradient = ctx.createLinearGradient(0, 0, rect.width, rect.height);
-    gradient.addColorStop(0, 'rgba(245, 245, 246, 0.94)');
-    gradient.addColorStop(1, 'rgba(245, 245, 246, 0.88)');
+    gradient.addColorStop(0, 'rgba(245, 245, 246, 0.82)');
+    gradient.addColorStop(1, 'rgba(245, 245, 246, 0.74)');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, rect.width, rect.height);
 
@@ -64,13 +80,13 @@ export default function FrostedReveal({
   }, []);
 
   useEffect(() => {
-    paintFrost();
+    if (imgLoaded) paintFrost();
     const container = containerRef.current;
     if (!container) return;
     const resizeObserver = new ResizeObserver(paintFrost);
     resizeObserver.observe(container);
     return () => resizeObserver.disconnect();
-  }, [paintFrost]);
+  }, [paintFrost, imgLoaded]);
 
   function wipeAt(clientX: number, clientY: number) {
     const canvas = canvasRef.current;
@@ -110,17 +126,18 @@ export default function FrostedReveal({
       className={styles.container}
       style={{ aspectRatio: `${width} / ${height}` }}
     >
-      {/* Plain <img> keeps this a simple drop-in alongside the canvas overlay.
-          Swap for next/image with `fill` if you'd rather have it optimized. */}
-      <img src={src} alt={alt} className={styles.image} draggable={false} />
+      <img
+        ref={imgRef}
+        src={src}
+        alt={alt}
+        className={styles.image}
+        draggable={false}
+        onLoad={() => setImgLoaded(true)}
+      />
       <canvas
         ref={canvasRef}
         className={styles.frost}
-        style={{
-          backdropFilter: 'blur(14px)',
-          WebkitBackdropFilter: 'blur(14px)',
-          opacity: ready ? 1 : 0,
-        }}
+        style={{ opacity: ready ? 1 : 0 }}
         onPointerMove={handlePointerMove}
         onPointerLeave={handlePointerLeave}
       />

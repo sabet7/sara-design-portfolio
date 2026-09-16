@@ -43,6 +43,7 @@ export default function Home() {
               alt="Sara Del Villar"
               width={220}
               height={220}
+              resetOnLeave={false}
             />
           </div>
         </div>

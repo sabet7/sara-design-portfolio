@@ -78,7 +78,7 @@ export default function Header() {
     >
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
-          <strong style={{ fontSize: 20, fontWeight: 800 }}>SV</strong>
+          <strong style={{ fontSize: 20, fontWeight: 800 }}>Sara Del Villar</strong>
         </Link>
         {now && (
           <span>
