@@ -80,48 +80,120 @@ export default function ProjectCard({
       onMouseLeave={handleMouseLeave}
       style={{ cursor: onClick ? "pointer" : undefined, position: "relative" }}
     >
+      {/* Outer horizontal wrapper: featured dot (21x21) on the left, project
+          info (title/type + timeline/year) filling the rest. Dot is centered
+          against the full height of the two-row text stack. */}
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          gap: 12,
-          marginBottom: 8,
-          fontSize: 13,
-          minHeight: "2.6em",
+          flexDirection: "row",
+          alignItems: "top",
+          gap: 10,
+          marginBottom: 2,
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0, flex: "1 1 auto" }}>
-          <span style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700 }}>
-            {featured && (
-              <span
-                aria-hidden="true"
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: "50%",
-                  background: "var(--color-featured)",
-                  flexShrink: 0,
-                }}
-              />
-            )}
-            <span style={{ overflowWrap: "break-word" }}>{title}</span>
-          </span>
-          {timeline && <span style={{ opacity: 0.6 }}>{timeline}</span>}
-        </div>
+        {featured && (
+          <span
+            aria-hidden="true"
+            style={{
+              width: 15,
+              height: 15,
+              borderRadius: "50%",
+              background: "var(--color-featured)",
+              flexShrink: 0,
+            }}
+          />
+        )}
+
+        {/* Project information: auto-layout column, 3px between the two rows */}
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: 2,
-            alignItems: "flex-end",
-            textAlign: "right",
-            flexShrink: 0,
-            maxWidth: "45%",
+            gap: 0,
+            minWidth: 0,
+            flex: "1 1 auto",
           }}
         >
-          <span style={{ fontWeight: 700 }}>{types.slice(0, MAX_TYPES_ON_CARD).join(" · ")}</span>
-          <span style={{ opacity: 0.6 }}>{year}</span>
+          {/* Title / Type row — Medium 18px. Fixed height + 2-line clamp on
+              both sides: titles vary a lot in length ("Nurtur" vs a full
+              sentence), and without this every card's header ends up a
+              different height, which pushes each card's image down by a
+              different amount and breaks the grid's row alignment. Clamping
+              guarantees this row is always exactly the same height, whether
+              the title is one word or four lines' worth. */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 12,
+              fontWeight: 500,
+              fontSize: 16,
+              lineHeight: 1.2,
+              height: 44, // 2 lines * 18px * 1.2 line-height
+            }}
+          >
+            <span
+              style={{
+                overflowWrap: "break-word",
+                minWidth: 0,
+                flex: "1 1 auto",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {title}
+            </span>
+            <span
+              style={{
+                flexShrink: 0,
+                maxWidth: "45%",
+                textAlign: "right",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {types.slice(0, MAX_TYPES_ON_CARD).join(" · ")}
+            </span>
+          </div>
+
+          {/* Timeline / Year row — Light 16px. Same fixed-height + clamp
+              treatment, but single-line: timeline/year text is always
+              short, so a 1-line cap is enough. Timeline only exists for
+              case studies (concepts/explorations never have one), so it's
+              gated on `variant` rather than just truthiness — but the row
+              itself always renders at the same fixed height so the layout
+              never shifts between card types, and Year always sits on the
+              right. */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 10,
+              fontWeight: 300,
+              fontSize: 14,
+              lineHeight: 1.1,
+              height: 19, // 1 line * 16px * 1.2 line-height
+              opacity: 0.6,
+            }}
+          >
+            <span
+              style={{
+                minWidth: 0,
+                flex: "1 1 auto",
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis",
+                overflow: "hidden",
+              }}
+            >
+              {variant === "case-study" ? timeline : null}
+            </span>
+            <span style={{ flexShrink: 0, whiteSpace: "nowrap" }}>{year}</span>
+          </div>
         </div>
       </div>
 

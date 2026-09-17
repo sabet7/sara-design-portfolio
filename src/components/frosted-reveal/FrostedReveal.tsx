@@ -27,6 +27,42 @@ interface FrostedRevealProps {
 // remove the white tint sitting on top of an unchanged blur.
 const BLUR_PX = 14;
 
+/** Draws `img` into the canvas so it fills exactly dw x dh while preserving
+ *  aspect ratio and cropping overflow — matching the real <img>'s
+ *  `object-fit: cover` behavior (see FrostedReveal.module.css .image).
+ *  Without this, a stretch-to-fit draw looks visibly squished/stretched
+ *  next to the real, correctly-cropped photo it's supposed to be hiding,
+ *  the moment the wipe reveals it. */
+function drawImageCover(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  dw: number,
+  dh: number
+) {
+  const iw = img.naturalWidth;
+  const ih = img.naturalHeight;
+  if (iw === 0 || ih === 0 || dw === 0 || dh === 0) return;
+
+  const imageRatio = iw / ih;
+  const destRatio = dw / dh;
+  let sx = 0;
+  let sy = 0;
+  let sw = iw;
+  let sh = ih;
+
+  if (imageRatio > destRatio) {
+    // Image is wider than the destination box — crop the left/right edges.
+    sw = ih * destRatio;
+    sx = (iw - sw) / 2;
+  } else {
+    // Image is taller than the destination box — crop the top/bottom edges.
+    sh = iw / destRatio;
+    sy = (ih - sh) / 2;
+  }
+
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, dw, dh);
+}
+
 export default function FrostedReveal({
   src,
   alt,
@@ -42,6 +78,13 @@ export default function FrostedReveal({
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgFailed, setImgFailed] = useState(false);
 
+  // Falls back to a square box if width/height ever come through as 0 or
+  // undefined from the call site, instead of silently collapsing to 0px
+  // tall (which is what was actually making the whole effect "disappear" —
+  // see the .container minHeight fallback in FrostedReveal.module.css for
+  // the second layer of the same safety net).
+  const aspectRatio = width > 0 && height > 0 ? `${width} / ${height}` : '1 / 1';
+
   const paintFrost = useCallback(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -51,6 +94,8 @@ export default function FrostedReveal({
 
     const dpr = window.devicePixelRatio || 1;
     const rect = container.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return; // container not laid out yet
+
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     canvas.style.width = `${rect.width}px`;
@@ -62,12 +107,12 @@ export default function FrostedReveal({
     ctx.globalCompositeOperation = 'source-over';
     ctx.clearRect(0, 0, rect.width, rect.height);
 
-    // Bake a blurred copy of the actual image into the canvas — this is
-    // the pixel content that erasing will reveal a hole in, so a wipe
-    // uncovers the sharp <img> underneath instead of a blur that was
-    // never really part of the canvas to begin with.
+    // Bake a blurred, cover-cropped copy of the actual image into the
+    // canvas — this is the pixel content that erasing will reveal a hole
+    // in, so a wipe uncovers the sharp <img> underneath (at the same crop
+    // and scale) instead of a mismatched stretch.
     ctx.filter = `blur(${BLUR_PX}px)`;
-    ctx.drawImage(img, 0, 0, rect.width, rect.height);
+    drawImageCover(ctx, img, rect.width, rect.height);
     ctx.filter = 'none';
 
     // Frost tint on top of the baked blur.
@@ -135,7 +180,7 @@ export default function FrostedReveal({
     <div
       ref={containerRef}
       className={styles.container}
-      style={{ aspectRatio: `${width} / ${height}` }}
+      style={{ aspectRatio }}
     >
       <img
         ref={imgRef}

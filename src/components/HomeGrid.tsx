@@ -44,7 +44,8 @@ export default function HomeGrid({ items }: { items: CardData[] }) {
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(5, 1fr)",
-          gap: "1.5rem",
+          rowGap: "3rem",
+          columnGap: "1.5rem",
           paddingBottom: "6rem",
         }}
       >

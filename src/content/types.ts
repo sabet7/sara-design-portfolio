@@ -29,6 +29,10 @@ export const CaseStudyFrontmatterSchema = z.object({
   oneLiner: z.string().min(1, "oneLiner is required"),
   featured: z.boolean().default(false),
   designType: z.array(z.string()).min(1, "designType needs at least one tag for filtering"),
+  // Optional: only case studies show a timeline on their project card
+  // (explorations never do — see ProjectCard.tsx, which gates this on
+  // `variant === "case-study"` rather than just checking truthiness).
+  timeline: z.string().optional(),
   role: z.array(z.string()).default([]),
   year: z.string().min(1, "year is required"),
   status: z.string().default("Complete"), // e.g. "In Progress" | "Concept" | "Complete"

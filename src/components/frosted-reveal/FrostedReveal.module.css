@@ -1,6 +1,15 @@
 .container {
   position: relative;
   width: 100%;
+  /* Both children (.image, .frost) are position: absolute, so they
+     contribute zero intrinsic height — this container's actual height
+     comes entirely from the inline aspect-ratio style set in
+     FrostedReveal.tsx. If width/height props ever come through as 0 or
+     undefined, aspect-ratio has nothing to compute, the box collapses to
+     0px tall, and overflow: hidden clips everything inside it into
+     invisibility — even though the image loaded and the canvas painted
+     fine. This min-height is a hard floor so that can never happen. */
+  min-height: 160px;
   overflow: hidden;
   border-radius: 12px;
   cursor: crosshair;

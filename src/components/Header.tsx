@@ -30,37 +30,70 @@ const FADE_MS = 450;
 
 function RotatingSubtext() {
   const [index, setIndex] = useState(0);
-  const [visible, setVisible] = useState(true);
+  // 'in': settled and visible. 'out': the current phrase animating away.
+  // 'entering': the new phrase just mounted in its hidden pose, about to
+  // be flipped to 'in' on the next frame so the transition actually has
+  // something to animate from — without this extra step, setting the new
+  // phrase's index and its visible state in the same update means it
+  // renders straight into its final pose with no transition ever playing.
+  const [phase, setPhase] = useState<"in" | "out" | "entering">("in");
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setVisible(false);
+      setPhase("out");
       setTimeout(() => {
         setIndex((i) => (i + 1) % SUBTEXT_PHRASES.length);
-        setVisible(true);
+        setPhase("entering");
+        // Two rAFs: the first lets the "entering" (hidden-pose) render
+        // actually commit and paint; only then does flipping to "in" on
+        // the following frame register as a genuine style change for the
+        // browser to transition, rather than being coalesced into the
+        // same paint as the initial hidden pose.
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => setPhase("in"));
+        });
       }, FADE_MS);
     }, HOLD_MS + FADE_MS);
     return () => clearInterval(interval);
   }, []);
 
-  const words = SUBTEXT_PHRASES[index].split(" ");
+  const visible = phase === "in";
+  // Both the outgoing phrase's exit target AND the incoming phrase's
+  // entry start use this same angle — like a single drum that always
+  // rotates the same direction: the front face tips back through -80deg
+  // and out of view, and the next face continues that same motion,
+  // arriving back at 0deg from that same -80deg position. That's what
+  // makes "Product Designer" rotating away and "Connecting..." rotating
+  // in read as two faces of one cylinder rather than two separate,
+  // independently-directed animations. If this reads as spinning the
+  // wrong way once you see it live, flip the sign to 80deg on both.
+  const HIDDEN_ANGLE = -80;
 
   return (
-    <span style={{ fontSize: 13, fontWeight: 500, opacity: 0.65, minHeight: "1.3em", width: 280, display: "block" }}>
-      {words.map((word, i) => (
-        <span
-          key={`${index}-${i}`}
-          style={{
-            display: "inline-block",
-            marginRight: "0.28em",
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(3px)",
-            transition: `opacity ${FADE_MS}ms ease ${i * 25}ms, transform ${FADE_MS}ms ease ${i * 25}ms`,
-          }}
-        >
-          {word}
-        </span>
-      ))}
+    <span
+      style={{
+        fontSize: 13,
+        fontWeight: 500,
+        opacity: 0.65,
+        minHeight: "1.3em",
+        width: 280,
+        display: "block",
+        perspective: "500px",
+      }}
+    >
+      <span
+        key={index}
+        style={{
+          display: "inline-block",
+          transformOrigin: "50% 50%",
+          backfaceVisibility: "hidden",
+          opacity: visible ? 1 : 0,
+          transform: visible ? "rotateX(0deg)" : `rotateX(${HIDDEN_ANGLE}deg)`,
+          transition: `transform ${FADE_MS}ms cubic-bezier(0.4, 0, 0.2, 1), opacity ${FADE_MS}ms ease`,
+        }}
+      >
+        {SUBTEXT_PHRASES[index]}
+      </span>
     </span>
   );
 }
@@ -116,7 +149,12 @@ export default function Header() {
           display: "flex",
           alignItems: "flex-start",
           justifyContent: "space-between",
-          padding: "1.5rem 2rem",
+          // Matches <main>'s "0 3rem 3rem" side padding in page.tsx —
+          // these two were out of sync (2rem here vs 3rem there), which is
+          // why "Sara Del Villar" didn't line up with the intro paragraph
+          // or the grid's left/right edges even though everything looked
+          // individually centered.
+          padding: "1.5rem 3rem",
           fontSize: 18,
           fontWeight: 500,
           flexWrap: "wrap",

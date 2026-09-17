@@ -31,7 +31,7 @@ body {
   --color-text-light-muted: #898989;
   --color-brand-orange: #f65009;
   --color-brand-blue: #63c6ff;
-  --color-featured: #fcba03;
+  --color-featured: #f65009;
 }
 
 :root[data-dimmer-stage="light"] {
@@ -442,6 +442,30 @@ body {
   --sv-sheen-o: 0.4;
 }
 
+/* Sliding "liquid glass" active-filter pill — travels between buttons and
+   supplies the glass background/blur/shadow that used to live directly on
+   .float-nav-item.active (see below). left/width/top/height are all set
+   inline from LiquidNav.tsx as real box values (measured from the active
+   button's actual rect), not a scaleX transform — scaleX stretches
+   border-radius along with everything else, turning the pill's rounded
+   caps into flat, barely-curved edges at any real width. The earlier
+   "hop" bug wasn't actually caused by animating width directly; it was
+   the old per-button nav-bounce animation firing alongside this pill
+   (see .float-nav-item.active below, now stripped of it). */
+.float-nav-pill {
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(6px) saturate(160%);
+  -webkit-backdrop-filter: blur(6px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+  pointer-events: none;
+  z-index: 1;
+  transition: left 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
+    width 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 .float-nav-item {
   position: relative;
   z-index: 3;
@@ -463,14 +487,14 @@ body {
   background: rgba(0, 0, 0, 0.07);
   font-weight: 500;
 }
+/* Background/blur/shadow/bounce moved to .float-nav-pill above, which now
+   travels between buttons instead of each button popping its own glass
+   treatment in and out — that per-button snap-plus-bounce was the "hop"
+   half of "hop and bounce". This rule now only carries the active label's
+   text styling. */
 .float-nav-item.active {
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(6px) saturate(160%);
-  -webkit-backdrop-filter: blur(6px) saturate(160%);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.6) inset;
   font-weight: 600;
   color: #f65009;
-  animation: nav-bounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .tag {
@@ -505,16 +529,6 @@ body {
   pointer-events: none;
   z-index: 5;
   opacity: 0;
-  /* Ramps 0% to 100% opacity across the draw, so the stroke looks like
-     it's gaining ink as it's drawn rather than snapping fully solid.
-     linear (not ease) keeps the opacity climb steady rather than
-     front- or back-loaded, assuming the underlying WebP draws at a
-     roughly constant rate. 0.6s is a starting guess for how long the
-     draw actually takes — I can't measure your asset's real playback
-     timing from here, so nudge this to match what you see live: if
-     it's still visibly drawing after it's already fully opaque,
-     lengthen it; if it reaches full opacity well after the drawing
-     has finished, shorten it. */
   transition: opacity 0.6s linear;
 }
 .hover-circle.active {
