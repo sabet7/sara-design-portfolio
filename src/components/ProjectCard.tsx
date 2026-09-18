@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ViewTransition } from "react";
-import Image from "next/image";
+import SkeletonImage from "@/components/SkeletonImage";
 
 interface ProjectCardProps {
   slug: string;
@@ -87,17 +87,17 @@ export default function ProjectCard({
         style={{
           display: "flex",
           flexDirection: "row",
-          alignItems: "top",
-          gap: 10,
-          marginBottom: 2,
+          alignItems: "center",
+          gap: 12,
+          marginBottom: 8,
         }}
       >
         {featured && (
           <span
             aria-hidden="true"
             style={{
-              width: 15,
-              height: 15,
+              width: 21,
+              height: 21,
               borderRadius: "50%",
               background: "var(--color-featured)",
               flexShrink: 0,
@@ -110,7 +110,7 @@ export default function ProjectCard({
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: 0,
+            gap: 3,
             minWidth: 0,
             flex: "1 1 auto",
           }}
@@ -128,7 +128,7 @@ export default function ProjectCard({
               justifyContent: "space-between",
               gap: 12,
               fontWeight: 500,
-              fontSize: 16,
+              fontSize: 18,
               lineHeight: 1.2,
               height: 44, // 2 lines * 18px * 1.2 line-height
             }}
@@ -173,10 +173,10 @@ export default function ProjectCard({
             style={{
               display: "flex",
               justifyContent: "space-between",
-              gap: 10,
+              gap: 12,
               fontWeight: 300,
-              fontSize: 14,
-              lineHeight: 1.1,
+              fontSize: 16,
+              lineHeight: 1.2,
               height: 19, // 1 line * 16px * 1.2 line-height
               opacity: 0.6,
             }}
@@ -223,7 +223,7 @@ export default function ProjectCard({
                 style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
               />
             ) : (
-              <Image src={thumbnailSrc} alt={title} fill style={{ objectFit: "cover" }} />
+              <SkeletonImage src={thumbnailSrc} alt={title} fill style={{ objectFit: "cover" }} />
             )}
           </ViewTransition>
         </div>

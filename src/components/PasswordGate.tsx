@@ -9,16 +9,18 @@ interface PasswordGateProps {
    *  frontmatter.slug. */
   slug: string;
   /** Shown top-right as a nudge, e.g. `it's not the app's name`. Comes from
-   *  frontmatter.passwordHint — omit it there and none is shown. */
+   *  frontmatter.passwordHint — this one IS meant to be set per project,
+   *  since the hint itself should differ. Omit it and none is shown. */
   hint?: string;
-  /** Your hand-drawn rectangle that frames the password input, from
-   *  frontmatter.passwordFrameImage. Falls back to a plain bordered box
-   *  until you add one. */
+  /** Override for THIS project only — leave unset almost always. Every
+   *  gated project shares one drawn frame by default (DEFAULT_FRAME_IMAGE
+   *  below); only pass frontmatter.passwordFrameImage if some project
+   *  genuinely needs a different one. */
   frameImageSrc?: string;
-  /** Your keyhole animation, from frontmatter.passwordAnimation — same
-   *  animated-WebP-via-<img> pattern as the rest of the site's animations
-   *  (keeps alpha transparency, which <video> would strip). Falls back to
-   *  a plain gray box until you add one. */
+  /** Override for THIS project only — same deal as frameImageSrc. Every
+   *  gated project shares one keyhole animation by default
+   *  (DEFAULT_ANIMATION below); only pass frontmatter.passwordAnimation
+   *  for a project that needs something different. */
   animationSrc?: string;
   /** The gated content — revealed once the correct password is entered. */
   children: React.ReactNode;
@@ -27,6 +29,16 @@ interface PasswordGateProps {
 // How many wrong guesses are allowed before the form locks for the rest of
 // the session. Change this one number if 5 feels wrong once you've tried it.
 const MAX_ATTEMPTS = 5;
+
+// The shared assets every private project uses unless it passes its own
+// frameImageSrc/animationSrc. Drop your hand-drawn rectangle and keyhole
+// animation at these exact paths (public/media/password-gate/...) and
+// every gated case study/exploration picks them up automatically — no
+// frontmatter edits needed per project. Until the files actually exist
+// there, the <img> onError handlers below fall back to the plain
+// placeholder boxes, so nothing breaks in the meantime.
+const DEFAULT_FRAME_IMAGE = "/media/password-gate/frame.png";
+const DEFAULT_ANIMATION = "/media/password-gate/keyhole-animation.webp";
 
 // One shared password for every project flagged `private` in its
 // frontmatter, rather than a password per project — simpler to manage for
@@ -59,7 +71,12 @@ export default function PasswordGate({
   const [value, setValue] = useState("");
   const [status, setStatus] = useState<GateStatus>("idle");
   const [attempts, setAttempts] = useState(0);
+  const [frameFailed, setFrameFailed] = useState(false);
+  const [animationFailed, setAnimationFailed] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const resolvedFrame = frameImageSrc ?? DEFAULT_FRAME_IMAGE;
+  const resolvedAnimation = animationSrc ?? DEFAULT_ANIMATION;
 
   useEffect(() => {
     const alreadyUnlocked = sessionStorage.getItem(unlockKey) === "true";
@@ -118,23 +135,37 @@ export default function PasswordGate({
 
         <div
           className={styles.animation}
-          style={animationSrc ? undefined : { background: "#d9d9d9" }}
+          style={animationFailed ? { background: "#d9d9d9" } : undefined}
         >
-          {animationSrc && (
+          {!animationFailed && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={animationSrc}
+              src={resolvedAnimation}
               alt=""
               aria-hidden="true"
               className={styles.animationImg}
+              onError={() => setAnimationFailed(true)}
             />
           )}
         </div>
 
         <div
           className={styles.frame}
-          style={frameImageSrc ? { backgroundImage: `url(${frameImageSrc})` } : undefined}
+          style={frameFailed ? undefined : { backgroundImage: `url(${resolvedFrame})` }}
         >
+          {/* Hidden probe image, not displayed — its only job is to fire
+              onError when resolvedFrame 404s, so .frame can fall back to
+              its plain bordered look via CSS instead of showing a broken
+              background-image. */}
+          {!frameFailed && (
+            <img
+              src={resolvedFrame}
+              alt=""
+              aria-hidden="true"
+              style={{ display: "none" }}
+              onError={() => setFrameFailed(true)}
+            />
+          )}
           <input
             ref={inputRef}
             type="password"

@@ -14,7 +14,7 @@ export default function Button({ children, href, onClick, icon, fontSize = 14 }:
     alignItems: "center",
     gap: 6,
     background: "var(--color-brand-orange)",
-    color: "var(--color-text)",
+    color: "#ffffff", //This affects all text colors on all buttons on this site. Be mindful of this when changing the color of the button text.
     fontWeight: 700,
     fontSize,
     padding: "8px 18px",

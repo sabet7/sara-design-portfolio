@@ -40,15 +40,20 @@ export const CaseStudyFrontmatterSchema = z.object({
   thumbnailImage: z.string().min(1, "thumbnailImage is required"),
   gifImage: z.string().optional(),
   heroImage: z.string().min(1, "heroImage is required"),
-  //Privacy gate:  set `private: true` on any project that shouldn't be
-  // publicly readable yet (e.g. an unreleased Duolingo concept). When true,
-  // the detail component wraps its content in <PasswordGate>, which blurs
-  // everything behind a password prompt until the visitor unlocks it for
-  // the session. The three fields below are optional per-project
-  // customization for that prompt — see PasswordGate.tsx for how they're
-  // used and what they fall back to when left blank.set to true
+  // Privacy gate. `private: true`  -> GATED: hidden behind PasswordGate's
+  //                                    blur + password prompt.
+  // `private: false` (the default) -> PUBLIC: renders normally, as every
+  //                                    project does today.
+  // Defaults to false, so no existing project's frontmatter needs to
+  // change — add `private: true` only to a project you want to hide right
+  // now, like an unreleased Duolingo concept.
   private: z.boolean().default(false),
+  // Set per project — this is the one field below actually meant to vary.
   passwordHint: z.string().optional(),
+  // Leave these two unset almost always: every gated project shares one
+  // drawn frame + one keyhole animation by default (see PasswordGate.tsx's
+  // DEFAULT_FRAME_IMAGE/DEFAULT_ANIMATION). Only set one here if this
+  // specific project needs a different image than the shared default.
   passwordFrameImage: z.string().optional(),
   passwordAnimation: z.string().optional(),
 });
@@ -97,6 +102,9 @@ export const ExplorationFrontmatterSchema = z.object({
   painPoints: z.array(z.string()).default([]),
   solutions: z.array(z.string()).default([]),
   learnings: z.array(z.string()).default([]),
+  // Same privacy gate as CaseStudyFrontmatterSchema above: `true` = gated,
+  // `false` (default) = public. See that comment for the full explanation
+  // — works identically here for explorations.
   private: z.boolean().default(false),
   passwordHint: z.string().optional(),
   passwordFrameImage: z.string().optional(),
