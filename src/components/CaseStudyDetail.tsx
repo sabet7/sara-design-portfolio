@@ -5,6 +5,7 @@ import { REQUIRED_CASE_STUDY_SECTIONS } from "@/content/types";
 import type { CaseStudy } from "@/lib/content";
 import DetailSidebar from "@/components/DetailSidebar";
 import VoiceNote from "@/components/voice-note/VoiceNote";
+import PasswordGate from "@/components/PasswordGate";
 
 function slugify(text: string): string {
   return text
@@ -26,7 +27,7 @@ const mdxComponents = {
     return <h6 id={slugify(text)} className="detail-section-heading" {...props} />;
   },
   h2: (props: React.ComponentProps<"h2">) => (<h2 className="detail-subheading" {...props} />),
-  
+
   p: (props: React.ComponentProps<"p">) => <p className="detail-paragraph" {...props} />,
   VoiceNote,
 };
@@ -34,7 +35,7 @@ const mdxComponents = {
 export default function CaseStudyDetail({ caseStudy }: { caseStudy: CaseStudy }) {
   const { frontmatter, content } = caseStudy;
 
-  return (
+  const detail = (
     <>
       <div className="detail-header">
         <div>
@@ -74,4 +75,26 @@ export default function CaseStudyDetail({ caseStudy }: { caseStudy: CaseStudy })
       </div>
     </>
   );
+
+  // Gated projects (frontmatter.private: true) render the same content as
+  // always, but PasswordGate wraps it in a blur + scrim + password prompt
+  // until the visitor unlocks it for the session. Everything the prompt
+  // needs (hint text, your hand-drawn frame image, the keyhole animation)
+  // comes straight from this project's own frontmatter, so no code change
+  // is needed to gate a different project later — just set `private: true`
+  // on it.
+  if (frontmatter.private) {
+    return (
+      <PasswordGate
+        slug={frontmatter.slug}
+        hint={frontmatter.passwordHint}
+        frameImageSrc={frontmatter.passwordFrameImage}
+        animationSrc={frontmatter.passwordAnimation}
+      >
+        {detail}
+      </PasswordGate>
+    );
+  }
+
+  return detail;
 }

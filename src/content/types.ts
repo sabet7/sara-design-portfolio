@@ -40,6 +40,17 @@ export const CaseStudyFrontmatterSchema = z.object({
   thumbnailImage: z.string().min(1, "thumbnailImage is required"),
   gifImage: z.string().optional(),
   heroImage: z.string().min(1, "heroImage is required"),
+  //Privacy gate:  set `private: true` on any project that shouldn't be
+  // publicly readable yet (e.g. an unreleased Duolingo concept). When true,
+  // the detail component wraps its content in <PasswordGate>, which blurs
+  // everything behind a password prompt until the visitor unlocks it for
+  // the session. The three fields below are optional per-project
+  // customization for that prompt — see PasswordGate.tsx for how they're
+  // used and what they fall back to when left blank.set to true
+  private: z.boolean().default(false),
+  passwordHint: z.string().optional(),
+  passwordFrameImage: z.string().optional(),
+  passwordAnimation: z.string().optional(),
 });
 
 export type CaseStudyFrontmatter = z.infer<typeof CaseStudyFrontmatterSchema>;
@@ -86,6 +97,10 @@ export const ExplorationFrontmatterSchema = z.object({
   painPoints: z.array(z.string()).default([]),
   solutions: z.array(z.string()).default([]),
   learnings: z.array(z.string()).default([]),
+  private: z.boolean().default(false),
+  passwordHint: z.string().optional(),
+  passwordFrameImage: z.string().optional(),
+  passwordAnimation: z.string().optional(),
 });
 
 export type ExplorationFrontmatter = z.infer<typeof ExplorationFrontmatterSchema>;
