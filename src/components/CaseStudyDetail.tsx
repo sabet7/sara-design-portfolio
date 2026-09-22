@@ -6,6 +6,7 @@ import type { CaseStudy } from "@/lib/content";
 import DetailSidebar from "@/components/DetailSidebar";
 import VoiceNote from "@/components/voice-note/VoiceNote";
 import PasswordGate from "@/components/PasswordGate";
+import DuolingoCharacter from "@/components/duolingo-character/DuolingoCharacter";
 
 function slugify(text: string): string {
   return text
@@ -21,15 +22,37 @@ function getText(children: ReactNode): string {
   return "";
 }
 
+// h1 through h6, largest to smallest. h1 is deliberately styled the same
+// as h2 (both use "detail-subheading") rather than getting its own,
+// bigger look: the page's own <h1 className="detail-title"> above is
+// already the true top-level heading, so any h1 written inside MDX body
+// content should read as a section headline, not compete with it for
+// "biggest text on the page." h2 and h6 already had classes; h3/h4/h5 are
+// new — see the matching .detail-heading-3/4/5 rules in globals.css.
 const mdxComponents = {
+  h1: (props: React.ComponentProps<"h1">) => (
+    <h1 className="detail-subheading" {...props} />
+  ),
+  h2: (props: React.ComponentProps<"h2">) => (
+    <h2 className="detail-subheading" {...props} />
+  ),
+  h3: (props: React.ComponentProps<"h3">) => (
+    <h3 className="detail-heading-3" {...props} />
+  ),
+  h4: (props: React.ComponentProps<"h4">) => (
+    <h4 className="detail-heading-4" {...props} />
+  ),
+  h5: (props: React.ComponentProps<"h5">) => (
+    <h5 className="detail-heading-5" {...props} />
+  ),
   h6: (props: React.ComponentProps<"h6">) => {
     const text = getText(props.children);
     return <h6 id={slugify(text)} className="detail-section-heading" {...props} />;
   },
-  h2: (props: React.ComponentProps<"h2">) => (<h2 className="detail-subheading" {...props} />),
 
   p: (props: React.ComponentProps<"p">) => <p className="detail-paragraph" {...props} />,
   VoiceNote,
+  DuolingoCharacter,
 };
 
 export default function CaseStudyDetail({ caseStudy }: { caseStudy: CaseStudy }) {

@@ -7,7 +7,10 @@ import Button from "./Button";
 const NYC_LAT = 40.7128;
 const NYC_LON = -74.006;
 
-function weatherIcon(code: number | null, isDay: boolean): string {
+// Emoji fallback — used until your hand-drawn icon for a given condition
+// exists (or if one ever fails to load), so the weather section never
+// shows a broken image.
+function weatherEmoji(code: number | null, isDay: boolean): string {
   if (code === null) return "☀️";
   if (code === 0) return isDay ? "☀️" : "🌙";
   if ([1, 2, 3].includes(code)) return isDay ? "⛅" : "☁️";
@@ -17,6 +20,46 @@ function weatherIcon(code: number | null, isDay: boolean): string {
   if ([71, 73, 75, 77, 85, 86].includes(code)) return "❄️";
   if ([95, 96, 99].includes(code)) return "⛈️";
   return "☀️";
+}
+
+// Maps the same weather codes to your hand-drawn icon files. Drop each
+// file in at the path below as you finish drawing it — nothing else
+// changes. Until a given file exists, WeatherIcon's onError silently
+// falls back to the matching emoji above, so missing ones just look like
+// they do today rather than breaking.
+function weatherIconSrc(code: number | null, isDay: boolean): string {
+  const base = "/media/weather";
+  if (code === null) return `${base}/sunny.png`;
+  if (code === 0) return isDay ? `${base}/sunny.png` : `${base}/moon.png`;
+  if ([1, 2, 3].includes(code)) {
+    return isDay ? `${base}/partly-cloudy.png` : `${base}/partly-cloudy-night.png`;
+  }
+  if ([45, 48].includes(code)) return `${base}/fog.png`;
+  if ([51, 53, 55, 56, 57].includes(code)) return `${base}/drizzle.png`;
+  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return `${base}/rain.png`;
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return `${base}/snow.png`;
+  if ([95, 96, 99].includes(code)) return `${base}/thunderstorm.png`;
+  return `${base}/sunny.png`;
+}
+
+function WeatherIcon({ code, isDay }: { code: number | null; isDay: boolean }) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return <span aria-hidden="true">{weatherEmoji(code, isDay)}</span>;
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={weatherIconSrc(code, isDay)}
+      alt=""
+      aria-hidden="true"
+      draggable={false}
+      onError={() => setFailed(true)}
+      style={{ width: 18, height: 18, verticalAlign: "-4px" }}
+    />
+  );
 }
 
 // Cycles between the two lines, fading each word out and back in with a
@@ -148,22 +191,45 @@ export default function Header() {
         style={{
           display: "flex",
           alignItems: "flex-start",
-          justifyContent: "space-between",
+          // Was "space-between": across only 4-5 groups, that stretches
+          // them to fill the ENTIRE row width on a wide monitor — the
+          // big-gap look you flagged. That was always true of this
+          // layout; it just never showed because html{zoom:75%} shrank
+          // the whole page (gaps included) down to 75% scale, which
+          // happened to land close to how the Figma reference looks. Now
+          // that the zoom is gone, "flex-start" + a fixed gap keeps every
+          // group close together regardless of window width — matching
+          // image 3 — and marginLeft:"auto" below pins just the
+          // date/weather block to the far right, the same way it reads
+          // in that reference.
+          justifyContent: "flex-start",
           // Matches <main>'s "0 3rem 3rem" side padding in page.tsx —
           // these two were out of sync (2rem here vs 3rem there), which is
           // why "Sara Del Villar" didn't line up with the intro paragraph
           // or the grid's left/right edges even though everything looked
           // individually centered.
           padding: "1.5rem 3rem",
-          fontSize: 18,
+          fontSize: 14,
           fontWeight: 500,
-          flexWrap: "wrap",
-          gap: "1rem",
+          // nowrap, not wrap: this header is designed as ONE row, always
+          // (per the Figma reference) — it should never break into a
+          // second line on desktop. "wrap" was the actual bug just now:
+          // the 2.5rem gaps between the other 4 groups ate into the
+          // leftover space the date/weather block needed to fit on line
+          // one, so it silently wrapped to its own second line, and
+          // marginLeft:"auto" then pushed that lone item to the right
+          // edge of that (mostly empty) second line — which is why it
+          // looked like it had jumped down near the portrait image. With
+          // nowrap, marginLeft:"auto" on the date block still does its
+          // job (flush right, everything else flush left) but the row
+          // itself can never split, regardless of exact widths.
+          flexWrap: "nowrap",
+          gap: "2rem",
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.15, marginRight: "2.5rem" }}>
+        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.15 }}>
           <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
-            <strong style={{ fontSize: 20, fontWeight: 800 }}>Sara Del Villar</strong>
+            <strong style={{ fontSize: 16, fontWeight: 600 }}>Sara Del Villar</strong>
           </Link>
           <RotatingSubtext />
         </div>
@@ -183,16 +249,16 @@ export default function Header() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
           <span>Services</span>
-          <span style={{ color: "#777777", fontSize: 13, lineHeight: 1.5 }}>Product design</span>
-          <span style={{ color: "#777777", fontSize: 13, lineHeight: 1.5 }}>Web design</span>
-          <span style={{ color: "#777777", fontSize: 13, lineHeight: 1.5 }}>Interaction design</span>
+          <span style={{ color: "#777777", fontSize: 12, lineHeight: 1.5 }}>Product design</span>
+          <span style={{ color: "#777777", fontSize: 12, lineHeight: 1.5 }}>Web design</span>
+          <span style={{ color: "#777777", fontSize: 12, lineHeight: 1.5 }}>Interaction design</span>
         </div>
 
         <nav style={{ display: "flex", alignItems: "center", gap: "1.25rem", color: "inherit" }}>
           <a href="/resume.pdf" style={{ color: "inherit" }}>
             Resume
           </a>
-          <Button href="mailto:sedelvillar104@gmail.com" fontSize={16}>
+          <Button href="mailto:sedelvillar104@gmail.com" fontSize={14}>
             Connect
           </Button>
           <a
@@ -209,9 +275,25 @@ export default function Header() {
         </nav>
 
         {now && (
-          <span style={{ paddingTop: 3 }}>
-            {dateString} {timeString} EST - New York{" "}
-            {tempF !== null ? `${weatherIcon(weatherCode, isDay)} ${tempF}°F` : ""}
+          // marginLeft: "auto" pins just this block to the far right edge
+          // (like image 3), instead of relying on space-between across
+          // the whole row to push it there.
+          <span
+            style={{
+              paddingTop: 3,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 5,
+              marginLeft: "auto",
+            }}
+          >
+            {dateString} {timeString} EST - New York
+            {tempF !== null && (
+              <>
+                <WeatherIcon code={weatherCode} isDay={isDay} />
+                {tempF}°F
+              </>
+            )}
           </span>
         )}
       </header>
@@ -219,7 +301,7 @@ export default function Header() {
       <span
         style={{
           position: "fixed",
-          bottom: 16,
+          bottom: 15,
           right: 16,
           fontSize: 10,
           color: "#b3b3b3",

@@ -10,6 +10,13 @@ import styles from './DoodleLayer.module.css';
 
 const WEIGHTS = [2, 4, 7, 11];
 
+// Your hand-drawn icons for the toggle button, one per state. Drop each
+// file in at the path below once it's ready — until then, BrushToggleIcon's
+// onError falls back to the original line-drawn SVG for that state, so a
+// missing file just looks like it does today instead of breaking.
+const BRUSH_ICON_SRC = "/media/doodle/doodle-brush.png";
+const CLOSE_ICON_SRC = "/media/doodle/doodle-close.png";
+
 interface Point {
   x: number;
   y: number;
@@ -202,10 +209,34 @@ export default function DoodleLayer() {
           aria-pressed={active}
           aria-label={active ? 'Turn off doodling' : 'Turn on doodling'}
         >
-          {active ? <CloseIcon /> : <BrushIcon />}
+          {/* Keyed by `active` so each state's <img> gets its own fresh
+              onError tracking — without this, one broken icon's failure
+              would incorrectly disable the other, already-working one
+              too. */}
+          <BrushToggleIcon key={active ? 'close' : 'brush'} active={active} />
         </button>
       </div>
     </>
+  );
+}
+
+function BrushToggleIcon({ active }: { active: boolean }) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return active ? <CloseIcon /> : <BrushIcon />;
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={active ? CLOSE_ICON_SRC : BRUSH_ICON_SRC}
+      alt=""
+      width={active ? 16 : 18}
+      height={active ? 16 : 18}
+      draggable={false}
+      onError={() => setFailed(true)}
+    />
   );
 }
 

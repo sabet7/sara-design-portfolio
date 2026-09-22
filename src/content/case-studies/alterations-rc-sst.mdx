@@ -51,7 +51,13 @@ Key Insight: Daily operations heavily relied on data provided by the customer; h
 
 ![Competitive analysis](/media/case-studies/alterations-rc-sst/content/alterations-competitive-a.png)
 
-Although there are business management and work management software available for businesses, Alterations by R.C. needed a specific work management system that accounted for the details and data that make work for a tailor possible. 
+Although there are business management and work management software available, these softwares (like Jira, Trello, and Zendesk) handle projects and not clothing. Therefore, these softwares were completely incompatible with the type of business Alterations by R.C.  Alterations by R.C. needed a specific work management system that accounted for the details and data that make work for a tailor possible. 
+
+In depth research, I came across other options created specifically for tailoring and dry cleaning businesses.  The most popular being Geelus.
+
+[insert images of Geelus UI] 
+ 
+However, the interface of these softwares was far too complex for the employees at Alterations. Additionally, it did not allow tailors to track status of the completion of garments. Geelus was geared towards managing business growth and sales but not the fine details of operations. 
 
 ###### Process
 
@@ -96,11 +102,23 @@ Although the experiences for the frontend and backend were different, they neede
 
 #### Current stage
 
+## AI powered product design / Creating an MVP with Claude and Lovable
+
+In order to test the effectiveness of my design, I wanted to create a working prototype that employees and customers could use. This MVP was to see how this new system would impact business operations and test customer use in real time. 
+
+After designing the main screens, I hopped Github and set up my code space and set up a staging layer in Supabase with SQL tables that would store login credentials for employees, and ticket information for the garments.
+
+### Technical limitations and considerations
+
+While setting up the staging layer, I had to consider how I would handle garment entries and pick ups. Because the purposes of the MVP was to test, I did not want to the tables to store client personal information. However, each garment needed to be identified. This was handled by generating a random number for each order and using that number to track the item throughout the system. 
+
+/*[insert images]*/
+
+Other technical limitations were connecting the current payment system to the this new system. In-store, clients would pay via a Verifone. The receipt issued after payment was typically attached to the the garment ticket. However, it was not always a reliable way to confirm payments. I needed to connect the current system to the device in store and ensure that payments made were reflected in the system.
+
+### Roadblocks during MVP stage
+
 A few days before testing the MVP design, I learned that the shop no longer had WiFi connection. The new paper system was created, not as an afterthought, but as conscious fallback system for when things don't work. 
-
-#### Beta launch and testing
-
-## The MVP
 
 {/* Image link: https://cdn.prod.website-files.com/6472406d34ccbfd57740801d/6a3ebd1bc4832521800119e1_THE%20MVP.png */}
 

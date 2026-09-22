@@ -397,49 +397,110 @@ body {
   justify-content: center;
   max-width: calc(100vw - 160px);
   background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(7px) saturate(200%) contrast(115%);
-  -webkit-backdrop-filter: blur(7px) saturate(200%) contrast(115%);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  /* Bumped from blur(7px) saturate(200%) contrast(115%) — thicker blur and
+     more saturate/contrast punch reads as denser, heavier glass rather
+     than a thin frosted film. */
+  backdrop-filter: blur(11px) saturate(220%) contrast(122%);
+  -webkit-backdrop-filter: blur(11px) saturate(220%) contrast(122%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
     border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Layered for actual depth instead of one flat drop-shadow: an ambient
+     lift shadow (soft/wide, like the pill is floating a little off the
+     page), a tight contact shadow right under it (grounds it so it
+     doesn't look like it's hovering too far away), a bright inset rim
+     along the top (light catching the curved top bevel of the glass),
+     a soft inset glow just under that rim (the "thickness" of the glass
+     material itself, not just its edge), a dark inset shadow along the
+     bottom inside edge (the underside of that same thickness), and the
+     chromatic fringe at the left/right edges (subtle red/blue split,
+     like light bending through a curved edge) — now slightly stronger
+     than the original 0.05 alpha so it actually reads at a glance. */
   box-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.1),
-    0 1px 0 rgba(255, 255, 255, 0.75) inset,
-    -0.5px 0 0 rgba(255, 0, 60, 0.05),
-    0.5px 0 0 rgba(0, 140, 255, 0.05);
+    0 18px 45px rgba(0, 0, 0, 0.16),
+    0 3px 8px rgba(0, 0, 0, 0.14),
+    0 1.5px 0 rgba(255, 255, 255, 0.85) inset,
+    0 -1px 6px rgba(255, 255, 255, 0.35) inset,
+    0 -2px 4px rgba(0, 0, 0, 0.12) inset,
+    -1px 0 0 rgba(255, 0, 60, 0.09),
+    1px 0 0 rgba(0, 140, 255, 0.09);
 }
 
 /* Curved-glass sheen — a soft diagonal highlight standing in for real
    refraction, so the pill reads as glass rather than flat frosted
    plastic. Without this the backdrop-filter/box-shadow alone still
    look correct on paper but flatter in practice. border-radius:
-   inherit clips it to the pill's own shape automatically. */
+   inherit clips it to the pill's own shape automatically.
+
+   Now animated (sv-sheen-sweep) instead of static: a real glass/liquid
+   surface never has a fixed, frozen highlight — it catches and loses
+   the light as you (or it) move. background-size is wider than the
+   box itself and background-position slides slowly back and forth, so
+   the bright band drifts across the pill like light travelling over a
+   curved, wet surface — this is the "how it reacts to light" cue,
+   without needing real-time cursor tracking (which would need
+   LiquidNav.tsx's own pointer-move handling, not just CSS). */
 .sara-float-nav::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(115deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.08) 22%, rgba(255, 255, 255, 0) 45%);
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.55) 45%, rgba(255, 255, 255, 0) 70%);
+  background-size: 260% 100%;
   mix-blend-mode: overlay;
   opacity: var(--sv-sheen-o, 1);
   pointer-events: none;
   z-index: 2;
+  animation: sv-sheen-sweep 7s ease-in-out infinite;
+}
+
+@keyframes sv-sheen-sweep {
+  0%, 100% { background-position: 120% 0; }
+  50% { background-position: -60% 0; }
+}
+
+/* Frosted grain texture — a fine SVG feTurbulence noise tile, blended
+   softly over the glass. This is the piece that was purely missing
+   before: blur + saturate alone reads as "smudged," not "frosted" —
+   actual frosted glass has a faint physical grain to it, which is what
+   this adds. Low opacity and a small tile size keep it a texture, not
+   visible static. */
+.sara-float-nav::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 60px 60px;
+  mix-blend-mode: overlay;
+  opacity: var(--sv-noise-o, 0.35);
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* Dark-stage glass tint — ported from Webflow's .invert variant, using
    this rebuild's actual 5-stage dimmer attribute instead of a binary
-   class, so it participates in the same transition as everything else. */
+   class, so it participates in the same transition as everything else.
+   Depth layers get their own dark-mode-appropriate values (a light
+   ambient shadow reads as fog on a dark background, not a shadow, so
+   these go darker/tighter instead), and the noise texture backs off
+   slightly since overlay-blended grain reads stronger against a dark
+   base than a light one. */
 :root[data-dimmer-stage="charcoal"] .sara-float-nav,
 :root[data-dimmer-stage="near-black"] .sara-float-nav {
   background: rgba(20, 20, 20, 0.34);
   border-color: rgba(255, 255, 255, 0.18);
   box-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.35),
-    0 1px 0 rgba(255, 255, 255, 0.08) inset,
-    -0.5px 0 0 rgba(255, 0, 60, 0.07),
-    0.5px 0 0 rgba(0, 140, 255, 0.07);
+    0 18px 45px rgba(0, 0, 0, 0.5),
+    0 3px 10px rgba(0, 0, 0, 0.4),
+    0 1.5px 0 rgba(255, 255, 255, 0.14) inset,
+    0 -1px 6px rgba(255, 255, 255, 0.06) inset,
+    0 -2px 4px rgba(0, 0, 0, 0.35) inset,
+    -1px 0 0 rgba(255, 0, 60, 0.12),
+    1px 0 0 rgba(0, 140, 255, 0.12);
   --sv-sheen-o: 0.4;
+  --sv-noise-o: 0.22;
 }
 
 /* Sliding "liquid glass" active-filter pill — travels between buttons and
