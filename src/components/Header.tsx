@@ -7,6 +7,33 @@ import Button from "./Button";
 const NYC_LAT = 40.7128;
 const NYC_LON = -74.006;
 
+// Set this once you actually have a job — replace null with the company
+// name (e.g. "Duolingo") and the header switches from an auto-updating
+// "Available <month>" to "Currently at <company>" on its own, everywhere
+// this renders. Flip it back to null between jobs and the availability
+// line just resumes where it left off — no other code to touch either
+// way.
+const CURRENT_EMPLOYER: string | null = null;
+
+// The if/else you asked for: employed takes priority and shows a fixed
+// "Currently at X"; otherwise this always reflects the ACTUAL current
+// month/year (not a typed-in one), so it rolls over on its own at every
+// month boundary — and at every December→January year boundary too,
+// since it's reading both straight off the real date instead of a
+// separately hardcoded pair.
+function getAvailabilityLabel(now: Date): string {
+  if (CURRENT_EMPLOYER) return `Currently at ${CURRENT_EMPLOYER}`;
+  const month = now.toLocaleDateString("en-US", {
+    month: "long",
+    timeZone: "America/New_York",
+  });
+  const year = now.toLocaleDateString("en-US", {
+    year: "numeric",
+    timeZone: "America/New_York",
+  });
+  return `Available ${month} ${year}`;
+}
+
 // Emoji fallback — used until your hand-drawn icon for a given condition
 // exists (or if one ever fails to load), so the weather section never
 // shows a broken image.
@@ -57,7 +84,12 @@ function WeatherIcon({ code, isDay }: { code: number | null; isDay: boolean }) {
       aria-hidden="true"
       draggable={false}
       onError={() => setFailed(true)}
-      style={{ width: 18, height: 18, verticalAlign: "-4px" }}
+      // Was 18/18 with a -4px nudge — bumped to 24/24 (matches your
+      // "barely noticeable" note on the hand-drawn art) and the vertical
+      // nudge scaled up proportionally so it still sits centered against
+      // the surrounding 18px header text. Tweak verticalAlign a px or two
+      // if it reads slightly high/low once you see it live.
+      style={{ width: 24, height: 24, verticalAlign: "-6px" }}
     />
   );
 }
@@ -115,7 +147,7 @@ function RotatingSubtext() {
   return (
     <span
       style={{
-        fontSize: 13,
+        fontSize: 14,
         fontWeight: 500,
         opacity: 0.65,
         minHeight: "1.3em",
@@ -209,7 +241,7 @@ export default function Header() {
           // or the grid's left/right edges even though everything looked
           // individually centered.
           padding: "1.5rem 3rem",
-          fontSize: 14,
+          fontSize: 15,
           fontWeight: 500,
           // nowrap, not wrap: this header is designed as ONE row, always
           // (per the Figma reference) — it should never break into a
@@ -229,32 +261,46 @@ export default function Header() {
       >
         <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.15 }}>
           <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
-            <strong style={{ fontSize: 16, fontWeight: 600 }}>Sara Del Villar</strong>
+            <strong style={{ fontSize: 16, fontWeight: 700 }}>Sara Del Villar</strong>
           </Link>
           <RotatingSubtext />
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 7, paddingTop: 3 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <span
             style={{
               width: 8,
               height: 8,
               borderRadius: "50%",
-              background: "#03C000",
+              // Green reads as "open for work"; once CURRENT_EMPLOYER is
+              // set, the dot switches to the brand blue instead, so the
+              // indicator's color still matches what the text next to it
+              // is actually saying rather than staying a job-search green
+              // forever.
+              background: CURRENT_EMPLOYER ? "var(--color-brand-blue)" : "#03C000",
               display: "inline-block",
             }}
           />
-          <span>Available September 2026</span>
+          <span>{now ? getAvailabilityLabel(now) : ""}</span>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
           <span>Services</span>
-          <span style={{ color: "#777777", fontSize: 12, lineHeight: 1.5 }}>Product design</span>
-          <span style={{ color: "#777777", fontSize: 12, lineHeight: 1.5 }}>Web design</span>
-          <span style={{ color: "#777777", fontSize: 12, lineHeight: 1.5 }}>Interaction design</span>
+          <span style={{ color: "#777777", fontSize: 13, lineHeight: 1.5 }}>Product design</span>
+          <span style={{ color: "#777777", fontSize: 13, lineHeight: 1.5 }}>Web design</span>
+          <span style={{ color: "#777777", fontSize: 13, lineHeight: 1.5 }}>Interaction design</span>
         </div>
 
-        <nav style={{ display: "flex", alignItems: "center", gap: "1.25rem", color: "inherit" }}>
+        {/* flex-start, not center: "center" was vertically centering
+            Resume/Github/X within nav's own height — and nav's height is
+            set by its TALLEST child, the Connect button, which is taller
+            than a line of plain text because of its own vertical padding.
+            So the plain-text links were sitting in the middle of a box
+            that's taller than they are, which reads as "lower than it
+            should be" compared to the flush-top text everywhere else in
+            the header. flex-start pins every child's top edge to nav's
+            top edge instead, matching the rest of the row. */}
+        <nav style={{ display: "flex", alignItems: "flex-start", gap: "1.25rem", color: "inherit" }}>
           <a href="/resume.pdf" style={{ color: "inherit" }}>
             Resume
           </a>
@@ -275,19 +321,20 @@ export default function Header() {
         </nav>
 
         {now && (
-          // marginLeft: "auto" pins just this block to the far right edge
-          // (like image 3), instead of relying on space-between across
-          // the whole row to push it there.
+          // No marginLeft:"auto" here on purpose — that fills ALL leftover
+          // row width, which is small on a Figma-canvas-sized frame but
+          // huge on an actual wide monitor (that was the "too much space
+          // between X and Mon" gap). Letting this block flow right after
+          // nav with the same fixed `gap` as every other group keeps it
+          // consistently close, regardless of window width.
           <span
             style={{
-              paddingTop: 3,
               display: "inline-flex",
               alignItems: "center",
               gap: 5,
-              marginLeft: "auto",
             }}
           >
-            {dateString} {timeString} EST - New York
+            {dateString} {timeString} EST - NYC
             {tempF !== null && (
               <>
                 <WeatherIcon code={weatherCode} isDay={isDay} />
@@ -301,7 +348,7 @@ export default function Header() {
       <span
         style={{
           position: "fixed",
-          bottom: 15,
+          bottom: 16,
           right: 16,
           fontSize: 10,
           color: "#b3b3b3",

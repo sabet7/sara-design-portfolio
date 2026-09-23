@@ -396,13 +396,20 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   max-width: calc(100vw - 160px);
-  background: rgba(255, 255, 255, 0.14);
-  /* Bumped from blur(7px) saturate(200%) contrast(115%) — thicker blur and
-     more saturate/contrast punch reads as denser, heavier glass rather
-     than a thin frosted film. */
-  backdrop-filter: blur(11px) saturate(220%) contrast(122%);
-  -webkit-backdrop-filter: blur(11px) saturate(220%) contrast(122%);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  /* Bumped from 0.14 — that was the actual readability bug: at 14% white
+     over blur alone, page content scrolling underneath the fixed pill
+     (body copy, card titles) still read through clearly enough to be
+     distracting. This is the real fix, not more blur — blur softens
+     edges but doesn't reduce how much of the backdrop's own contrast
+     survives through a mostly-transparent tint. A denser base tint is
+     also just more correct for "glass with depth": true frosted glass
+     you can set a cup down on reads far more opaque than a light film. */
+  background: rgba(255, 255, 255, 0.55);
+  /* Blur pushed further too (11px -> 18px) so text edges underneath are
+     genuinely dissolved, not just dimmed. */
+  backdrop-filter: blur(18px) saturate(225%) contrast(124%);
+  -webkit-backdrop-filter: blur(18px) saturate(225%) contrast(124%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
   transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
     border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -413,18 +420,20 @@ body {
      along the top (light catching the curved top bevel of the glass),
      a soft inset glow just under that rim (the "thickness" of the glass
      material itself, not just its edge), a dark inset shadow along the
-     bottom inside edge (the underside of that same thickness), and the
-     chromatic fringe at the left/right edges (subtle red/blue split,
-     like light bending through a curved edge) — now slightly stronger
-     than the original 0.05 alpha so it actually reads at a glance. */
+     bottom inside edge (the underside of that same thickness), a second,
+     tighter inner shadow further in (reads as a thicker slab of glass —
+     one inset shadow alone reads as a thin rim, two nested ones read as
+     real depth), and the chromatic fringe at the left/right edges
+     (subtle red/blue split, like light bending through a curved edge). */
   box-shadow:
-    0 18px 45px rgba(0, 0, 0, 0.16),
-    0 3px 8px rgba(0, 0, 0, 0.14),
-    0 1.5px 0 rgba(255, 255, 255, 0.85) inset,
-    0 -1px 6px rgba(255, 255, 255, 0.35) inset,
-    0 -2px 4px rgba(0, 0, 0, 0.12) inset,
-    -1px 0 0 rgba(255, 0, 60, 0.09),
-    1px 0 0 rgba(0, 140, 255, 0.09);
+    0 22px 55px rgba(0, 0, 0, 0.18),
+    0 4px 10px rgba(0, 0, 0, 0.15),
+    0 1.5px 0 rgba(255, 255, 255, 0.9) inset,
+    0 -1px 6px rgba(255, 255, 255, 0.4) inset,
+    0 -3px 8px rgba(0, 0, 0, 0.14) inset,
+    0 0 0 4px rgba(255, 255, 255, 0.08) inset,
+    -1px 0 0 rgba(255, 0, 60, 0.1),
+    1px 0 0 rgba(0, 140, 255, 0.1);
 }
 
 /* Curved-glass sheen — a soft diagonal highlight standing in for real
@@ -433,14 +442,13 @@ body {
    look correct on paper but flatter in practice. border-radius:
    inherit clips it to the pill's own shape automatically.
 
-   Now animated (sv-sheen-sweep) instead of static: a real glass/liquid
-   surface never has a fixed, frozen highlight — it catches and loses
-   the light as you (or it) move. background-size is wider than the
-   box itself and background-position slides slowly back and forth, so
-   the bright band drifts across the pill like light travelling over a
-   curved, wet surface — this is the "how it reacts to light" cue,
-   without needing real-time cursor tracking (which would need
-   LiquidNav.tsx's own pointer-move handling, not just CSS). */
+   Animated (sv-sheen-sweep) so the glass isn't dead when nobody's
+   touching it — a slow, ambient drift standing in for light moving
+   across the room. It backs off (paused + dimmed) below whenever the
+   real cursor-tracked highlight (.sara-float-nav-glare, from
+   LiquidNav.tsx's pointermove handler) is active, so the two lights
+   don't visually fight each other — idle ambience when untouched,
+   real reactivity when you're actually on it. */
 .sara-float-nav::before {
   content: "";
   position: absolute;
@@ -458,6 +466,46 @@ body {
 @keyframes sv-sheen-sweep {
   0%, 100% { background-position: 120% 0; }
   50% { background-position: -60% 0; }
+}
+
+/* The real cursor-tracked highlight, driven by --glare-x/--glare-y (set on
+   .sara-float-nav itself, in %, from LiquidNav.tsx's onPointerMove) and
+   shown/hidden via the data-glare attribute the same component toggles on
+   enter/leave. This is an actual DOM child (see LiquidNav.tsx), not a
+   third pseudo-element — .sara-float-nav already spends its ::before/
+   ::after budget on the ambient sheen and the noise texture above.
+
+   soft-light instead of overlay: overlay's math is multiply-leaning on a
+   dark backdrop, which would make a white highlight nearly invisible on
+   the charcoal/near-black dimmer stages — soft-light brightens visibly
+   against both light and dark bases, so the effect reads the same way in
+   every stage. */
+.sara-float-nav-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  background: radial-gradient(
+    140px 140px at var(--glare-x, 50%) var(--glare-y, 30%),
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0) 70%
+  );
+  mix-blend-mode: soft-light;
+}
+
+.sara-float-nav[data-glare="on"] .sara-float-nav-glare {
+  opacity: var(--sv-glare-o, 1);
+}
+
+/* Pause + dim the idle ambient sweep while the real cursor-driven glare
+   is active, so the two lights read as one coherent surface reacting to
+   you, rather than two separate highlights crossing each other. */
+.sara-float-nav[data-glare="on"]::before {
+  animation-play-state: paused;
+  opacity: calc(var(--sv-sheen-o, 1) * 0.3);
 }
 
 /* Frosted grain texture — a fine SVG feTurbulence noise tile, blended
@@ -489,18 +537,22 @@ body {
    base than a light one. */
 :root[data-dimmer-stage="charcoal"] .sara-float-nav,
 :root[data-dimmer-stage="near-black"] .sara-float-nav {
-  background: rgba(20, 20, 20, 0.34);
-  border-color: rgba(255, 255, 255, 0.18);
+  /* Same readability fix as the light stage — 0.34 was letting scrolled
+     text underneath show through too clearly against the dark tint. */
+  background: rgba(20, 20, 20, 0.62);
+  border-color: rgba(255, 255, 255, 0.2);
   box-shadow:
-    0 18px 45px rgba(0, 0, 0, 0.5),
-    0 3px 10px rgba(0, 0, 0, 0.4),
-    0 1.5px 0 rgba(255, 255, 255, 0.14) inset,
-    0 -1px 6px rgba(255, 255, 255, 0.06) inset,
-    0 -2px 4px rgba(0, 0, 0, 0.35) inset,
-    -1px 0 0 rgba(255, 0, 60, 0.12),
-    1px 0 0 rgba(0, 140, 255, 0.12);
+    0 22px 55px rgba(0, 0, 0, 0.55),
+    0 4px 12px rgba(0, 0, 0, 0.45),
+    0 1.5px 0 rgba(255, 255, 255, 0.16) inset,
+    0 -1px 6px rgba(255, 255, 255, 0.07) inset,
+    0 -3px 8px rgba(0, 0, 0, 0.4) inset,
+    0 0 0 4px rgba(255, 255, 255, 0.04) inset,
+    -1px 0 0 rgba(255, 0, 60, 0.14),
+    1px 0 0 rgba(0, 140, 255, 0.14);
   --sv-sheen-o: 0.4;
   --sv-noise-o: 0.22;
+  --sv-glare-o: 0.8;
 }
 
 /* Sliding "liquid glass" active-filter pill — travels between buttons and
@@ -603,4 +655,30 @@ body {
 :root[data-dimmer-stage="charcoal"] .hover-circle-dark,
 :root[data-dimmer-stage="near-black"] .hover-circle-dark {
   display: block;
+}
+
+/* Project-card title underline — the hand-drawn line-draw reveal that
+   replaces .hover-circle on the card itself (that rule and its assets
+   above are untouched, just no longer referenced from ProjectCard, so
+   they're free to reuse somewhere else later). Positioned against the
+   bottom of the title/timeline text block (see ProjectCard.tsx), inside
+   the 8px gap that already exists between that block and the thumbnail
+   below it, so it never collides with either line of text. width is
+   92%/capped rather than a full 100% so it reads as an underline drawn
+   under the title rather than a rule spanning the whole card row —
+   adjust freely if you want it wider, narrower, or snugged closer to the
+   title with a smaller |bottom|. */
+.title-underline {
+  position: absolute;
+  left: 0;
+  bottom: -9px;
+  width: 92%;
+  max-width: 320px;
+  height: auto;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s linear;
+}
+.title-underline.active {
+  opacity: 1;
 }

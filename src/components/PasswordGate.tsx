@@ -8,9 +8,10 @@ interface PasswordGateProps {
    *  and attempt count) so gating one project never affects another. Pass
    *  frontmatter.slug. */
   slug: string;
-  /** Shown top-right as a nudge, e.g. `it's not the app's name`. Comes from
-   *  frontmatter.passwordHint — this one IS meant to be set per project,
-   *  since the hint itself should differ. Omit it and none is shown. */
+  /** Shown below the password field as a nudge, e.g. `it's not the app's
+   *  name`. Comes from frontmatter.passwordHint — this one IS meant to be
+   *  set per project, since the hint itself should differ. Omit it and
+   *  none is shown. */
   hint?: string;
   /** Override for THIS project only — leave unset almost always. Every
    *  gated project shares one drawn frame by default (DEFAULT_FRAME_IMAGE
@@ -126,8 +127,6 @@ export default function PasswordGate({
           Made a wrong turn, take me back to home
         </a>
 
-        {hint && <p className={styles.hint}>Hint: {hint}</p>}
-
         <h2 className={styles.headline}>
           Would love for you to read what&rsquo;s here, but I can&rsquo;t let
           you unless you have the password
@@ -183,6 +182,14 @@ export default function PasswordGate({
             className={styles.input}
           />
         </div>
+
+        {/* Moved here from just under homeLink at the top — it was
+            corner-pinned there before (see .hint in PasswordGate.module.css)
+            and read as floating outside the card, jumbled with whatever
+            else was near the top or bottom of the viewport depending on
+            scroll. Directly under the password field is where it's
+            actually useful anyway. */}
+        {hint && <p className={styles.hint}>Hint: {hint}</p>}
 
         <p className={styles.message}>
           {status === "wrong" && "That’s not the correct password."}

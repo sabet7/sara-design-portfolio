@@ -232,8 +232,13 @@ function BrushToggleIcon({ active }: { active: boolean }) {
     <img
       src={active ? CLOSE_ICON_SRC : BRUSH_ICON_SRC}
       alt=""
-      width={active ? 16 : 18}
-      height={active ? 16 : 18}
+      // Was 16/18 — bumped up (keeping the close icon 2px smaller than
+      // the brush icon, same ratio as before) since the hand-drawn art
+      // was reading as barely-there at the old size. If the button itself
+      // has fixed padding/dimensions in DoodleLayer.module.css, check
+      // that this still fits comfortably rather than crowding the edges.
+      width={active ? 22 : 24}
+      height={active ? 22 : 24}
       draggable={false}
       onError={() => setFailed(true)}
     />

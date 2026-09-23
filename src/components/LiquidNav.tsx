@@ -48,8 +48,53 @@ export default function LiquidNav({ active, onChange }: LiquidNavProps) {
     return () => window.removeEventListener("resize", measure);
   }, [active]);
 
+  // Real cursor-tracked "light on glass" highlight — this is the actual
+  // light-reactivity piece, as opposed to the always-on ambient sweep
+  // animation living in globals.css (.sara-float-nav::before), which just
+  // keeps the pill feeling alive when nobody's touching it. Written
+  // directly to the DOM via refs/setProperty rather than React state,
+  // since pointermove fires far too often to put through a re-render —
+  // this way moving the mouse over the pill costs nothing beyond updating
+  // two CSS custom properties, which the browser is already optimized to
+  // repaint cheaply.
+  function handlePointerMove(e: React.PointerEvent<HTMLElement>) {
+    const nav = navRef.current;
+    if (!nav) return;
+    const rect = nav.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    nav.style.setProperty("--glare-x", `${x}%`);
+    nav.style.setProperty("--glare-y", `${y}%`);
+  }
+
+  function handlePointerEnter() {
+    navRef.current?.setAttribute("data-glare", "on");
+  }
+
+  function handlePointerLeave() {
+    // Not removed instantly — see the opacity transition on
+    // .sara-float-nav-glare in globals.css, which fades it out instead of
+    // snapping it away the moment the cursor steps off the glass.
+    navRef.current?.setAttribute("data-glare", "off");
+  }
+
   return (
-    <nav className="sara-float-nav" ref={navRef}>
+    <nav
+      className="sara-float-nav"
+      ref={navRef}
+      onPointerMove={handlePointerMove}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+    >
+      {/* The cursor-follow highlight itself — a real element rather than a
+          third pseudo-element, since .sara-float-nav already spends its
+          ::before/::after budget on the ambient sheen sweep and the
+          frosted noise texture. Purely decorative (aria-hidden), and
+          pointer-events: none in CSS so it never intercepts clicks meant
+          for the filter buttons underneath. */}
+      <div className="sara-float-nav-glare" aria-hidden="true" />
+
       {pill && (
         <div
           className="float-nav-pill"
@@ -93,3 +138,4 @@ export default function LiquidNav({ active, onChange }: LiquidNavProps) {
     </nav>
   );
 }
+

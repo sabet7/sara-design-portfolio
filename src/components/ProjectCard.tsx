@@ -45,8 +45,7 @@ export default function ProjectCard({
 }: ProjectCardProps) {
   const [hovering, setHovering] = useState(false);
   const [canHover, setCanHover] = useState(false);
-  const lightRef = useRef<HTMLImageElement | null>(null);
-  const darkRef = useRef<HTMLImageElement | null>(null);
+  const underlineRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
     setCanHover(window.matchMedia("(hover: hover)").matches);
@@ -65,8 +64,7 @@ export default function ProjectCard({
 
   function handleMouseEnter() {
     setHovering(true);
-    restart(lightRef.current);
-    restart(darkRef.current);
+    restart(underlineRef.current);
   }
 
   function handleMouseLeave() {
@@ -105,9 +103,13 @@ export default function ProjectCard({
           />
         )}
 
-        {/* Project information: auto-layout column, 3px between the two rows */}
+        {/* Project information: auto-layout column, 3px between the two
+            rows. position:relative so the hand-drawn underline below can
+            anchor to the bottom of THIS block specifically, rather than
+            the whole card. */}
         <div
           style={{
+            position: "relative",
             display: "flex",
             flexDirection: "column",
             gap: 3,
@@ -115,22 +117,26 @@ export default function ProjectCard({
             flex: "1 1 auto",
           }}
         >
-          {/* Title / Type row — Medium 18px. Fixed height + 2-line clamp on
-              both sides: titles vary a lot in length ("Nurtur" vs a full
-              sentence), and without this every card's header ends up a
-              different height, which pushes each card's image down by a
-              different amount and breaks the grid's row alignment. Clamping
-              guarantees this row is always exactly the same height, whether
-              the title is one word or four lines' worth. */}
+          {/* Title / Type row — Medium 15px (was 18px: next to the intro
+              paragraph's clamp(14px,1.1vw,20px) and the header's 18px
+              baseline, 18px-bold titles across a whole grid of cards read
+              noticeably heavier than everything around them). Fixed height
+              + 2-line clamp on both sides: titles vary a lot in length
+              ("Nurtur" vs a full sentence), and without this every card's
+              header ends up a different height, which pushes each card's
+              image down by a different amount and breaks the grid's row
+              alignment. Clamping guarantees this row is always exactly the
+              same height, whether the title is one word or four lines'
+              worth. */}
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               gap: 12,
               fontWeight: 500,
-              fontSize: 18,
+              fontSize: 15,
               lineHeight: 1.2,
-              height: 44, // 2 lines * 18px * 1.2 line-height
+              height: 36, // 2 lines * 15px * 1.2 line-height
             }}
           >
             <span
@@ -161,23 +167,25 @@ export default function ProjectCard({
             </span>
           </div>
 
-          {/* Timeline / Year row — Light 16px. Same fixed-height + clamp
-              treatment, but single-line: timeline/year text is always
-              short, so a 1-line cap is enough. Timeline only exists for
-              case studies (concepts/explorations never have one), so it's
-              gated on `variant` rather than just truthiness — but the row
-              itself always renders at the same fixed height so the layout
-              never shifts between card types, and Year always sits on the
-              right. */}
+          {/* Timeline / Year row — Light 12px (was 16px, for the same
+              reason as the title above — this scales down with it so the
+              two rows keep their relative weight to each other). Same
+              fixed-height + clamp treatment, but single-line: timeline/year
+              text is always short, so a 1-line cap is enough. Timeline only
+              exists for case studies (concepts/explorations never have
+              one), so it's gated on `variant` rather than just truthiness —
+              but the row itself always renders at the same fixed height so
+              the layout never shifts between card types, and Year always
+              sits on the right. */}
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               gap: 12,
               fontWeight: 300,
-              fontSize: 16,
+              fontSize: 12,
               lineHeight: 1.2,
-              height: 19, // 1 line * 16px * 1.2 line-height
+              height: 15, // 1 line * 12px * 1.2 line-height, rounded up
               opacity: 0.6,
             }}
           >
@@ -194,12 +202,32 @@ export default function ProjectCard({
             </span>
             <span style={{ flexShrink: 0, whiteSpace: "nowrap" }}>{year}</span>
           </div>
+
+          {/* Hand-drawn underline reveal — replaces the circle hover cue
+              that used to live on the thumbnail below (that markup and
+              its CSS in globals.css are untouched, just unused here, so
+              it's ready to reuse elsewhere later). Same restart-on-hover
+              trick as the old circle: resetting the img's src forces the
+              animated webp to replay its draw-in from frame one every
+              time, instead of staying stuck on whatever frame it last
+              landed on. Sits in the existing 8px gap between this text
+              block and the thumbnail, so it never overlaps the title or
+              timeline text — nudge `bottom` on `.title-underline` in
+              globals.css if you'd rather it hug the title line itself
+              more tightly. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            ref={underlineRef}
+            src="/media/effects/title-underline.webp"
+            alt=""
+            aria-hidden="true"
+            className={`title-underline${hovering ? " active" : ""}`}
+          />
         </div>
       </div>
 
       {/* Dedicated wrapper sized exactly to the image, with no overflow
-          clipping of its own — this is what the hover-circle actually
-          anchors to now, instead of the whole card (title block included). */}
+          clipping of its own. */}
       <div style={{ position: "relative" }}>
         <div
           className="project-card-media"
@@ -227,23 +255,6 @@ export default function ProjectCard({
             )}
           </ViewTransition>
         </div>
-
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          ref={lightRef}
-          src="/media/effects/hover-circle-light.webp"
-          alt=""
-          aria-hidden="true"
-          className={`hover-circle hover-circle-light${hovering ? " active" : ""}`}
-        />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          ref={darkRef}
-          src="/media/effects/hover-circle-dark.webp"
-          alt=""
-          aria-hidden="true"
-          className={`hover-circle hover-circle-dark${hovering ? " active" : ""}`}
-        />
       </div>
     </div>
   );
