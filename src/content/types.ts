@@ -48,7 +48,14 @@ export const CaseStudyFrontmatterSchema = z.object({
   // change — add `private: true` only to a project you want to hide right
   // now, like an unreleased Duolingo concept.
   private: z.boolean().default(false),
-  // Set per project — this is the one field below actually meant to vary.
+  // This project's own password, checked against what the visitor types
+  // into PasswordGate. Required (in practice) for any project with
+  // `private: true` — each gated project now sets its own, rather than
+  // sharing one global password. Optional here in the schema only because
+  // public projects (`private: false`) don't need it at all.
+  password: z.string().optional(),
+  // Set per project — the hint shown to the visitor, distinct from the
+  // actual password above.
   passwordHint: z.string().optional(),
   // Leave these two unset almost always: every gated project shares one
   // drawn frame + one keyhole animation by default (see PasswordGate.tsx's
@@ -106,6 +113,8 @@ export const ExplorationFrontmatterSchema = z.object({
   // `false` (default) = public. See that comment for the full explanation
   // — works identically here for explorations.
   private: z.boolean().default(false),
+  // Same per-project password as CaseStudyFrontmatterSchema above.
+  password: z.string().optional(),
   passwordHint: z.string().optional(),
   passwordFrameImage: z.string().optional(),
   passwordAnimation: z.string().optional(),

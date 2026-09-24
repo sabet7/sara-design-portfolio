@@ -102,14 +102,21 @@ export default function CaseStudyDetail({ caseStudy }: { caseStudy: CaseStudy })
   // Gated projects (frontmatter.private: true) render the same content as
   // always, but PasswordGate wraps it in a blur + scrim + password prompt
   // until the visitor unlocks it for the session. Everything the prompt
-  // needs (hint text, your hand-drawn frame image, the keyhole animation)
-  // comes straight from this project's own frontmatter, so no code change
-  // is needed to gate a different project later — just set `private: true`
-  // on it.
+  // needs (password, hint text, your hand-drawn frame image, the keyhole
+  // animation) comes straight from this project's own frontmatter, so no
+  // code change is needed to gate a different project later — just set
+  // `private: true` and `password: "..."` on it.
+  //
+  // `frontmatter.password ?? ""` is just a type-safety fallback for
+  // TypeScript (PasswordGate's `password` prop is a required string) — in
+  // practice every project with `private: true` should have its own
+  // `password` set in its .mdx frontmatter, or it will render locked with
+  // no working password.
   if (frontmatter.private) {
     return (
       <PasswordGate
         slug={frontmatter.slug}
+        password={frontmatter.password ?? ""}
         hint={frontmatter.passwordHint}
         frameImageSrc={frontmatter.passwordFrameImage}
         animationSrc={frontmatter.passwordAnimation}

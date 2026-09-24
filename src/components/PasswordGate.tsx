@@ -8,10 +8,17 @@ interface PasswordGateProps {
    *  and attempt count) so gating one project never affects another. Pass
    *  frontmatter.slug. */
   slug: string;
+  /** This project's own password, from frontmatter.password. Each private
+   *  project sets its own now — there's no longer a single shared
+   *  password for every gated project. As before, this is a lightweight
+   *  gate: the value ships in the client bundle/props, visible to anyone
+   *  who opens dev tools, so it's fine for keeping a portfolio piece off
+   *  search engines and casual visitors, not for anything that actually
+   *  needs to stay secret. */
+  password: string;
   /** Shown below the password field as a nudge, e.g. `it's not the app's
-   *  name`. Comes from frontmatter.passwordHint — this one IS meant to be
-   *  set per project, since the hint itself should differ. Omit it and
-   *  none is shown. */
+   *  name`. Comes from frontmatter.passwordHint. Omit it and none is
+   *  shown. */
   hint?: string;
   /** Override for THIS project only — leave unset almost always. Every
    *  gated project shares one drawn frame by default (DEFAULT_FRAME_IMAGE
@@ -41,22 +48,11 @@ const MAX_ATTEMPTS = 5;
 const DEFAULT_FRAME_IMAGE = "/media/password-gate/frame.png";
 const DEFAULT_ANIMATION = "/media/password-gate/keyhole-animation.webp";
 
-// One shared password for every project flagged `private` in its
-// frontmatter, rather than a password per project — simpler to manage for
-// now, and easy to split into a per-slug map later if you ever want
-// different passwords per project. Set in .env.local as
-// NEXT_PUBLIC_CASE_STUDY_PASSWORD, and add the same variable in Vercel's
-// dashboard (same pattern as the Elie API key). NEXT_PUBLIC_ vars ship in
-// the client bundle, so — as discussed — this is a lightweight gate, not
-// real access control: fine for keeping a portfolio piece off search
-// engines and casual visitors, not for anything that actually needs to
-// stay secret.
-const CORRECT_PASSWORD = process.env.NEXT_PUBLIC_CASE_STUDY_PASSWORD ?? "";
-
 type GateStatus = "idle" | "wrong" | "correct" | "locked";
 
 export default function PasswordGate({
   slug,
+  password,
   hint,
   frameImageSrc,
   animationSrc,
@@ -91,7 +87,7 @@ export default function PasswordGate({
   function handleSubmit() {
     if (status === "locked" || status === "correct") return;
 
-    if (value.length > 0 && value === CORRECT_PASSWORD) {
+    if (value.length > 0 && value === password) {
       sessionStorage.setItem(unlockKey, "true");
       setStatus("correct");
       // Short pause so "Congrats! You've been chosen." is actually read
