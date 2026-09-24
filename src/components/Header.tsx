@@ -315,6 +315,14 @@ export default function Header() {
           >
             Github
           </a>
+          <a
+            href="https://www.linkedin.com/in/saradelvillar/"
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: "inherit" }}
+          >
+            LinkedIn
+          </a>
           <a href="https://x.com/" target="_blank" rel="noreferrer" style={{ color: "inherit" }}>
             X
           </a>
@@ -329,6 +337,14 @@ export default function Header() {
           // consistently close, regardless of window width.
           <span
             style={{
+              // Extra marginLeft ON TOP OF the header's own 2rem gap —
+              // not a bigger overall gap, which would space out every
+              // group evenly (Name/Available/Services/Nav too) rather
+              // than just pulling this one block further from "X". This
+              // is the one spot that needed more separation so date/
+              // time/weather reads as its own clearly right-aligned
+              // section instead of crowding the nav links.
+              marginLeft: "1rem",
               display: "inline-flex",
               alignItems: "center",
               gap: 5,
