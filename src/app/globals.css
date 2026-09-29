@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FFFCF6;
+  --foreground: #201F1C;
 }
 
 @theme inline {
@@ -83,11 +83,16 @@ body {
   border-radius: 4px;
   overflow: hidden;
   border: 2px solid transparent;
-  filter: brightness(1.05) saturate(0.96);
+  /* Was 1.05 at rest / 1.21 on hover — that first fix (1.05 -> 1.08)
+     brought the two states so close together the hover effect stopped
+     reading at all. This flips the direction instead: images sit dimmed
+     at rest and come up to full, neutral brightness on hover, so the
+     "spotlight" reveal is obvious without ever overexposing. */
+  filter: brightness(0.85) saturate(0.96);
   transition: filter 0.35s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .project-card-media:hover {
-  filter: brightness(1.21) saturate(1.05);
+  filter: brightness(1) saturate(1.05);
 }
 
 @keyframes nav-bounce {
@@ -169,6 +174,18 @@ body {
   background: repeating-linear-gradient(45deg, #eee, #eee 10px, #e4e4e4 10px, #e4e4e4 20px);
 }
 
+/* .sara-float-nav sits fixed at bottom:24px with z-index:9100 — way above
+   this backdrop's z-index:300 — so it always renders on top of the card
+   underneath it. Centering the card via align-items/justify-content over
+   the FULL viewport (padding was a uniform 1.5rem on every side) put the
+   card's bottom edge almost exactly where the nav sits on a typical
+   viewport height, which is why they read as "squished" together: the
+   nav wasn't leaving room to begin with, it was drawing over the card.
+   A taller bottom padding shrinks the box this content centers within,
+   shifting the whole card up and off the nav — 24px (the nav's own
+   offset) + ~55px (its rendered height) + 15px of actual breathing room.
+   Adjust the number directly if the nav's height ever changes
+   noticeably. */
 .detail-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -177,7 +194,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding: 1.5rem 1.5rem 94px;
 }
 
 .detail-modal-backdrop .detail-card {
@@ -312,6 +329,77 @@ body {
   font-weight: 600;
 }
 
+/* Wrapper for each sidebar link + its pair of hover-circle images.
+   position:relative so the circles (position:absolute below) anchor to
+   THIS item, not the whole sidebar column — inline-block so it only
+   takes up as much width as its label, keeping the circle centered on
+   the text itself rather than stretched across the sidebar's full
+   width. Small padding gives the (slightly larger) circle room to
+   breathe around short labels without visually colliding with the item
+   above/below it. */
+.detail-sidebar-item {
+  position: relative;
+  display: inline-block;
+  padding: 6px 4px;
+}
+
+.detail-sidebar-item a {
+  position: relative;
+  /* Sits above the circle images below (they're position:absolute with
+     no z-index, which still paints above plain static text by default —
+     this explicit stacking makes sure the label stays legible over the
+     drawn circle rather than being covered by it). */
+  z-index: 1;
+}
+
+/* Deliberately NOT reusing .hover-circle's own width:100%/aspect-ratio
+   4:3 sizing — that was tuned for a roughly-square project thumbnail,
+   and stretched across a short text label it would tower over the
+   sidebar's own 12px item spacing. Centered on the label instead, at a
+   fixed size tuned for a short word or two — bump `width` up a bit if
+   your longer labels ("Final Design") need the circle to reach further
+   past their edges. */
+.detail-sidebar-hover-circle {
+  position: absolute;
+  /* +1px / +4px: a code-only fix for the oval reading off-center on the
+     text, instead of re-cropping the image again. The drawn oval isn't
+     perfectly centered in its own file — there's a small pen-entry tail
+     at the top-left of the artwork that pulls the file's own visual
+     center up and to the left of the file's plain bounding box. Since
+     `top`/`left` here are resolved BEFORE the transform below (so this
+     offset moves the whole box a flat number of pixels, unaffected by
+     the scale(1.3) that follows), nudging the anchor point down-right by
+     that same amount cancels it out, landing the actual drawn oval back
+     on 50%/50% of the label instead of the file's own bounding box.
+     Measured from the current hover-circle-light.webp specifically — if
+     you ever redraw/re-export that file, these two numbers will likely
+     need a small re-tweak (nudge live and eyeball it against a short
+     label). */
+  top: calc(50% + 1px);
+  left: calc(50% + 4px);
+  width: 90px;
+  height: auto;
+  transform: translate(-50%, -50%) scale(1.3);
+  object-fit: contain;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s linear;
+}
+.detail-sidebar-hover-circle.active {
+  opacity: 1;
+}
+.detail-sidebar-hover-circle.hover-circle-dark {
+  display: none;
+}
+:root[data-dimmer-stage="charcoal"] .detail-sidebar-hover-circle.hover-circle-light,
+:root[data-dimmer-stage="near-black"] .detail-sidebar-hover-circle.hover-circle-light {
+  display: none;
+}
+:root[data-dimmer-stage="charcoal"] .detail-sidebar-hover-circle.hover-circle-dark,
+:root[data-dimmer-stage="near-black"] .detail-sidebar-hover-circle.hover-circle-dark {
+  display: block;
+}
+
 .detail-content {
   min-width: 0;
 }
@@ -396,20 +484,21 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   max-width: calc(100vw - 160px);
-  /* Bumped from 0.14 — that was the actual readability bug: at 14% white
-     over blur alone, page content scrolling underneath the fixed pill
-     (body copy, card titles) still read through clearly enough to be
-     distracting. This is the real fix, not more blur — blur softens
-     edges but doesn't reduce how much of the backdrop's own contrast
-     survives through a mostly-transparent tint. A denser base tint is
-     also just more correct for "glass with depth": true frosted glass
-     you can set a cup down on reads far more opaque than a light film. */
-  background: rgba(255, 255, 255, 0.55);
-  /* Blur pushed further too (11px -> 18px) so text edges underneath are
-     genuinely dissolved, not just dimmed. */
-  backdrop-filter: blur(18px) saturate(225%) contrast(124%);
-  -webkit-backdrop-filter: blur(18px) saturate(225%) contrast(124%);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  /* Fourth pass on frost density: 0.14 -> 0.55 -> 0.68 -> 0.74. Each
+     round the actual lever has been base opacity, not blur — blur
+     softens edges but doesn't reduce how much of the backdrop's own
+     contrast survives through a mostly-transparent tint. A denser base
+     tint is also just more correct for "glass with depth": true frosted
+     glass you can set a cup down on reads far more opaque than a light
+     film. */
+  background: rgba(255, 255, 255, 0.74);
+  /* "Splay" — how spread/dissolved the text underneath reads — is the
+     blur radius, not the opacity above: blur(11px -> 18px -> 26px ->
+     34px). Saturate/contrast bumped alongside it again so the extra
+     blur doesn't start looking flat/gray as it thickens. */
+  backdrop-filter: blur(34px) saturate(255%) contrast(132%);
+  -webkit-backdrop-filter: blur(34px) saturate(255%) contrast(132%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
   transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
     border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -537,9 +626,8 @@ body {
    base than a light one. */
 :root[data-dimmer-stage="charcoal"] .sara-float-nav,
 :root[data-dimmer-stage="near-black"] .sara-float-nav {
-  /* Same readability fix as the light stage — 0.34 was letting scrolled
-     text underneath show through too clearly against the dark tint. */
-  background: rgba(20, 20, 20, 0.62);
+  /* Same frost-density pass as the light stage — 0.34 -> 0.62 -> 0.72 -> 0.78. */
+  background: rgba(20, 20, 20, 0.78);
   border-color: rgba(255, 255, 255, 0.2);
   box-shadow:
     0 22px 55px rgba(0, 0, 0, 0.55),
@@ -615,7 +703,7 @@ body {
   border-radius: 3.2px;
   font-size: 10.24px;
   font-weight: 600;
-  color: #000;
+  color: #201F1C;
   white-space: nowrap;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -655,6 +743,21 @@ body {
 :root[data-dimmer-stage="charcoal"] .hover-circle-dark,
 :root[data-dimmer-stage="near-black"] .hover-circle-dark {
   display: block;
+}
+
+/* Header weather icon (see WeatherIcon in Header.tsx) — the hand-drawn
+   files are black-stroke on transparent, same as every other doodle
+   asset on the site. Fine against the light/warm/dusk header
+   backgrounds, but invisible once the header itself goes near-black at
+   the two darkest dimmer stages. Rather than drawing/shipping a second
+   light-ink file (the pattern used for the hover circles), this just
+   flips the existing black stroke to white with a filter at those same
+   two stages — same threshold .hover-circle-light/dark already switch
+   at, just above. If a future icon ever isn't pure black/white line
+   art, swap this for real light/dark asset files instead. */
+:root[data-dimmer-stage="charcoal"] .weather-icon,
+:root[data-dimmer-stage="near-black"] .weather-icon {
+  filter: invert(1);
 }
 
 /* Project-card title underline — the hand-drawn line-draw reveal that

@@ -43,7 +43,12 @@ export default function HomeGrid({ items }: { items: CardData[] }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
+          // Was repeat(5, 1fr) — dropped to 3 columns per row so each
+          // card (and its thumbnail image) renders noticeably larger.
+          // Same 4:3 image aspect ratio as before (see .project-card-media
+          // in globals.css) — this only changes how many fit per row, not
+          // the image's proportions.
+          gridTemplateColumns: "repeat(4, 1fr)",
           rowGap: "3rem",
           columnGap: "1.5rem",
           paddingBottom: "6rem",

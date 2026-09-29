@@ -84,12 +84,22 @@ function WeatherIcon({ code, isDay }: { code: number | null; isDay: boolean }) {
       aria-hidden="true"
       draggable={false}
       onError={() => setFailed(true)}
-      // Was 18/18 with a -4px nudge — bumped to 24/24 (matches your
-      // "barely noticeable" note on the hand-drawn art) and the vertical
-      // nudge scaled up proportionally so it still sits centered against
-      // the surrounding 18px header text. Tweak verticalAlign a px or two
-      // if it reads slightly high/low once you see it live.
-      style={{ width: 24, height: 24, verticalAlign: "-6px" }}
+      // "weather-icon" class: doesn't do anything by itself — it's what
+      // globals.css hooks into to invert this icon to white at the
+      // charcoal/near-black dimmer stages. The icon files are black
+      // stroke on transparent, same as every other hand-drawn asset on
+      // the site, which is invisible once the header background goes
+      // that dark. See the ":root[data-dimmer-stage=...] .weather-icon"
+      // rule right after the .hover-circle-dark rules in globals.css.
+      className="weather-icon"
+      // Was 24/24 with a -6px nudge — still read as "practically not
+      // visible" at that size, so bumped to 34/34. verticalAlign scaled
+      // down proportionally from -6px (at 24px) to roughly the same
+      // relative offset at the new size — tweak a px or two if it reads
+      // slightly high/low once you see it live. Only this icon's own
+      // size changed; the surrounding date/time/temperature text is
+      // untouched.
+      style={{ width: 34, height: 34, verticalAlign: "-9px" }}
     />
   );
 }

@@ -46,7 +46,7 @@ const MAX_ATTEMPTS = 5;
 // there, the <img> onError handlers below fall back to the plain
 // placeholder boxes, so nothing breaks in the meantime.
 const DEFAULT_FRAME_IMAGE = "/media/password-gate/frame.png";
-const DEFAULT_ANIMATION = "/media/password-gate/keyhole-animation.webp";
+const DEFAULT_ANIMATION = "/media/password-gate/password-gate-animation.webp";
 
 type GateStatus = "idle" | "wrong" | "correct" | "locked";
 
@@ -112,8 +112,14 @@ export default function PasswordGate({
       {/* The real content, blurred behind the gate. `inert` (a real HTML
           attribute, not just ARIA) drops it from tab order and screen
           readers in one shot — aria-hidden alone would still let a
-          keyboard user tab into it. */}
-      <div className={styles.gateBackdrop} aria-hidden="true" {...({ inert: "" } as Record<string, string>)}>
+          keyboard user tab into it. Passed as a plain boolean prop, not
+          the old `{...({ inert: "" } as Record<string, string>) }` spread
+          trick — that was a workaround for older React versions that
+          didn't recognize `inert` as a real prop. Your React version now
+          supports it natively, so the empty-string spread was actually
+          triggering a console warning ("received an empty string for a
+          boolean attribute") instead of doing anything useful. */}
+      <div className={styles.gateBackdrop} aria-hidden="true" inert={true}>
         {children}
       </div>
       <div className={styles.gateScrim} aria-hidden="true" />

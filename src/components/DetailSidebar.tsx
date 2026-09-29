@@ -86,7 +86,7 @@ export default function DetailSidebar({ sections }: { sections: Section[] }) {
             ref={(el) => {
               lightRefs.current[id] = el;
             }}
-            src="/media/effects/hover-circle-light.webp"
+            src="/media/effects/hover-oval.webp"
             alt=""
             aria-hidden="true"
             className={`detail-sidebar-hover-circle hover-circle-light${

@@ -232,13 +232,16 @@ function BrushToggleIcon({ active }: { active: boolean }) {
     <img
       src={active ? CLOSE_ICON_SRC : BRUSH_ICON_SRC}
       alt=""
-      // Was 16/18 — bumped up (keeping the close icon 2px smaller than
-      // the brush icon, same ratio as before) since the hand-drawn art
-      // was reading as barely-there at the old size. If the button itself
-      // has fixed padding/dimensions in DoodleLayer.module.css, check
-      // that this still fits comfortably rather than crowding the edges.
-      width={active ? 22 : 24}
-      height={active ? 22 : 24}
+      // Third bump: 16/18 -> 22/24 -> 28/30 -> 36/38. The 28/30 version
+      // was already sent once before (confirmed then that .brushToggle
+      // in DoodleLayer.module.css is a fixed 48x48 circle, with ~9px
+      // clearance per side at 30px) — but that update apparently never
+      // made it into the live file, which was still at 22/24 ("still
+      // incredibly small"). Going straight to 36/38 this time: still
+      // inside the same 48x48 button with ~5-6px clearance per side, but
+      // a much bigger jump than another timid nudge.
+      width={active ? 36 : 38}
+      height={active ? 36 : 38}
       draggable={false}
       onError={() => setFailed(true)}
     />
