@@ -37,10 +37,11 @@ export default function Home() {
           room still, the other one is FrostedReveal's width/height={220}
           just below, since that's the tallest thing in this block. */}
       <div style={{ marginBottom: "2rem" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "3rem" }}>
+        <div style={{ display: "flex", alignItems: "top", justifyContent: "space-between", gap: "3rem" }}>
           <p className="home-intro">
-            Welcome to the digital archive of Sara Del Villar, a multidisciplinary
-            product designer and developer working across web, brand, and product design to build unique and delighful experiences that connect businesses with their users.
+            Welcome to my digital archive, a place for projects and explorations. I design products and then build them, working across web and prodcut to connect people and and meet business goals. 
+             
+           Some of what's archived here is shipped and in use (like a tailor shop's work-order system) or in beta. The rest are the result of curiosity and exploration. Browse at your own pace! The weather's fine.
           </p>
           <div style={{ width: 220, flexShrink: 0 }}>
             <FrostedReveal

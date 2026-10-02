@@ -361,23 +361,22 @@ body {
    past their edges. */
 .detail-sidebar-hover-circle {
   position: absolute;
-  /* +1px / +4px: a code-only fix for the oval reading off-center on the
-     text, instead of re-cropping the image again. The drawn oval isn't
-     perfectly centered in its own file — there's a small pen-entry tail
-     at the top-left of the artwork that pulls the file's own visual
-     center up and to the left of the file's plain bounding box. Since
-     `top`/`left` here are resolved BEFORE the transform below (so this
-     offset moves the whole box a flat number of pixels, unaffected by
-     the scale(1.3) that follows), nudging the anchor point down-right by
-     that same amount cancels it out, landing the actual drawn oval back
-     on 50%/50% of the label instead of the file's own bounding box.
-     Measured from the current hover-circle-light.webp specifically — if
-     you ever redraw/re-export that file, these two numbers will likely
-     need a small re-tweak (nudge live and eyeball it against a short
-     label). */
-  top: calc(50% + 1px);
-  left: calc(50% + 4px);
-  width: 90px;
+  /* Plain 50%/50% — NOT the calc(50% + 1px)/calc(50% + 4px) offset this
+     rule had before. That offset was a patch for the OLD oval artwork,
+     which had a pen-entry tail pulling its own bounding box off from its
+     true visual center. The file behind hover-oval.webp/
+     hover-circle-light.webp has since been re-cropped around its own
+     ink centroid, so it's already centered in its own frame — keeping
+     the old offset here was compensating for a problem that file no
+     longer has, which just pushed it off-center the other way. If you
+     ever swap in a new hand-drawn oval that isn't centered in its own
+     crop, re-add a small calc() offset here rather than re-cropping
+     again, and re-measure it against that specific file. */
+  top: 50%;
+  left: 50%;
+  /* Bumped 90 -> 104px — more presence next to the label without
+     overrunning short words like "Overview". Pure number, adjust freely. */
+  width: 104px;
   height: auto;
   transform: translate(-50%, -50%) scale(1.3);
   object-fit: contain;
@@ -468,6 +467,34 @@ body {
   .detail-header { flex-direction: column; }
   .detail-meta { flex-direction: row; align-items: center; gap: 12px; }
   .exploration-gallery { grid-template-columns: 1fr; }
+}
+
+/* Floating pill nav — scale padding/gap/font-size down at narrower
+   viewports instead of letting the pill just get crowded/overflow as its
+   buttons stay full-size. .float-nav-pill itself needs no rule here: its
+   left/width/top/height are set inline from LiquidNav.tsx, measured off
+   the active button's own rendered rect, so once the button shrinks via
+   the rules below, the pill measuring it shrinks to match automatically. */
+@media (max-width: 640px) {
+  .sara-float-nav {
+    gap: 2px;
+    padding: 6px 10px;
+    max-width: calc(100vw - 32px);
+  }
+  .float-nav-item {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 400px) {
+  .sara-float-nav {
+    padding: 5px 8px;
+  }
+  .float-nav-item {
+    padding: 7px 9px;
+    font-size: 12px;
+  }
 }
 
 .sara-float-nav {
