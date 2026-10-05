@@ -1,6 +1,5 @@
 import { getAllCaseStudies, getAllExplorations } from "@/lib/content";
 import HomeGrid, { CardData } from "@/components/HomeGrid";
-import FrostedReveal from "@/components/frosted-reveal/FrostedReveal";
 
 export default function Home() {
   const caseStudies = getAllCaseStudies();
@@ -32,26 +31,16 @@ export default function Home() {
 
   return (
     <main style={{ padding: "0 3rem 3rem" }}>
-      {/* Reduced from 4rem to move the grid up toward the fold — this is
-          the single biggest lever for that in this file. If you want more
-          room still, the other one is FrostedReveal's width/height={220}
-          just below, since that's the tallest thing in this block. */}
+      {/* Portrait removed — it now lives in Elie's "About" modal instead of
+          next to this paragraph (see Elie.tsx's ProfileCircle, which reads
+          from /media/elie/sara-profile.webp). This is a single-column block
+          now, no more flex row / FrostedReveal here. */}
       <div style={{ marginBottom: "2rem" }}>
-        <div style={{ display: "flex", alignItems: "top", justifyContent: "space-between", gap: "3rem" }}>
-          <p className="home-intro">
-            Welcome to my digital archive, a place for projects and explorations. I design products and then build them, working across web and prodcut to connect people and and meet business goals. 
-             
-           Some of what's archived here is shipped and in use (like a tailor shop's work-order system) or in beta. The rest are the result of curiosity and exploration. Browse at your own pace! The weather's fine.
-          </p>
-          <div style={{ width: 220, flexShrink: 0 }}>
-            <FrostedReveal
-              src="/media/personal/portrait-placeholder.jpeg"
-              alt="Sara Del Villar"
-              width={220}
-              height={220}
-            />
-          </div>
-        </div>
+        <p className="home-intro">
+          Welcome to my digital archive, a place for projects and explorations. I design products and then build them, working across web and prodcut to connect people and and meet business goals.
+
+          Some of what's archived here is shipped and in use (like a tailor shop's work-order system) or in beta. The rest are the result of curiosity and exploration. Browse at your own pace! The weather's fine.
+        </p>
       </div>
       <HomeGrid items={items} />
     </main>

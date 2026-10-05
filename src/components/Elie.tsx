@@ -32,7 +32,7 @@ const ELIE_ICON_SRC = "/media/elie/elie-icon.webp";
 
 // Sara's profile photo, shown in the circle on the About view.
 // Falls back to a plain gray circle until the file exists at this path.
-const PROFILE_SRC = "/media/elie/sara-profile.webp";
+const PROFILE_SRC = "/media/elie/sara-profile.jpg";
 
 // About Me copy — edit here without touching the layout below.
 const ABOUT_HEADLINE =
@@ -56,6 +56,15 @@ const MOOD_SLOT_HEIGHT = 110;
 
 // Fixed card height — identical in the About view and the chat view.
 const CARD_HEIGHT = "min(560px, 70vh)";
+
+// How far the trigger icon can tilt/shift toward the cursor. MAX_DIST is
+// the cursor-to-icon distance (px) at which the icon holds its furthest
+// pose — past that, moving the cursor further away doesn't tilt it any
+// harder, so a cursor on the far side of the screen doesn't read as a
+// wild extreme angle.
+const TILT_MAX_DIST = 160;
+const TILT_MAX_OFFSET = 6; // px
+const TILT_MAX_ROTATE = 8; // deg
 
 function MoodArt({
   mood,
@@ -203,6 +212,8 @@ export default function Elie() {
 
   const nextId = useRef(0);
   const threadRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const iconImgRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => setMounted(true), []);
 
@@ -261,6 +272,40 @@ export default function Elie() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // Mouse-reactive trigger icon: tilts/shifts toward the cursor based on
+  // its distance from the button's own center. Written straight to the
+  // DOM via refs (same pattern as LiquidNav's cursor-glare handler) rather
+  // than React state, since mousemove fires far too often to put through
+  // a re-render here. Disabled while the modal is open, since the icon is
+  // already fading/scaling out at that point (see its own style below).
+  useEffect(() => {
+    if (open) return;
+    function handleMove(e: MouseEvent) {
+      const btn = triggerRef.current;
+      const img = iconImgRef.current;
+      if (!btn || !img) return;
+      const rect = btn.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = e.clientX - cx;
+      const dy = e.clientY - cy;
+      const dist = Math.min(Math.sqrt(dx * dx + dy * dy), TILT_MAX_DIST);
+      const ratio = dist / TILT_MAX_DIST;
+      const angle = Math.atan2(dy, dx);
+      const tx = Math.cos(angle) * ratio * TILT_MAX_OFFSET;
+      const ty = Math.sin(angle) * ratio * TILT_MAX_OFFSET;
+      const rotate = Math.cos(angle) * ratio * -TILT_MAX_ROTATE;
+      img.style.transform = `translate(${tx}px, ${ty}px) rotate(${rotate}deg)`;
+    }
+    window.addEventListener("mousemove", handleMove);
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      // Reset to neutral so re-opening the trigger later doesn't start
+      // from whatever angle the cursor last left it at.
+      if (iconImgRef.current) iconImgRef.current.style.transform = "";
+    };
   }, [open]);
 
   function ask(id: string) {
@@ -488,7 +533,7 @@ export default function Elie() {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Ask Elie about Sara"
+      aria-label="About Sara"
       onClick={handleClose}
       style={{
         position: "fixed",
@@ -635,8 +680,9 @@ export default function Elie() {
   return (
     <>
       <button
+        ref={triggerRef}
         onClick={reset}
-        aria-label="Ask Elie about Sara"
+        aria-label="About"
         style={{
           position: "relative",
           zIndex: 40,
@@ -645,6 +691,10 @@ export default function Elie() {
           cursor: "pointer",
           padding: 0,
           flexShrink: 0,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 3,
           opacity: open ? 0 : 1,
           transform: open ? "translateY(-10px) scale(0.7)" : "translateY(0) scale(1)",
           transition: "opacity 0.3s ease, transform 0.3s ease",
@@ -671,12 +721,36 @@ export default function Elie() {
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
           <img
+            ref={iconImgRef}
             src={ELIE_ICON_SRC}
             alt=""
-            style={{ width: 56, height: 56, display: "block" }}
+            style={{
+              width: 56,
+              height: 56,
+              display: "block",
+              // Smooths out the per-mousemove transform updates written
+              // directly to this element above, instead of the icon
+              // snapping between angles on every pixel of cursor motion.
+              transition: "transform 0.15s ease-out",
+            }}
             onError={() => setIconFailed(true)}
           />
         )}
+        {/* The "reads as About" label from your request — small and quiet
+            so it doesn't compete with the filter labels next to it in the
+            nav, but makes it clear this icon opens an About/chat panel
+            rather than being purely decorative. */}
+        <span
+          aria-hidden="true"
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            color: "var(--color-text-muted)",
+            letterSpacing: 0.3,
+          }}
+        >
+          About
+        </span>
       </button>
 
       {mounted && modal && createPortal(modal, document.body)}

@@ -7,6 +7,20 @@ import Elie from "./Elie";
 const FILTERS = ["All", "Product", "Web", "Brand", "Creative"] as const;
 export type Filter = (typeof FILTERS)[number];
 
+// Display-only labels — the underlying Filter value ("All") is untouched,
+// so HomeGrid's matchesFilter() and anything else keyed off that string
+// still works exactly as before. Only what's rendered on the button
+// changes. Swap "Works" for "Complete Works" here if you'd rather have
+// the longer label — just know it'll push the pill wider, especially at
+// the thinner mobile padding.
+const FILTER_LABELS: Record<Filter, string> = {
+  All: "Works",
+  Product: "Product",
+  Web: "Web",
+  Brand: "Brand",
+  Creative: "Creative",
+};
+
 interface LiquidNavProps {
   active: Filter;
   onChange: (f: Filter) => void;
@@ -129,7 +143,7 @@ export default function LiquidNav({ active, onChange }: LiquidNavProps) {
           className={`float-nav-item ${active === f ? "active" : ""}`}
           onClick={() => onChange(f)}
         >
-          {f}
+          {FILTER_LABELS[f]}
         </button>
       ))}
       <div className="float-nav-divider" />
@@ -138,4 +152,3 @@ export default function LiquidNav({ active, onChange }: LiquidNavProps) {
     </nav>
   );
 }
-

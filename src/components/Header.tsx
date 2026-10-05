@@ -333,9 +333,6 @@ export default function Header() {
           >
             LinkedIn
           </a>
-          <a href="https://x.com/" target="_blank" rel="noreferrer" style={{ color: "inherit" }}>
-            X
-          </a>
         </nav>
 
         {now && (
