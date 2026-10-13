@@ -487,6 +487,166 @@ body {
   display: block;
 }
 
+/* Header — converted from 100% inline styles to these classes specifically
+   so it can be responsive: an inline style always beats a stylesheet rule,
+   so font-size/padding/gap had to move here before @media could touch any
+   of it. white-space: nowrap on .header-row is inherited by every child
+   span/link, which is the actual fix for "Available October 2026" wrapping
+   onto 3 lines at a narrower width — that text had no nowrap before, so
+   once its flex column got squeezed the browser wrapped it word-by-word
+   instead of the row just shrinking. overflow-x: auto is a pure safety net
+   (invisible unless something genuinely doesn't fit) so a true layout
+   overflow scrolls instead of visibly breaking. Availability-text font
+   sizes (20/18/16) are copied directly from your Figma inspector; every
+   other size/spacing value below scales down by roughly the same
+   proportion at each breakpoint. */
+.header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow-x: auto;
+  padding: 1.5rem 3rem;
+  font-size: 15px;
+  font-weight: 500;
+  gap: 2rem;
+}
+
+.header-name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.header-subtext {
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.65;
+  min-height: 1.3em;
+  width: 280px;
+  display: block;
+  perspective: 500px;
+}
+
+.header-subtext-inner {
+  display: inline-block;
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+}
+
+.header-availability {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.header-availability-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.header-availability-text {
+  font-size: 20px;
+}
+
+.header-services-item {
+  color: #777777;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.header-nav {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  color: inherit;
+}
+
+.header-nav-link {
+  color: inherit;
+}
+
+.header-datetime {
+  margin-left: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.header-weather-icon {
+  width: 34px;
+  height: 34px;
+  vertical-align: -9px;
+}
+
+@media (max-width: 1024px) {
+  .header-row {
+    padding: 1.25rem 1.5rem;
+    font-size: 14px;
+    gap: 1.1rem;
+  }
+  .header-name {
+    font-size: 15px;
+  }
+  .header-subtext {
+    font-size: 13px;
+    width: 200px;
+  }
+  .header-availability-text {
+    font-size: 18px;
+  }
+  .header-services-item {
+    font-size: 12px;
+  }
+  .header-nav {
+    gap: 0.85rem;
+  }
+  .header-datetime {
+    margin-left: 0.5rem;
+    gap: 4px;
+  }
+  .header-weather-icon {
+    width: 28px;
+    height: 28px;
+    vertical-align: -7px;
+  }
+}
+
+@media (max-width: 640px) {
+  .header-row {
+    padding: 1rem 1rem;
+    font-size: 12px;
+    gap: 0.6rem;
+  }
+  .header-name {
+    font-size: 13px;
+  }
+  .header-subtext {
+    font-size: 10.5px;
+    width: 140px;
+  }
+  .header-availability-text {
+    font-size: 16px;
+  }
+  .header-services-item {
+    font-size: 10.5px;
+  }
+  .header-nav {
+    gap: 0.5rem;
+  }
+  .header-datetime {
+    margin-left: 0.35rem;
+    gap: 3px;
+  }
+  .header-weather-icon {
+    width: 22px;
+    height: 22px;
+    vertical-align: -5px;
+  }
+}
+
 @media (max-width: 640px) {
   .detail-body { grid-template-columns: 1fr; }
   .detail-sidebar { position: static; flex-direction: row; flex-wrap: wrap; gap: 16px; }
@@ -501,7 +661,23 @@ body {
    buttons stay full-size. .float-nav-pill itself needs no rule here: its
    left/width/top/height are set inline from LiquidNav.tsx, measured off
    the active button's own rendered rect, so once the button shrinks via
-   the rules below, the pill measuring it shrinks to match automatically. */
+   the rules below, the pill measuring it shrinks to match automatically.
+   flex-wrap was "wrap" below (see .sara-float-nav's base rule) — changed
+   to nowrap so the pill can only ever shrink via these breakpoints,
+   never break onto a second line, matching "keep it in one line" for the
+   header above. */
+@media (max-width: 1024px) {
+  .sara-float-nav {
+    gap: 3px;
+    padding: 5.5px 10px;
+    max-width: calc(100vw - 64px);
+  }
+  .float-nav-item {
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+}
+
 @media (max-width: 640px) {
   .sara-float-nav {
     gap: 2px;
@@ -539,7 +715,10 @@ body {
      than this new desktop base. */
   padding: 6px 12px;
   border-radius: 999px;
-  flex-wrap: wrap;
+  /* Was "wrap" — at a narrow enough width this let the pill break onto a
+     second line instead of shrinking. nowrap plus the 1024px/640px/400px
+     breakpoints above/below mean it only ever gets thinner, never taller. */
+  flex-wrap: nowrap;
   justify-content: center;
   max-width: calc(100vw - 160px);
   /* Fourth pass on frost density: 0.14 -> 0.55 -> 0.68 -> 0.74. Each

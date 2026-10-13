@@ -21,7 +21,7 @@ private: false
 
 ## Alterations by R.C.’s analog system created miscommunication and organizational issues that affected the employee’s daily workflows and ultimately customers. 
 
-A small garment business was growing. As a result, more orders were coming in. However, it's current system could not keep up the business’s demand of clients — creating unnecessary friction, bottlenecks and delays.  Backed-up, delayed, or misplaced orders began to affect the store’s reputation and it's newfound momentum. Here's how I rebuilt that system,and what happened when it got tested by conditions we didn't plan for.
+A small garment business was growing, which meant more incoming orders. However, it's current system could not keep up with the growing demand. Employees and clients faced  unnecessary friction, bottlenecks and delays. Backed-up, delayed, or misplaced orders began to affect the store’s reputation and it's newfound momentum. Here's how I rebuilt that system,and what happened when it got tested by conditions we didn't plan for.
 
 ### SOLUTION
 
@@ -33,7 +33,7 @@ Alteration’s new system is a unified platform that handles both daily operatio
 
 ## Backed-up orders started to get in the way of business.
 
-Business growth was outpacing the operation system at Alterations by R.C. As a result, orders were backed up, and tailors were being stretched thin.I spent a few weeks assisting the staff as a sales associate. As a temporary sales associate, during busy hours, it often felt like we were short staffed. While I assisted one customer and a tailor did a fitting, we often had up to five customers waiting to fulfill simple requests. 
+Business growth was outpacing the operation system at Alterations by R.C. As a result, orders were backed up, and tailors were being stretched thin. I spent a few weeks assisting the staff as a sales associate and quickly noticed how short staffed the shop was.  
 
 ![Service blueprint of operations](/media/case-studies/alterations-rc-sst/content/alterations-service-blueprint.png)
 
@@ -77,7 +77,6 @@ However, in desiging and building this system, one question persisted: how would
 
 The kiosk now allowed for customer pick-ups, another task that tailors needed to attend to. Creating the pick-up flow was tricky.  How can I create something that keeps a history of picked-up items for the business owner, but clears out every week? 
 
-This was more of a developer note, but throughout the design process and since I (with the help of Claude) was developing the MVP, I had to keep in mind the types of data structures I was going to use to keep track of orders. The business owners needed a history of fulfilled tickets, but on the customer-facing side, the kiosk needed clean “lockers”, an array from 1 through however many high-priority tickets were being fulfilled that week, to sort finished garments. This functionality of input data via new tickets and cleared data via picked-up garments helped create the backend. 
 
 After asking the tailors and owner a few questions and bouncing a ideas around in Claude, figured that a clean array every week would work. It was a risky move, but it made the new digitized work order system feasible to manage given that there was no compliance or data officers among the staff. 
 
