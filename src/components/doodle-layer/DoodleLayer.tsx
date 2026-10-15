@@ -142,6 +142,21 @@ export default function DoodleLayer() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
+  // Lets someone keep what they drew without the site storing it anywhere:
+  // this reads straight off the canvas and triggers a local download, no
+  // server round-trip, no account, nothing saved on your end to clean up
+  // later. The doodle still only ever lives in this visitor's own browser
+  // tab until they click this — nothing is uploaded or persisted by the
+  // site itself either way.
+  function handleSave() {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const link = document.createElement('a');
+    link.download = `doodle-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+
   return (
     <>
       <canvas
@@ -192,6 +207,21 @@ export default function DoodleLayer() {
               ))}
             </div>
 
+            <button
+              type="button"
+              // Reuses the existing clearButton styling rather than a new
+              // class — I don't have your current DoodleLayer.module.css
+              // in front of me (the component's own import path moved to
+              // components/doodle-layer/ since I last saw this file), so
+              // this stays inside a class that's already defined and
+              // imported rather than inventing a saveButton rule you'd
+              // need to add yourself. Swap the className if you want it
+              // visually distinct from Clear.
+              className={styles.clearButton}
+              onClick={handleSave}
+            >
+              Save
+            </button>
             <button
               type="button"
               className={styles.clearButton}

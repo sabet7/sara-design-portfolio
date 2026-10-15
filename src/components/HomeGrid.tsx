@@ -18,24 +18,16 @@ export interface CardData {
   href: string;
 }
 
-const NAMED_FILTERS = ["Product", "Web", "Brand"] as const;
-
+// "Works" = case studies, "Fun" = design explorations — matches on the
+// card's variant directly rather than its types, since the nav no longer
+// filters by project type (Product/Web/Brand now live on the card
+// itself instead — see ProjectCard).
 function matchesFilter(item: CardData, filter: Filter): boolean {
-  if (filter === "All") return true;
-  if (filter === "Creative") {
-    // Creative is a catch-all — anything that doesn't match one of the
-    // three named categories, rather than needing a literal "Creative"
-    // tag that nothing in the content actually has.
-    return !NAMED_FILTERS.some((named) =>
-      item.types.some((t) => t.toLowerCase().includes(named.toLowerCase()))
-    );
-  }
-  const target = filter.toLowerCase();
-  return item.types.some((t) => t.toLowerCase().includes(target));
+  return filter === "Works" ? item.variant === "case-study" : item.variant === "exploration";
 }
 
 export default function HomeGrid({ items }: { items: CardData[] }) {
-  const [filter, setFilter] = useState<Filter>("All");
+  const [filter, setFilter] = useState<Filter>("Works");
   const visible = items.filter((item) => matchesFilter(item, filter));
 
   return (
@@ -43,10 +35,10 @@ export default function HomeGrid({ items }: { items: CardData[] }) {
       <div
         style={{
           display: "grid",
-          // Was repeat(5, 1fr) — dropped to 3 columns per row so each
-          // card (and its thumbnail image) renders noticeably larger.
-          // Same 4:3 image aspect ratio as before (see .project-card-media
-          // in globals.css) — this only changes how many fit per row, not
+          // Was repeat(5, 1fr) — dropped to 4 columns per row so each
+          // card (and its thumbnail image) renders larger. Same 4:3 image
+          // aspect ratio as before (see .project-card-media in
+          // globals.css) — this only changes how many fit per row, not
           // the image's proportions.
           gridTemplateColumns: "repeat(4, 1fr)",
           rowGap: "3rem",

@@ -491,18 +491,22 @@ body {
    so it can be responsive: an inline style always beats a stylesheet rule,
    so font-size/padding/gap had to move here before @media could touch any
    of it. white-space: nowrap on .header-row is inherited by every child
-   span/link, which is the actual fix for "Available October 2026" wrapping
-   onto 3 lines at a narrower width — that text had no nowrap before, so
-   once its flex column got squeezed the browser wrapped it word-by-word
+   span/link, which is the fix for "Available October 2026" wrapping onto
+   3 lines at a narrower width — that text had no nowrap before, so once
+   its flex column got squeezed the browser wrapped it word-by-word
    instead of the row just shrinking. overflow-x: auto is a pure safety net
    (invisible unless something genuinely doesn't fit) so a true layout
-   overflow scrolls instead of visibly breaking. Availability-text font
-   sizes (20/18/16) are copied directly from your Figma inspector; every
-   other size/spacing value below scales down by roughly the same
-   proportion at each breakpoint. */
+   overflow scrolls instead of visibly breaking.
+
+   header-name and header-availability-text have NO font-size of their
+   own below — both inherit .header-row's own font-size at every
+   breakpoint, which is what makes every piece of header text (name,
+   availability, nav links, date/time) render at one uniform size. Only
+   header-services-item (the Product/Web/Interaction design sub-list) is
+   deliberately excluded and keeps its own smaller, muted size. */
 .header-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-start;
   flex-wrap: nowrap;
   white-space: nowrap;
@@ -514,24 +518,7 @@ body {
 }
 
 .header-name {
-  font-size: 16px;
   font-weight: 700;
-}
-
-.header-subtext {
-  font-size: 14px;
-  font-weight: 500;
-  opacity: 0.65;
-  min-height: 1.3em;
-  width: 280px;
-  display: block;
-  perspective: 500px;
-}
-
-.header-subtext-inner {
-  display: inline-block;
-  transform-origin: 50% 50%;
-  backface-visibility: hidden;
 }
 
 .header-availability {
@@ -545,10 +532,6 @@ body {
   height: 8px;
   border-radius: 50%;
   display: inline-block;
-}
-
-.header-availability-text {
-  font-size: 20px;
 }
 
 .header-services-item {
@@ -587,16 +570,6 @@ body {
     font-size: 14px;
     gap: 1.1rem;
   }
-  .header-name {
-    font-size: 15px;
-  }
-  .header-subtext {
-    font-size: 13px;
-    width: 200px;
-  }
-  .header-availability-text {
-    font-size: 18px;
-  }
   .header-services-item {
     font-size: 12px;
   }
@@ -620,16 +593,6 @@ body {
     font-size: 12px;
     gap: 0.6rem;
   }
-  .header-name {
-    font-size: 13px;
-  }
-  .header-subtext {
-    font-size: 10.5px;
-    width: 140px;
-  }
-  .header-availability-text {
-    font-size: 16px;
-  }
   .header-services-item {
     font-size: 10.5px;
   }
@@ -644,6 +607,59 @@ body {
     width: 22px;
     height: 22px;
     vertical-align: -5px;
+  }
+}
+
+/* Real phone widths (480px) and small phones (375px, e.g. iPhone SE) —
+   the 640px tier above was sized more for "small tablet" than "phone in
+   portrait," and without anything past it the row relied on
+   .header-row's overflow-x: auto safety net to not visibly break at
+   these widths, which reads as unresponsive (silently scrolling) rather
+   than actually fitting. These two tiers keep shrinking the same
+   properties so it keeps fitting instead of falling back to scroll. */
+@media (max-width: 480px) {
+  .header-row {
+    padding: 0.75rem 0.75rem;
+    font-size: 10.5px;
+    gap: 0.4rem;
+  }
+  .header-services-item {
+    font-size: 9px;
+  }
+  .header-nav {
+    gap: 0.35rem;
+  }
+  .header-datetime {
+    margin-left: 0.2rem;
+    gap: 2px;
+  }
+  .header-weather-icon {
+    width: 18px;
+    height: 18px;
+    vertical-align: -4px;
+  }
+}
+
+@media (max-width: 375px) {
+  .header-row {
+    padding: 0.6rem 0.5rem;
+    font-size: 9.5px;
+    gap: 0.28rem;
+  }
+  .header-services-item {
+    font-size: 8px;
+  }
+  .header-nav {
+    gap: 0.25rem;
+  }
+  .header-datetime {
+    margin-left: 0.15rem;
+    gap: 2px;
+  }
+  .header-weather-icon {
+    width: 15px;
+    height: 15px;
+    vertical-align: -3px;
   }
 }
 
@@ -669,11 +685,11 @@ body {
 @media (max-width: 1024px) {
   .sara-float-nav {
     gap: 3px;
-    padding: 5.5px 10px;
+    padding: 4px 8px;
     max-width: calc(100vw - 64px);
   }
   .float-nav-item {
-    padding: 8px 14px;
+    padding: 6px 12px;
     font-size: 14px;
   }
 }
@@ -681,22 +697,33 @@ body {
 @media (max-width: 640px) {
   .sara-float-nav {
     gap: 2px;
-    padding: 5px 9px;
+    padding: 3.5px 7px;
     max-width: calc(100vw - 32px);
   }
   .float-nav-item {
-    padding: 7px 11px;
+    padding: 5px 9px;
     font-size: 13px;
   }
 }
 
 @media (max-width: 400px) {
   .sara-float-nav {
-    padding: 4px 7px;
+    padding: 3px 5px;
   }
   .float-nav-item {
-    padding: 6px 8px;
+    padding: 4px 6px;
     font-size: 12px;
+  }
+}
+
+@media (max-width: 375px) {
+  .sara-float-nav {
+    padding: 2px 4px;
+    gap: 1px;
+  }
+  .float-nav-item {
+    padding: 3px 5px;
+    font-size: 11px;
   }
 }
 
@@ -709,11 +736,15 @@ body {
   display: flex;
   align-items: center;
   gap: 4px;
-  /* Thinner nav: was 10px 16px. Mobile's own media-query overrides above
-     were tightened to match, so the nav keeps getting progressively
-     thinner at each breakpoint instead of mobile ending up less-thin
-     than this new desktop base. */
-  padding: 6px 12px;
+  /* Slimmer still: was 6px 12px. Pulled thinner again specifically to
+     free up vertical room above the pill for Elie's About modal, whose
+     mood-art icon was reading as cramped right against the viewport's
+     top edge (see CARD_HEIGHT/MOOD_SLOT_HEIGHT in Elie.tsx and the
+     modal wrapper's own padding, tightened to match). Mobile's own
+     media-query overrides above were tightened in step, so the nav
+     keeps getting progressively thinner at each breakpoint instead of
+     mobile ending up less-thin than this new desktop base. */
+  padding: 4px 10px;
   border-radius: 999px;
   /* Was "wrap" — at a narrow enough width this let the pill break onto a
      second line instead of shrinking. nowrap plus the 1024px/640px/400px
@@ -918,8 +949,11 @@ body {
   font-weight: 400;
   color: rgb(var(--fg));
   white-space: nowrap;
-  /* Thinner nav: was 12px 20px. */
-  padding: 9px 16px;
+  /* Thinner still: was 12px 20px, then 9px 16px. Vertical padding pulled
+     down further (horizontal untouched) — same "free up room above the
+     nav for Elie's modal" reasoning as .sara-float-nav's own padding
+     above. */
+  padding: 6px 16px;
   transition: background 0.2s ease, color 0.2s ease, font-weight 0.2s ease;
 }
 .float-nav-item:hover:not(.active) {
@@ -936,6 +970,114 @@ body {
   color: #f65009;
 }
 
+/* Dimmer button and Elie's trigger icon — these sat inside .sara-float-nav
+   at a fixed size (44px / 56px) regardless of viewport, while the filter
+   buttons next to them shrank at every breakpoint above. That mismatch —
+   not the shrinking itself — is what read as the nav "bulging": at a
+   narrow width the pill's own height is set by its tallest child, so a
+   full-size 56px icon sitting next to tiny shrunk text pills forced the
+   whole pill taller/lumpier right around that icon instead of the pill
+   shrinking evenly as one piece. Sizing these down in step with the same
+   breakpoints fixes that at the source. */
+/* Sizes pulled down one more notch from the previous pass (44/56 ->
+   38/48 base) as part of the same "slim the nav so there's more open
+   space above it for Elie's modal" change as the padding above. */
+.dimmer-btn {
+  width: 38px;
+  height: 38px;
+}
+.dimmer-btn-icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.elie-trigger-btn {
+  gap: 3px;
+}
+.elie-trigger-icon {
+  width: 48px;
+  height: 48px;
+}
+.elie-trigger-label {
+  font-size: 11px;
+}
+
+@media (max-width: 1024px) {
+  .dimmer-btn {
+    width: 34px;
+    height: 34px;
+  }
+  .dimmer-btn-icon {
+    width: 23px;
+    height: 23px;
+  }
+  .elie-trigger-icon {
+    width: 40px;
+    height: 40px;
+  }
+  .elie-trigger-label {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .dimmer-btn {
+    width: 28px;
+    height: 28px;
+  }
+  .dimmer-btn-icon {
+    width: 19px;
+    height: 19px;
+  }
+  .elie-trigger-btn {
+    gap: 2px;
+  }
+  .elie-trigger-icon {
+    width: 32px;
+    height: 32px;
+  }
+  .elie-trigger-label {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 400px) {
+  .dimmer-btn {
+    width: 24px;
+    height: 24px;
+  }
+  .dimmer-btn-icon {
+    width: 16px;
+    height: 16px;
+  }
+  .elie-trigger-icon {
+    width: 26px;
+    height: 26px;
+  }
+  .elie-trigger-label {
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 375px) {
+  .dimmer-btn {
+    width: 20px;
+    height: 20px;
+  }
+  .dimmer-btn-icon {
+    width: 14px;
+    height: 14px;
+  }
+  .elie-trigger-icon {
+    width: 22px;
+    height: 22px;
+  }
+  .elie-trigger-label {
+    font-size: 7px;
+  }
+}
+
 .tag {
   padding: 3.2px 6px;
   border-radius: 3.2px;
@@ -949,12 +1091,24 @@ body {
 .tag.case-study { background: #ff9900; }
 .tag.exploration { background: #00a6ff; }
 
+/* New heading sits directly above .home-intro — give it its own top
+   padding/margin instead of changing .home-intro's, so the paragraph's
+   existing spacing to whatever comes after it (the grid) is untouched. */
+.home-intro-heading {
+  max-width: 710px;
+  font-size: clamp(22px, 2.1vw, 32px);
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 1.5rem 0 0.75rem;
+}
+
 .home-intro {
   max-width: 710px;
   font-size: clamp(14px, 1.1vw, 20px);
   font-weight: 500;
   line-height: 1.4;
-  padding: 1.5rem 0 2.5rem;
+  color: #777777;
+  padding: 0 0 2.5rem;
 }
 
 .hover-circle {

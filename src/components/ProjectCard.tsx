@@ -94,8 +94,11 @@ export default function ProjectCard({
           <span
             aria-hidden="true"
             style={{
-              width: 21,
-              height: 21,
+              // Was 21/21, then 14/14 — still read as too big next to a
+              // 15px title. 8px is a small status dot, not a shape
+              // competing with the text for attention.
+              width: 8,
+              height: 8,
               borderRadius: "50%",
               background: "var(--color-featured)",
               flexShrink: 0,

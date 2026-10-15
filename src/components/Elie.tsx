@@ -32,7 +32,7 @@ const ELIE_ICON_SRC = "/media/elie/elie-icon.webp";
 
 // Sara's profile photo, shown in the circle on the About view.
 // Falls back to a plain gray circle until the file exists at this path.
-const PROFILE_SRC = "/media/elie/sara-profile.jpg";
+const PROFILE_SRC = "/media/elie/sara-profile.webp";
 
 // About Me copy — edit here without touching the layout below.
 const ABOUT_HEADLINE =
@@ -51,11 +51,18 @@ const AVATAR_SIZE = 120;
 
 // Elie animation size and the fixed slot it sits in above the card.
 // The slot keeps a constant height so the card never shifts between moods.
-const MOOD_SIZE = 96;
-const MOOD_SLOT_HEIGHT = 110;
+// Both pulled down a notch (96/110 -> 84/96) alongside the modal wrapper's
+// own padding below and the nav's new slimmer padding in globals.css —
+// together these are what free up real breathing room above the mood art
+// instead of it sitting cramped against the viewport's top edge.
+const MOOD_SIZE = 84;
+const MOOD_SLOT_HEIGHT = 96;
 
 // Fixed card height — identical in the About view and the chat view.
-const CARD_HEIGHT = "min(560px, 70vh)";
+// Was min(560px, 70vh) — smaller cap so there's guaranteed room left over
+// above it for the mood slot + top padding on a typical laptop-height
+// viewport, not just a tall monitor.
+const CARD_HEIGHT = "min(500px, 62vh)";
 
 // How far the trigger icon can tilt/shift toward the cursor. MAX_DIST is
 // the cursor-to-icon distance (px) at which the icon holds its furthest
@@ -545,9 +552,24 @@ export default function Elie() {
         alignItems: "center",
         justifyContent: "flex-end",
         padding: "1.5rem",
-        // Lands the modal's bottom edge above the floating nav.
-        // Nudge this number if the gap looks off.
-        paddingBottom: 100,
+        // Explicit top padding (was just the 1.5rem shorthand above) so
+        // the mood art always has real clearance from the viewport's top
+        // edge instead of however much happened to be left over after
+        // the card/mood-slot/bottom-padding math below. Combined with
+        // the smaller CARD_HEIGHT/MOOD_SIZE above and the nav's slimmer
+        // padding in globals.css, there's now enough total vertical room
+        // on a typical laptop-height viewport that this doesn't need to
+        // fight for space with everything else.
+        paddingTop: "2.5rem",
+        // Lands the modal's bottom edge above the floating nav. Lowered
+        // from 100 to 70 now that the nav itself is shorter (see
+        // .sara-float-nav/.float-nav-item/.elie-trigger-icon/.dimmer-btn
+        // in globals.css) — nudge this number if the gap looks off.
+        paddingBottom: 70,
+        // Safety net: if a given viewport still can't fit mood slot +
+        // card + both paddings, this scrolls instead of silently
+        // clipping content off the top with no way to reach it.
+        overflowY: "auto",
         opacity: closing ? 0 : 1,
         transition: "opacity 0.5s ease",
         pointerEvents: closing ? "none" : "auto",
@@ -683,6 +705,14 @@ export default function Elie() {
         ref={triggerRef}
         onClick={reset}
         aria-label="About"
+        // "elie-trigger-btn": carries gap in globals.css at each nav
+        // breakpoint (width/height on the icon itself is a separate
+        // class below). This button's icon was a fixed 56x56 regardless
+        // of viewport before — while the filter buttons next to it
+        // shrank down at narrow widths, this stayed full-size, which is
+        // what made the pill look uneven/"bulged" instead of shrinking
+        // as a whole.
+        className="elie-trigger-btn"
         style={{
           position: "relative",
           zIndex: 40,
@@ -694,7 +724,6 @@ export default function Elie() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 3,
           opacity: open ? 0 : 1,
           transform: open ? "translateY(-10px) scale(0.7)" : "translateY(0) scale(1)",
           transition: "opacity 0.3s ease, transform 0.3s ease",
@@ -704,9 +733,8 @@ export default function Elie() {
         {iconFailed ? (
           <div
             aria-hidden="true"
+            className="elie-trigger-icon"
             style={{
-              width: 56,
-              height: 56,
               borderRadius: "50%",
               background: "var(--color-brand-orange)",
               display: "flex",
@@ -724,9 +752,8 @@ export default function Elie() {
             ref={iconImgRef}
             src={ELIE_ICON_SRC}
             alt=""
+            className="elie-trigger-icon"
             style={{
-              width: 56,
-              height: 56,
               display: "block",
               // Smooths out the per-mousemove transform updates written
               // directly to this element above, instead of the icon
@@ -742,8 +769,8 @@ export default function Elie() {
             rather than being purely decorative. */}
         <span
           aria-hidden="true"
+          className="elie-trigger-label"
           style={{
-            fontSize: 11,
             fontWeight: 600,
             color: "var(--color-text-muted)",
             letterSpacing: 0.3,

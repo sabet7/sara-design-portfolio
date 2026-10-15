@@ -36,6 +36,9 @@ export default function Home() {
           from /media/elie/sara-profile.webp). This is a single-column block
           now, no more flex row / FrostedReveal here. */}
       <div style={{ marginBottom: "2rem" }}>
+        <h1 className="home-intro-heading">
+          Product designer — designing for connection and fun!
+        </h1>
         <p className="home-intro">
           Welcome to my digital archive, a place for projects and explorations. I design products and then build them, working across web and prodcut to connect people and and meet business goals.
 

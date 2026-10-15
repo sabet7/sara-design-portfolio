@@ -4,22 +4,13 @@ import { useLayoutEffect, useRef, useState } from "react";
 import Dimmer from "./Dimmer";
 import Elie from "./Elie";
 
-const FILTERS = ["All", "Product", "Web", "Brand", "Creative"] as const;
+// No longer filters by project type (Product/Web/Brand) — those labels
+// now live on the project card itself instead. This just toggles between
+// the two content kinds: case studies ("Works") and design explorations
+// ("Fun"). The value IS the label here, so no separate label map is
+// needed — see HomeGrid's matchesFilter() for how each maps to a variant.
+const FILTERS = ["Works", "Fun"] as const;
 export type Filter = (typeof FILTERS)[number];
-
-// Display-only labels — the underlying Filter value ("All") is untouched,
-// so HomeGrid's matchesFilter() and anything else keyed off that string
-// still works exactly as before. Only what's rendered on the button
-// changes. Swap "Works" for "Complete Works" here if you'd rather have
-// the longer label — just know it'll push the pill wider, especially at
-// the thinner mobile padding.
-const FILTER_LABELS: Record<Filter, string> = {
-  All: "Works",
-  Product: "Product",
-  Web: "Web",
-  Brand: "Brand",
-  Creative: "Creative",
-};
 
 interface LiquidNavProps {
   active: Filter;
@@ -143,7 +134,7 @@ export default function LiquidNav({ active, onChange }: LiquidNavProps) {
           className={`float-nav-item ${active === f ? "active" : ""}`}
           onClick={() => onChange(f)}
         >
-          {FILTER_LABELS[f]}
+          {f}
         </button>
       ))}
       <div className="float-nav-divider" />

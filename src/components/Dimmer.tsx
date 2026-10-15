@@ -57,9 +57,14 @@ export default function Dimmer() {
     <button
       onClick={cycle}
       aria-label={`Dimmer: ${stage}. Click to cycle to the next stage.`}
+      // "dimmer-btn": carries width/height/font-size in globals.css now,
+      // with the same 1024/640/480/375px breakpoints as the rest of the
+      // nav. This button was a fixed 44x44 regardless of viewport before —
+      // while the filter buttons next to it shrank down at narrow widths,
+      // this stayed full-size, which is what made the pill look uneven/
+      // "bulged" around this end instead of shrinking as a whole.
+      className="dimmer-btn"
       style={{
-        width: 44,
-        height: 44,
         borderRadius: "50%",
         display: "flex",
         alignItems: "center",
@@ -71,7 +76,11 @@ export default function Dimmer() {
       }}
     >
       {iconFailed ? (
-        <span aria-hidden="true" style={{ fontSize: ICON_SIZE * 0.8, lineHeight: 1 }}>
+        <span
+          aria-hidden="true"
+          className="dimmer-btn-icon"
+          style={{ fontSize: ICON_SIZE * 0.8, lineHeight: 1 }}
+        >
           {isDark ? ICON_PLACEHOLDER_EMOJI.moon : ICON_PLACEHOLDER_EMOJI.sun}
         </span>
       ) : (
@@ -82,6 +91,12 @@ export default function Dimmer() {
           height={ICON_SIZE}
           unoptimized
           onError={() => setIconFailed(true)}
+          // Next/Image renders real width/height attributes from the props
+          // above — this class overrides the visual size via CSS at each
+          // breakpoint without touching those props (object-fit: contain
+          // in the class keeps it from distorting as it's resized smaller
+          // than its native attributes).
+          className="dimmer-btn-icon"
         />
       )}
     </button>

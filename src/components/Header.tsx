@@ -84,102 +84,15 @@ function WeatherIcon({ code, isDay }: { code: number | null; isDay: boolean }) {
       aria-hidden="true"
       draggable={false}
       onError={() => setFailed(true)}
-      // "weather-icon" class: doesn't do anything by itself — it's what
-      // globals.css hooks into to invert this icon to white at the
-      // charcoal/near-black dimmer stages. The icon files are black
-      // stroke on transparent, same as every other hand-drawn asset on
-      // the site, which is invisible once the header background goes
-      // that dark. See the ":root[data-dimmer-stage=...] .weather-icon"
-      // rule right after the .hover-circle-dark rules in globals.css.
-      className="weather-icon"
-      // Was 24/24 with a -6px nudge — still read as "practically not
-      // visible" at that size, so bumped to 34/34. verticalAlign scaled
-      // down proportionally from -6px (at 24px) to roughly the same
-      // relative offset at the new size — tweak a px or two if it reads
-      // slightly high/low once you see it live. Only this icon's own
-      // size changed; the surrounding date/time/temperature text is
-      // untouched.
-      style={{ width: 34, height: 34, verticalAlign: "-9px" }}
+      // "weather-icon": hooks into globals.css to invert this icon to
+      // white at the charcoal/near-black dimmer stages (unchanged).
+      // "header-weather-icon": the NEW class carrying this icon's
+      // width/height/verticalAlign — moved out of inline style and into
+      // globals.css so the 3 responsive breakpoints there can shrink it
+      // alongside the rest of the header instead of it staying a fixed
+      // 34px regardless of viewport.
+      className="weather-icon header-weather-icon"
     />
-  );
-}
-
-// Cycles between the two lines, fading each word out and back in with a
-// slight per-word stagger rather than a flat block cross-fade.
-const SUBTEXT_PHRASES = [
-  "Product designer (and developer)",
-  "Connecting businesses to users with design",
-];
-const HOLD_MS = 2600;
-const FADE_MS = 450;
-
-function RotatingSubtext() {
-  const [index, setIndex] = useState(0);
-  // 'in': settled and visible. 'out': the current phrase animating away.
-  // 'entering': the new phrase just mounted in its hidden pose, about to
-  // be flipped to 'in' on the next frame so the transition actually has
-  // something to animate from — without this extra step, setting the new
-  // phrase's index and its visible state in the same update means it
-  // renders straight into its final pose with no transition ever playing.
-  const [phase, setPhase] = useState<"in" | "out" | "entering">("in");
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPhase("out");
-      setTimeout(() => {
-        setIndex((i) => (i + 1) % SUBTEXT_PHRASES.length);
-        setPhase("entering");
-        // Two rAFs: the first lets the "entering" (hidden-pose) render
-        // actually commit and paint; only then does flipping to "in" on
-        // the following frame register as a genuine style change for the
-        // browser to transition, rather than being coalesced into the
-        // same paint as the initial hidden pose.
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => setPhase("in"));
-        });
-      }, FADE_MS);
-    }, HOLD_MS + FADE_MS);
-    return () => clearInterval(interval);
-  }, []);
-
-  const visible = phase === "in";
-  // Both the outgoing phrase's exit target AND the incoming phrase's
-  // entry start use this same angle — like a single drum that always
-  // rotates the same direction: the front face tips back through -80deg
-  // and out of view, and the next face continues that same motion,
-  // arriving back at 0deg from that same -80deg position. That's what
-  // makes "Product Designer" rotating away and "Connecting..." rotating
-  // in read as two faces of one cylinder rather than two separate,
-  // independently-directed animations. If this reads as spinning the
-  // wrong way once you see it live, flip the sign to 80deg on both.
-  const HIDDEN_ANGLE = -80;
-
-  return (
-    <span
-      style={{
-        fontSize: 14,
-        fontWeight: 500,
-        opacity: 0.65,
-        minHeight: "1.3em",
-        width: 280,
-        display: "block",
-        perspective: "500px",
-      }}
-    >
-      <span
-        key={index}
-        style={{
-          display: "inline-block",
-          transformOrigin: "50% 50%",
-          backfaceVisibility: "hidden",
-          opacity: visible ? 1 : 0,
-          transform: visible ? "rotateX(0deg)" : `rotateX(${HIDDEN_ANGLE}deg)`,
-          transition: `transform ${FADE_MS}ms cubic-bezier(0.4, 0, 0.2, 1), opacity ${FADE_MS}ms ease`,
-        }}
-      >
-        {SUBTEXT_PHRASES[index]}
-      </span>
-    </span>
   );
 }
 
@@ -229,80 +142,47 @@ export default function Header() {
 
   return (
     <>
-      <header
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          // Was "space-between": across only 4-5 groups, that stretches
-          // them to fill the ENTIRE row width on a wide monitor — the
-          // big-gap look you flagged. That was always true of this
-          // layout; it just never showed because html{zoom:75%} shrank
-          // the whole page (gaps included) down to 75% scale, which
-          // happened to land close to how the Figma reference looks. Now
-          // that the zoom is gone, "flex-start" + a fixed gap keeps every
-          // group close together regardless of window width — matching
-          // image 3 — and marginLeft:"auto" below pins just the
-          // date/weather block to the far right, the same way it reads
-          // in that reference.
-          justifyContent: "flex-start",
-          // Matches <main>'s "0 3rem 3rem" side padding in page.tsx —
-          // these two were out of sync (2rem here vs 3rem there), which is
-          // why "Sara Del Villar" didn't line up with the intro paragraph
-          // or the grid's left/right edges even though everything looked
-          // individually centered.
-          padding: "1.5rem 3rem",
-          fontSize: 15,
-          fontWeight: 500,
-          // nowrap, not wrap: this header is designed as ONE row, always
-          // (per the Figma reference) — it should never break into a
-          // second line on desktop. "wrap" was the actual bug just now:
-          // the 2.5rem gaps between the other 4 groups ate into the
-          // leftover space the date/weather block needed to fit on line
-          // one, so it silently wrapped to its own second line, and
-          // marginLeft:"auto" then pushed that lone item to the right
-          // edge of that (mostly empty) second line — which is why it
-          // looked like it had jumped down near the portrait image. With
-          // nowrap, marginLeft:"auto" on the date block still does its
-          // job (flush right, everything else flush left) but the row
-          // itself can never split, regardless of exact widths.
-          flexWrap: "nowrap",
-          gap: "2rem",
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.15 }}>
-          <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
-            <strong style={{ fontSize: 16, fontWeight: 700 }}>Sara Del Villar</strong>
-          </Link>
-          <RotatingSubtext />
-        </div>
+      {/* All layout-affecting properties (padding, gap, font-size) live on
+          .header-row and its children in globals.css, with @media
+          overrides at 1024/640/480/375px. white-space: nowrap is set once
+          on .header-row and inherited by every child span/link below,
+          which is the fix for text wrapping onto multiple lines at a
+          narrower width. header-name and header-availability-text no
+          longer set their own font-size — both now inherit header-row's
+          base size at every breakpoint, so every piece of header text
+          (name, availability, nav links, date/time) renders at the same
+          size; only header-services-item (the Product/Web/Interaction
+          design list) keeps its own smaller, muted size. The rotating
+          subtitle under the name is gone — this is just the name now. */}
+      <header className="header-row">
+        <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
+          <strong className="header-name">Sara Del Villar</strong>
+        </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+        <div className="header-availability">
           <span
+            className="header-availability-dot"
             style={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
               // Green reads as "open for work"; once CURRENT_EMPLOYER is
               // set, the dot switches to the brand blue instead, so the
               // indicator's color still matches what the text next to it
               // is actually saying rather than staying a job-search green
               // forever.
               background: CURRENT_EMPLOYER ? "var(--color-brand-blue)" : "#03C000",
-              display: "inline-block",
             }}
           />
-          <span>{now ? getAvailabilityLabel(now) : ""}</span>
+          <span className="header-availability-text">{now ? getAvailabilityLabel(now) : ""}</span>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
           <span>Services</span>
-          <span style={{ color: "#777777", fontSize: 13, lineHeight: 1.5 }}>Product design</span>
-          <span style={{ color: "#777777", fontSize: 13, lineHeight: 1.5 }}>Web design</span>
-          <span style={{ color: "#777777", fontSize: 13, lineHeight: 1.5 }}>Interaction design</span>
+          <span className="header-services-item">Product design</span>
+          <span className="header-services-item">Web design</span>
+          <span className="header-services-item">Interaction design</span>
         </div>
 
         {/* flex-start, not center: "center" was vertically centering
-            Resume/Github/X within nav's own height — and nav's height is
+            Resume/Github within nav's own height — and nav's height is
             set by its TALLEST child, the Connect button, which is taller
             than a line of plain text because of its own vertical padding.
             So the plain-text links were sitting in the middle of a box
@@ -310,8 +190,8 @@ export default function Header() {
             should be" compared to the flush-top text everywhere else in
             the header. flex-start pins every child's top edge to nav's
             top edge instead, matching the rest of the row. */}
-        <nav style={{ display: "flex", alignItems: "flex-start", gap: "1.25rem", color: "inherit" }}>
-          <a href="/resume.pdf" style={{ color: "inherit" }}>
+        <nav className="header-nav">
+          <a href="/resume.pdf" className="header-nav-link">
             Resume
           </a>
           <Button href="mailto:sedelvillar104@gmail.com" fontSize={14}>
@@ -321,7 +201,7 @@ export default function Header() {
             href="https://github.com/sabet7"
             target="_blank"
             rel="noreferrer"
-            style={{ color: "inherit" }}
+            className="header-nav-link"
           >
             Github
           </a>
@@ -329,34 +209,14 @@ export default function Header() {
             href="https://www.linkedin.com/in/saradelvillar/"
             target="_blank"
             rel="noreferrer"
-            style={{ color: "inherit" }}
+            className="header-nav-link"
           >
             LinkedIn
           </a>
         </nav>
 
         {now && (
-          // No marginLeft:"auto" here on purpose — that fills ALL leftover
-          // row width, which is small on a Figma-canvas-sized frame but
-          // huge on an actual wide monitor (that was the "too much space
-          // between X and Mon" gap). Letting this block flow right after
-          // nav with the same fixed `gap` as every other group keeps it
-          // consistently close, regardless of window width.
-          <span
-            style={{
-              // Extra marginLeft ON TOP OF the header's own 2rem gap —
-              // not a bigger overall gap, which would space out every
-              // group evenly (Name/Available/Services/Nav too) rather
-              // than just pulling this one block further from "X". This
-              // is the one spot that needed more separation so date/
-              // time/weather reads as its own clearly right-aligned
-              // section instead of crowding the nav links.
-              marginLeft: "1rem",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 5,
-            }}
-          >
+          <span className="header-datetime">
             {dateString} {timeString} EST - NYC
             {tempF !== null && (
               <>
