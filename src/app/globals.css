@@ -506,15 +506,25 @@ body {
    deliberately excluded and keeps its own smaller, muted size. */
 .header-row {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
   flex-wrap: nowrap;
   white-space: nowrap;
   overflow-x: auto;
-  padding: 1.5rem 3rem;
-  font-size: 15px;
+  font-size: clamp(9px, 0.55vw + 7.3px, 15px);
   font-weight: 500;
-  gap: 2rem;
+  padding: 1.1em 2.2em;
+  gap: 1.5em;
+}
+.header-brand {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 1.5em;
+  flex-shrink: 0;
 }
 
 .header-name {
@@ -524,26 +534,27 @@ body {
 .header-availability {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 0.45em;
 }
 
 .header-availability-dot {
-  width: 8px;
-  height: 8px;
+  width: 0.55em;
+  height: 0.55em;
   border-radius: 50%;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .header-services-item {
   color: #777777;
-  font-size: 13px;
+  font-size: 0.87em;
   line-height: 1.5;
 }
 
 .header-nav {
   display: flex;
   align-items: flex-start;
-  gap: 1.25rem;
+  gap: 1em;
   color: inherit;
 }
 
@@ -552,117 +563,17 @@ body {
 }
 
 .header-datetime {
-  margin-left: 1rem;
+  margin-left: 0.7em;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 0.35em;
 }
 
 .header-weather-icon {
-  width: 34px;
-  height: 34px;
-  vertical-align: -9px;
+  width: 2.3em;
+  height: 2.3em;
+  flex-shrink: 0;
 }
-
-@media (max-width: 1024px) {
-  .header-row {
-    padding: 1.25rem 1.5rem;
-    font-size: 14px;
-    gap: 1.1rem;
-  }
-  .header-services-item {
-    font-size: 12px;
-  }
-  .header-nav {
-    gap: 0.85rem;
-  }
-  .header-datetime {
-    margin-left: 0.5rem;
-    gap: 4px;
-  }
-  .header-weather-icon {
-    width: 28px;
-    height: 28px;
-    vertical-align: -7px;
-  }
-}
-
-@media (max-width: 640px) {
-  .header-row {
-    padding: 1rem 1rem;
-    font-size: 12px;
-    gap: 0.6rem;
-  }
-  .header-services-item {
-    font-size: 10.5px;
-  }
-  .header-nav {
-    gap: 0.5rem;
-  }
-  .header-datetime {
-    margin-left: 0.35rem;
-    gap: 3px;
-  }
-  .header-weather-icon {
-    width: 22px;
-    height: 22px;
-    vertical-align: -5px;
-  }
-}
-
-/* Real phone widths (480px) and small phones (375px, e.g. iPhone SE) —
-   the 640px tier above was sized more for "small tablet" than "phone in
-   portrait," and without anything past it the row relied on
-   .header-row's overflow-x: auto safety net to not visibly break at
-   these widths, which reads as unresponsive (silently scrolling) rather
-   than actually fitting. These two tiers keep shrinking the same
-   properties so it keeps fitting instead of falling back to scroll. */
-@media (max-width: 480px) {
-  .header-row {
-    padding: 0.75rem 0.75rem;
-    font-size: 10.5px;
-    gap: 0.4rem;
-  }
-  .header-services-item {
-    font-size: 9px;
-  }
-  .header-nav {
-    gap: 0.35rem;
-  }
-  .header-datetime {
-    margin-left: 0.2rem;
-    gap: 2px;
-  }
-  .header-weather-icon {
-    width: 18px;
-    height: 18px;
-    vertical-align: -4px;
-  }
-}
-
-@media (max-width: 375px) {
-  .header-row {
-    padding: 0.6rem 0.5rem;
-    font-size: 9.5px;
-    gap: 0.28rem;
-  }
-  .header-services-item {
-    font-size: 8px;
-  }
-  .header-nav {
-    gap: 0.25rem;
-  }
-  .header-datetime {
-    margin-left: 0.15rem;
-    gap: 2px;
-  }
-  .header-weather-icon {
-    width: 15px;
-    height: 15px;
-    vertical-align: -3px;
-  }
-}
-
 @media (max-width: 640px) {
   .detail-body { grid-template-columns: 1fr; }
   .detail-sidebar { position: static; flex-direction: row; flex-wrap: wrap; gap: 16px; }

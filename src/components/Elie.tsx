@@ -32,7 +32,13 @@ const ELIE_ICON_SRC = "/media/elie/elie-icon.webp";
 
 // Sara's profile photo, shown in the circle on the About view.
 // Falls back to a plain gray circle until the file exists at this path.
-const PROFILE_SRC = "/media/elie/sara-profile.webp";
+const PROFILE_SRC_CANDIDATES = [
+  "/media/elie/sara-profile.jpg",
+  "/media/elie/sara-profile.jpeg",
+  "/media/elie/sara-profile.JPG",
+  "/media/elie/sara-profile.png",
+  "/media/elie/sara-profile.webp",
+];
 
 // About Me copy — edit here without touching the layout below.
 const ABOUT_HEADLINE =
@@ -133,6 +139,11 @@ function ProfileCircle({
   failed: boolean;
   onFail: () => void;
 }) {
+  // Tries each filename in PROFILE_SRC_CANDIDATES in order and only falls
+  // back to the gray circle if none of them load, so a .jpg/.jpeg/.png
+  // mismatch can't leave the circle empty.
+  const [candidate, setCandidate] = useState(0);
+
   if (failed) {
     return (
       <div
@@ -144,7 +155,8 @@ function ProfileCircle({
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={PROFILE_SRC}
+      key={PROFILE_SRC_CANDIDATES[candidate]}
+      src={PROFILE_SRC_CANDIDATES[candidate]}
       alt="Sara Del Villar"
       style={{
         width: size,
@@ -154,7 +166,13 @@ function ProfileCircle({
         display: "block",
         background: "#D9D9D9",
       }}
-      onError={onFail}
+      onError={() => {
+        if (candidate < PROFILE_SRC_CANDIDATES.length - 1) {
+          setCandidate(candidate + 1);
+        } else {
+          onFail();
+        }
+      }}
     />
   );
 }

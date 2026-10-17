@@ -26,31 +26,43 @@ function matchesFilter(item: CardData, filter: Filter): boolean {
   return filter === "Works" ? item.variant === "case-study" : item.variant === "exploration";
 }
 
+// Grid rules live HERE, not in globals.css, so the layout can never depend
+// on whether globals.css was swapped/reloaded. Always a multi-column grid:
+// 4 columns on desktop, 3 on tablet, 2 on mobile — there is deliberately no
+// 1-column rule. minmax(0, 1fr) lets columns shrink instead of overflowing.
+const GRID_CSS = `
+.sdv-home-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 1.5rem;
+  row-gap: 3rem;
+  padding-bottom: 6rem;
+}
+@media (max-width: 1100px) {
+  .sdv-home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .sdv-home-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1rem;
+    row-gap: 2rem;
+  }
+}
+`;
+
 export default function HomeGrid({ items }: { items: CardData[] }) {
   const [filter, setFilter] = useState<Filter>("Works");
   const visible = items.filter((item) => matchesFilter(item, filter));
 
   return (
     <>
-      <div
-        style={{
-          display: "grid",
-          // Was repeat(5, 1fr) — dropped to 4 columns per row so each
-          // card (and its thumbnail image) renders larger. Same 4:3 image
-          // aspect ratio as before (see .project-card-media in
-          // globals.css) — this only changes how many fit per row, not
-          // the image's proportions.
-          gridTemplateColumns: "repeat(4, 1fr)",
-          rowGap: "3rem",
-          columnGap: "1.5rem",
-          paddingBottom: "6rem",
-        }}
-      >
+      <style>{GRID_CSS}</style>
+      <div className="sdv-home-grid">
         {visible.map((item) => (
           <Link
             key={item.slug}
             href={item.href}
-            style={{ textDecoration: "none", color: "inherit" }}
+            style={{ textDecoration: "none", color: "inherit", minWidth: 0 }}
           >
             <ProjectCard
               slug={item.slug}
