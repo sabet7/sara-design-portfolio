@@ -7,12 +7,12 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
+import styles from './DoodleLayer.module.css';
 
 // ---------------------------------------------------------------------------
-// Doodle layer: a color slider, six brush types, and a per-brush weight
-// slider that opens when you tap a brush. Everything (markup, styles, brush
-// engine) lives in this one file — no DoodleLayer.module.css is imported, so
-// the old module file is no longer used and can be deleted.
+// Doodle layer: a color slider, the brush list (marker only for now), and a per-brush weight
+// slider that opens when you tap a brush. Styles live in
+// DoodleLayer.module.css; markup and the brush engine live in this file.
 //
 // These are canvas-code brushes, not Procreate brushes (those are a closed
 // file format nothing outside the app can read).
@@ -42,7 +42,7 @@ interface BrushDef {
 }
 
 // Order here is the order in the dock.
-const BRUSHES: BrushDef[] = [
+const ALL_BRUSHES: BrushDef[] = [
   {
     id: 'pen',
     label: 'Pen',
@@ -105,7 +105,13 @@ const BRUSHES: BrushDef[] = [
   },
 ];
 
-const BRUSH_BY_ID = Object.fromEntries(BRUSHES.map((b) => [b.id, b])) as Record<
+// Which brushes appear in the dock. Only the marker is on for now; the other
+// brush definitions and their drawing code stay in this file, unused. To add
+// a brush later, add its id here, e.g. ['marker', 'pencil'].
+const ENABLED_BRUSHES: BrushId[] = ['marker'];
+const BRUSHES = ALL_BRUSHES.filter((b) => ENABLED_BRUSHES.includes(b.id));
+
+const BRUSH_BY_ID = Object.fromEntries(ALL_BRUSHES.map((b) => [b.id, b])) as Record<
   BrushId,
   BrushDef
 >;
@@ -426,209 +432,6 @@ function resolvePressure(
   return prev.p + (target - prev.p) * 0.2;
 }
 
-// ---------------------------------------------------------------------------
-// Styles (scoped by the sdv-dl- prefix)
-// ---------------------------------------------------------------------------
-
-const DOODLE_CSS = `
-.sdv-dl-canvas,
-.sdv-dl-stroke {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9000;
-}
-.sdv-dl-canvas { pointer-events: none; }
-.sdv-dl-stroke { cursor: crosshair; touch-action: none; }
-
-.sdv-dl-dock {
-  --doodle-ink: #1c1c1c;
-  position: fixed;
-  right: 16px;
-  bottom: 40px;
-  z-index: 9200;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 12px;
-}
-:root[data-dimmer-stage="charcoal"] .sdv-dl-dock,
-:root[data-dimmer-stage="near-black"] .sdv-dl-dock { --doodle-ink: #f2f2f2; }
-
-.sdv-dl-tools {
-  width: 48px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  animation: sdvDlIn 0.2s ease;
-}
-@keyframes sdvDlIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.sdv-dl-hue {
-  position: relative;
-  width: 12px;
-  height: clamp(90px, 24vh, 170px);
-  border-radius: 999px;
-  background: ${HUE_GRADIENT};
-  touch-action: none;
-  cursor: pointer;
-}
-.sdv-dl-hue-thumb {
-  position: absolute;
-  left: 50%;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 3px solid #ffffff;
-  box-sizing: border-box;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-.sdv-dl-dots {
-  display: flex;
-  gap: 3px;
-  opacity: 0.45;
-}
-.sdv-dl-dots span {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--doodle-ink);
-}
-
-.sdv-dl-brushes {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-/* 20px icon + 4px padding. The ::before widens the tap target for fingers
-   without changing how the button looks. */
-.sdv-dl-brush {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: content-box;
-  width: 20px;
-  height: 20px;
-  padding: 4px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-.sdv-dl-brush::before {
-  content: "";
-  position: absolute;
-  inset: -1px -10px;
-}
-.sdv-dl-brush[aria-pressed="true"] {
-  background: rgba(240, 106, 26, 0.18);
-}
-.sdv-dl-preview {
-  display: block;
-  width: 20px;
-  height: 20px;
-  pointer-events: none;
-}
-@media (max-height: 560px) {
-  .sdv-dl-tools { gap: 6px; }
-  .sdv-dl-hue { height: 70px; }
-  .sdv-dl-brush { padding: 2px; }
-}
-:root[data-dimmer-stage="charcoal"] .sdv-dl-preview,
-:root[data-dimmer-stage="near-black"] .sdv-dl-preview { filter: invert(1); }
-
-.sdv-dl-weight {
-  position: absolute;
-  right: calc(100% + 12px);
-  top: 50%;
-  width: 150px;
-  height: 28px;
-  transform: translateY(-50%);
-  touch-action: none;
-  cursor: pointer;
-  animation: sdvDlSlide 0.16s ease;
-}
-@keyframes sdvDlSlide {
-  from { opacity: 0; transform: translateY(-50%) translateX(8px); }
-  to { opacity: 1; transform: translateY(-50%) translateX(0); }
-}
-.sdv-dl-weight-track {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 10px;
-  border-radius: 999px;
-  background: var(--doodle-ink);
-  transform: translateY(-50%);
-}
-.sdv-dl-weight-thumb {
-  position: absolute;
-  top: 50%;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-.sdv-dl-weight-thumb::after {
-  content: "";
-  position: absolute;
-  inset: 6px;
-  border-radius: 50%;
-  background: #555555;
-}
-
-.sdv-dl-bottom {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.sdv-dl-action {
-  height: 30px;
-  padding: 0 14px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 999px;
-  background: #ffffff;
-  color: #1c1c1c;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
-}
-.sdv-dl-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background: #ffffff;
-  color: #1c1c1c;
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
-}
-.sdv-dl-toggle[aria-pressed="true"] {
-  box-shadow: 0 0 0 2px var(--color-brand-orange, #f06a1a), 0 2px 10px rgba(0, 0, 0, 0.18);
-}
-`;
 
 // ---------------------------------------------------------------------------
 // Sliders
@@ -641,6 +444,7 @@ function Slider({
   label,
   valueText,
   className,
+  style,
   children,
 }: {
   orientation: 'vertical' | 'horizontal';
@@ -649,6 +453,7 @@ function Slider({
   label: string;
   valueText: string;
   className: string;
+  style?: React.CSSProperties;
   children: React.ReactNode;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -679,6 +484,7 @@ function Slider({
     <div
       ref={ref}
       className={className}
+      style={style}
       role="slider"
       tabIndex={0}
       aria-label={label}
@@ -754,7 +560,7 @@ function BrushPreview({ brush }: { brush: BrushDef }) {
   return (
     <canvas
       ref={ref}
-      className="sdv-dl-preview"
+      className={styles.preview}
       style={{ opacity: brush.opacity }}
       aria-hidden="true"
     />
@@ -784,7 +590,7 @@ export default function DoodleLayer() {
   const [brushId, setBrushId] = useState<BrushId>('marker');
   const [weights, setWeights] = useState<Record<BrushId, number>>(
     () =>
-      Object.fromEntries(BRUSHES.map((b) => [b.id, b.defaultWeight])) as Record<BrushId, number>
+      Object.fromEntries(ALL_BRUSHES.map((b) => [b.id, b.defaultWeight])) as Record<BrushId, number>
   );
   const [weightOpen, setWeightOpen] = useState(false);
 
@@ -986,12 +792,10 @@ export default function DoodleLayer() {
 
   return (
     <>
-      <style>{DOODLE_CSS}</style>
-
-      <canvas ref={canvasRef} className="sdv-dl-canvas" />
+      <canvas ref={canvasRef} className={styles.canvas} />
       <canvas
         ref={strokeRef}
-        className="sdv-dl-stroke"
+        className={styles.stroke}
         style={{ pointerEvents: active ? 'auto' : 'none' }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -999,19 +803,20 @@ export default function DoodleLayer() {
         onPointerCancel={finishStroke}
       />
 
-      <div className="sdv-dl-dock">
+      <div className={styles.dock}>
         {active && (
-          <div className="sdv-dl-tools">
+          <div className={styles.tools}>
             <Slider
               orientation="vertical"
-              className="sdv-dl-hue"
+              className={styles.hue}
+              style={{ background: HUE_GRADIENT }}
               label="Doodle color"
               valueText={`Hue ${Math.round(hue)}`}
               ratio={hue / HUE_MAX}
               onRatio={(r) => setHue(r * HUE_MAX)}
             >
               <div
-                className="sdv-dl-hue-thumb"
+                className={styles.hueThumb}
                 style={{
                   top: `${(hue / HUE_MAX) * 100}%`,
                   background: thumbColor(hue),
@@ -1019,20 +824,20 @@ export default function DoodleLayer() {
               />
             </Slider>
 
-            <div className="sdv-dl-dots" aria-hidden="true">
+            <div className={styles.dots} aria-hidden="true">
               <span />
               <span />
               <span />
             </div>
 
-            <div className="sdv-dl-brushes">
+            <div className={styles.brushes}>
               {BRUSHES.map((b) => {
                 const selected = b.id === brushId;
                 return (
                   <button
                     key={b.id}
                     type="button"
-                    className="sdv-dl-brush"
+                    className={styles.brush}
                     aria-pressed={selected}
                     aria-label={`${b.label} brush`}
                     onClick={() => selectBrush(b.id)}
@@ -1043,7 +848,7 @@ export default function DoodleLayer() {
                       <div onClick={(e) => e.stopPropagation()}>
                         <Slider
                           orientation="horizontal"
-                          className="sdv-dl-weight"
+                          className={styles.weight}
                           label={`${b.label} weight`}
                           valueText={`${weights[b.id].toFixed(1)} pixels`}
                           ratio={weightRatio}
@@ -1054,9 +859,9 @@ export default function DoodleLayer() {
                             }))
                           }
                         >
-                          <div className="sdv-dl-weight-track" />
+                          <div className={styles.weightTrack} />
                           <div
-                            className="sdv-dl-weight-thumb"
+                            className={styles.weightThumb}
                             style={{ left: `${weightRatio * 100}%` }}
                           />
                         </Slider>
@@ -1069,20 +874,20 @@ export default function DoodleLayer() {
           </div>
         )}
 
-        <div className="sdv-dl-bottom">
+        <div className={styles.bottom}>
           {active && (
             <>
-              <button type="button" className="sdv-dl-action" onClick={handleSave}>
+              <button type="button" className={styles.action} onClick={handleSave}>
                 Save
               </button>
-              <button type="button" className="sdv-dl-action" onClick={handleClear}>
+              <button type="button" className={styles.action} onClick={handleClear}>
                 Clear
               </button>
             </>
           )}
           <button
             type="button"
-            className="sdv-dl-toggle"
+            className={styles.toggle}
             onClick={toggleActive}
             aria-pressed={active}
             aria-label={active ? 'Turn off doodling' : 'Turn on doodling'}
