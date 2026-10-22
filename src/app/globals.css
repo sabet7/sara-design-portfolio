@@ -293,10 +293,12 @@ body {
 .detail-tag {
   display: inline-block;
   background: var(--color-brand-orange);
-  color: #111;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 10px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  padding: 5px 12px;
   border-radius: 999px;
 }
 
@@ -367,6 +369,10 @@ body {
 .detail-sidebar-item {
   position: relative;
   display: inline-block;
+  /* A flex item stretches to the full column width unless told otherwise,
+     which put the hover oval's centre in the middle of the column instead
+     of the middle of the label. */
+  align-self: flex-start;
   padding: 6px 4px;
 }
 
@@ -430,6 +436,16 @@ body {
   min-width: 0;
 }
 
+/* Images written in a case study's MDX body (![alt](/media/...)) — keeps
+   them inside the text column at any width instead of running past it. */
+.detail-content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin: 1.5rem 0;
+}
+
 .detail-section-heading {
   font-size: 0.75rem;
   font-weight: 600;
@@ -485,6 +501,7 @@ body {
   width: 100%;
   border-radius: 8px;
   display: block;
+  margin: 0;
 }
 
 /* Header — converted from 100% inline styles to these classes specifically
