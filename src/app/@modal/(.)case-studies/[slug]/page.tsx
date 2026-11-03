@@ -9,14 +9,19 @@
 // refresh or a direct link still falls through to your existing
 // app/case-studies/[slug]/page.tsx, full page, untouched.
 //
-// No generateStaticParams/generateMetadata here on purpose — this route
-// never serves as the canonical page search engines or link previews see
-// (your existing full-page route still owns that), it only ever renders
-// as an overlay during an in-app navigation.
+// No generateMetadata here on purpose — this route never serves as the
+// canonical page search engines or link previews see (the full-page route
+// owns that). generateStaticParams IS here so every case study modal is
+// built ahead of time at deploy, instead of being rendered on the server
+// the first time someone clicks a card.
 import { notFound } from "next/navigation";
-import { getCaseStudyBySlug } from "@/lib/content";
+import { getAllCaseStudies, getCaseStudyBySlug } from "@/lib/content";
 import CaseStudyDetail from "@/components/CaseStudyDetail";
 import Modal from "@/components/Modal";
+
+export function generateStaticParams() {
+  return getAllCaseStudies().map((cs) => ({ slug: cs.frontmatter.slug }));
+}
 
 export default async function InterceptedCaseStudyModal({
   params,

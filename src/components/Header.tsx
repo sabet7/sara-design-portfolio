@@ -215,7 +215,6 @@ const HEADER_CSS = `
   gap: 1.5em;
 }
 .sdv-hdr-name { font-weight: 700; }
-.sdv-hdr-id { display: flex; align-items: baseline; gap: 0.35em; }
 .sdv-greet { font-weight: 400; opacity: 0.55; }
 .sdv-hdr:not([data-compact="0"]) .sdv-greet { display: none; }
 .sdv-name-sv { display: none; }
@@ -238,6 +237,25 @@ const HEADER_CSS = `
   height: 0.55em;
   border-radius: 50%;
   flex-shrink: 0;
+  animation: sdvDotPulse 1.6s ease-in-out infinite;
+}
+/* The dot swells slightly while a soft halo of its own colour spreads out
+   and fades (the colour comes from the inline style, so it also follows the
+   blue "Currently at" dot). */
+@keyframes sdvDotPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 0%, transparent),
+      0 0 0 0 color-mix(in srgb, currentColor 0%, transparent);
+  }
+  45% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 0.12em color-mix(in srgb, currentColor 14%, transparent),
+      0 0 0.35em 0.05em color-mix(in srgb, currentColor 18%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sdv-hdr-dot { animation: none; }
 }
 .sdv-hdr-nav {
   display: flex;
@@ -481,6 +499,8 @@ export default function Header() {
     };
   }, [fitKey]);
 
+  const dotColor = CURRENT_EMPLOYER ? "var(--color-brand-blue)" : "#03C000";
+
   const timeString = now
     ? now.toLocaleTimeString("en-US", {
         timeZone: "America/New_York",
@@ -508,15 +528,12 @@ export default function Header() {
       <header className="sdv-hdr" ref={headerRef} data-mode="line" data-compact="0">
         <div className="sdv-hdr-items" ref={itemsRef}>
           <div className="sdv-hdr-brand">
-            <div className="sdv-hdr-id">
-              {now && <span className="sdv-greet">{getGreeting(now)}, I&apos;m</span>}
-              <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
-                <strong className="sdv-hdr-name">
-                  <span className="sdv-name-full">Sara Del Villar</span>
-                  <span className="sdv-name-sv">SV</span>
-                </strong>
-              </Link>
-            </div>
+            <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
+              <strong className="sdv-hdr-name">
+                <span className="sdv-name-full">Sara Del Villar</span>
+                <span className="sdv-name-sv">SV</span>
+              </strong>
+            </Link>
 
             <div className="sdv-hdr-avail">
               <span
@@ -524,7 +541,8 @@ export default function Header() {
                 style={{
                   // Green reads as "open for work"; switches to the brand
                   // blue once CURRENT_EMPLOYER is set.
-                  background: CURRENT_EMPLOYER ? "var(--color-brand-blue)" : "#03C000",
+                  background: dotColor,
+                  color: dotColor,
                 }}
               />
               <span className="sdv-full">{now ? getAvailabilityLabel(now) : ""}</span>
@@ -571,6 +589,7 @@ export default function Header() {
 
           {now && (
             <span className="sdv-hdr-datetime">
+              <span className="sdv-greet">{getGreeting(now)} ·</span>
               <span>
                 <span className="sdv-wk">{weekdayString}{", "}</span>
                 {monthDayString} {timeString}

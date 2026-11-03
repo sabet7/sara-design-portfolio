@@ -55,14 +55,13 @@ const ERROR_TEXT = "Something went wrong on my end — try again in a moment.";
 const ELIE_BUBBLE_BG = "#F2F2F2";
 const AVATAR_SIZE = 120;
 
-// Elie animation size and the fixed slot it sits in above the card.
-// The slot keeps a constant height so the card never shifts between moods.
-// Both pulled down a notch (96/110 -> 84/96) alongside the modal wrapper's
-// own padding below and the nav's new slimmer padding in globals.css —
-// together these are what free up real breathing room above the mood art
-// instead of it sitting cramped against the viewport's top edge.
-const MOOD_SIZE = 84;
-const MOOD_SLOT_HEIGHT = 96;
+// Elie's mood animation now sits INSIDE the card, in its top-left corner.
+// MOOD_SIZE is its width/height in px; MOOD_POS is its distance from the
+// card's top and left edges. The chat thread starts below it (see
+// CHAT_TOP_PADDING) so messages never sit underneath it at first.
+const MOOD_SIZE = 56;
+const MOOD_POS = { top: 18, left: 22 };
+const CHAT_TOP_PADDING = "2.4rem";
 
 // Fixed card height — identical in the About view and the chat view.
 // Was min(560px, 70vh) — smaller cap so there's guaranteed room left over
@@ -246,7 +245,7 @@ function MoodArt({
         maxHeight: size,
         objectFit: "contain",
         display: "block",
-        filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.35))",
+        filter: "none",
       }}
       onError={onFail}
     />
@@ -685,7 +684,7 @@ export default function Elie() {
         display: "flex",
         flexDirection: "column",
         gap: 20,
-        paddingTop: "0.5rem",
+        paddingTop: CHAT_TOP_PADDING,
       }}
     >
       {messages.map((msg) => {
@@ -754,31 +753,6 @@ export default function Elie() {
         aria-label="About Sara"
         style={{ bottom: start.bottom }}
       >
-        {/* Elie's mood animation — fixed-height slot directly above the sheet.
-            Mounted only once the sheet is opening so its drop-in plays then. */}
-        <div
-          style={{
-            height: MOOD_SLOT_HEIGHT,
-            display: "flex",
-            alignItems: "flex-end",
-            justifyContent: "center",
-            marginBottom: 12,
-            pointerEvents: "none",
-            flexShrink: 0,
-          }}
-        >
-          {expanded && (
-            <div key={mood} className="elie-modal-character">
-              <MoodArt
-                mood={mood}
-                size={MOOD_SIZE}
-                failed={failedMoods[mood]}
-                onFail={() => markFailed(mood)}
-              />
-            </div>
-          )}
-        </div>
-
         <div
           ref={sheetRef}
           className="elie-sheet"
@@ -800,6 +774,31 @@ export default function Elie() {
             >
               <span />
             </div>
+
+            {/* Elie's mood animation, inside the card (top-left). Mounted
+                once the sheet is opening so its drop-in plays then. */}
+            {expanded && (
+              <div
+                key={mood}
+                className="elie-modal-character"
+                style={{
+                  position: "absolute",
+                  top: MOOD_POS.top,
+                  left: MOOD_POS.left,
+                  zIndex: 2,
+                  pointerEvents: "none",
+                  animationDelay: "0.25s",
+                  animationFillMode: "both",
+                }}
+              >
+                <MoodArt
+                  mood={mood}
+                  size={MOOD_SIZE}
+                  failed={failedMoods[mood]}
+                  onFail={() => markFailed(mood)}
+                />
+              </div>
+            )}
 
             <button
               onClick={handleClose}

@@ -1070,6 +1070,12 @@ body {
   padding: 6px 16px;
   transition: background 0.2s ease, color 0.2s ease, font-weight 0.2s ease;
 }
+/* The nav glass stays light through the gray (dusk) stage and only turns
+   dark at charcoal/near-black, but dusk's text color (--fg) is near-white,
+   which vanished on the light glass. Dark text there instead. */
+:root[data-dimmer-stage="dusk"] .float-nav-item:not(.active) {
+  color: #191d25;
+}
 .float-nav-item:hover:not(.active) {
   background: rgba(0, 0, 0, 0.07);
   font-weight: 500;
@@ -1229,6 +1235,13 @@ body {
   color: #777777;
   padding: 0;
 }
+
+/* The paragraph's gray (#777) disappears on the darker dimmer stages, so
+   from dusk on it follows the stage's text color at a slightly lower
+   strength. Raise the 0.9 / 0.82 / 0.75 to make it whiter. */
+:root[data-dimmer-stage="dusk"] .home-intro { color: rgb(var(--fg) / 0.9); }
+:root[data-dimmer-stage="charcoal"] .home-intro { color: rgb(var(--fg) / 0.82); }
+:root[data-dimmer-stage="near-black"] .home-intro { color: rgb(var(--fg) / 0.75); }
 
 .hover-circle {
   position: absolute;

@@ -4,10 +4,16 @@
 // you open an exploration from inside the app (clicking a card). A direct
 // link or refresh falls through to app/explorations/[slug]/page.tsx. Both
 // now render the same ExplorationDetail component, so they look alike.
+// generateStaticParams builds every exploration modal ahead of time at
+// deploy, so opening a card doesn't wait on the server.
 import { notFound } from "next/navigation";
-import { getExplorationBySlug } from "@/lib/content";
+import { getAllExplorations, getExplorationBySlug } from "@/lib/content";
 import Modal from "@/components/Modal";
 import ExplorationDetail from "@/components/ExplorationDetail";
+
+export function generateStaticParams() {
+  return getAllExplorations().map((ex) => ({ slug: ex.frontmatter.slug }));
+}
 
 export default async function InterceptedExplorationModal({
   params,
