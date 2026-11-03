@@ -850,14 +850,14 @@ body {
      tint is also just more correct for "glass with depth": true frosted
      glass you can set a cup down on reads far more opaque than a light
      film. */
-  background: rgba(255, 255, 255, 0.74);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(244, 244, 244, 0.8) 100%);
   /* "Splay" — how spread/dissolved the text underneath reads — is the
      blur radius, not the opacity above: blur(11px -> 18px -> 26px ->
      34px). Saturate/contrast bumped alongside it again so the extra
      blur doesn't start looking flat/gray as it thickens. */
-  backdrop-filter: blur(34px) saturate(255%) contrast(132%);
-  -webkit-backdrop-filter: blur(34px) saturate(255%) contrast(132%);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(44px) saturate(220%) contrast(120%);
+  -webkit-backdrop-filter: blur(44px) saturate(220%) contrast(120%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
     border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -874,12 +874,13 @@ body {
      real depth), and the chromatic fringe at the left/right edges
      (subtle red/blue split, like light bending through a curved edge). */
   box-shadow:
-    0 22px 55px rgba(0, 0, 0, 0.18),
-    0 4px 10px rgba(0, 0, 0, 0.15),
-    0 1.5px 0 rgba(255, 255, 255, 0.9) inset,
-    0 -1px 6px rgba(255, 255, 255, 0.4) inset,
-    0 -3px 8px rgba(0, 0, 0, 0.14) inset,
-    0 0 0 4px rgba(255, 255, 255, 0.08) inset,
+    0 34px 80px rgba(0, 0, 0, 0.26),
+    0 12px 28px rgba(0, 0, 0, 0.18),
+    0 3px 6px rgba(0, 0, 0, 0.16),
+    0 1.5px 0 rgba(255, 255, 255, 0.95) inset,
+    0 16px 24px -14px rgba(255, 255, 255, 0.7) inset,
+    0 -16px 22px -12px rgba(0, 0, 0, 0.16) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.4) inset,
     -1px 0 0 rgba(255, 0, 60, 0.1),
     1px 0 0 rgba(0, 140, 255, 0.1);
 }
@@ -985,21 +986,43 @@ body {
    base than a light one. */
 :root[data-dimmer-stage="charcoal"] .sara-float-nav,
 :root[data-dimmer-stage="near-black"] .sara-float-nav {
-  /* Same frost-density pass as the light stage — 0.34 -> 0.62 -> 0.72 -> 0.78. */
-  background: rgba(20, 20, 20, 0.78);
-  border-color: rgba(255, 255, 255, 0.2);
+  /* Dense near-black glass: a vertical gradient (lighter at the top edge,
+     deeper at the bottom) at ~95% opacity, so the page behind only
+     reads as a faint glow instead of visible shapes. */
+  background: linear-gradient(180deg, rgba(38, 38, 38, 0.95) 0%, rgba(10, 10, 10, 0.97) 100%);
+  border-color: rgba(255, 255, 255, 0.16);
   box-shadow:
-    0 22px 55px rgba(0, 0, 0, 0.55),
-    0 4px 12px rgba(0, 0, 0, 0.45),
-    0 1.5px 0 rgba(255, 255, 255, 0.16) inset,
-    0 -1px 6px rgba(255, 255, 255, 0.07) inset,
-    0 -3px 8px rgba(0, 0, 0, 0.4) inset,
-    0 0 0 4px rgba(255, 255, 255, 0.04) inset,
+    0 34px 80px rgba(0, 0, 0, 0.75),
+    0 12px 28px rgba(0, 0, 0, 0.6),
+    0 3px 6px rgba(0, 0, 0, 0.5),
+    0 1.5px 0 rgba(255, 255, 255, 0.24) inset,
+    0 18px 28px -16px rgba(255, 255, 255, 0.14) inset,
+    0 -18px 26px -10px rgba(0, 0, 0, 0.7) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
     -1px 0 0 rgba(255, 0, 60, 0.14),
     1px 0 0 rgba(0, 140, 255, 0.14);
-  --sv-sheen-o: 0.4;
-  --sv-noise-o: 0.22;
+  --sv-sheen-o: 0.35;
+  --sv-noise-o: 0.5;
   --sv-glare-o: 0.8;
+}
+/* Overlay-blended grain all but vanishes on a near-black base, so on the
+   dark stages the grain is blended with soft-light instead, which shows
+   up as fine light speckle like the old Webflow nav. */
+:root[data-dimmer-stage="charcoal"] .sara-float-nav::after,
+:root[data-dimmer-stage="near-black"] .sara-float-nav::after {
+  mix-blend-mode: soft-light;
+}
+/* The sliding active-filter pill: brighter glass with a soft feathered glow
+   on the dark stages, so it reads as a lit surface sitting in the nav. */
+:root[data-dimmer-stage="charcoal"] .float-nav-pill,
+:root[data-dimmer-stage="near-black"] .float-nav-pill {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 0 22px rgba(255, 255, 255, 0.14),
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    0 1px 0 rgba(255, 255, 255, 0.35) inset,
+    0 -6px 10px -4px rgba(0, 0, 0, 0.35) inset;
 }
 
 /* Sliding "liquid glass" active-filter pill — travels between buttons and
@@ -1182,24 +1205,29 @@ body {
 .tag.case-study { background: #ff9900; }
 .tag.exploration { background: #00a6ff; }
 
-/* New heading sits directly above .home-intro — give it its own top
-   padding/margin instead of changing .home-intro's, so the paragraph's
-   existing spacing to whatever comes after it (the grid) is untouched. */
+/* Hero spacing (page.tsx wraps the heading + paragraph in .home-hero).
+   Negative space scales with the window height: a big gap above the
+   heading, a loose gap between heading and paragraph, and a large gap
+   before the project grid. Change the middle number in each clamp() to
+   tune it (it's a percentage of the window height). */
+.home-hero {
+  margin-bottom: clamp(5rem, 16vh, 11rem);
+}
 .home-intro-heading {
   max-width: 710px;
   font-size: clamp(22px, 2.1vw, 32px);
   font-weight: 700;
   line-height: 1.25;
-  margin: 1.5rem 0 0.75rem;
+  margin: clamp(3.5rem, 12vh, 8.5rem) 0 1.5rem;
 }
 
 .home-intro {
   max-width: 710px;
   font-size: clamp(14px, 1.1vw, 20px);
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.5;
   color: #777777;
-  padding: 0 0 2.5rem;
+  padding: 0;
 }
 
 .hover-circle {
@@ -1246,20 +1274,19 @@ body {
 /* Project-card title underline — the hand-drawn line-draw reveal that
    replaces .hover-circle on the card itself (that rule and its assets
    above are untouched, just no longer referenced from ProjectCard, so
-   they're free to reuse somewhere else later). Positioned against the
-   bottom of the title/timeline text block (see ProjectCard.tsx), inside
-   the 8px gap that already exists between that block and the thumbnail
-   below it, so it never collides with either line of text. width is
-   92%/capped rather than a full 100% so it reads as an underline drawn
-   under the title rather than a rule spanning the whole card row —
-   adjust freely if you want it wider, narrower, or snugged closer to the
-   title with a smaller |bottom|. */
+   they're free to reuse somewhere else later). ProjectCard.tsx measures
+   the title's height and sets `top` inline so the line sits directly under
+   the title's last line; the `bottom` below is only the fallback used
+   before that measurement runs (the line is invisible until hover, so
+   it is never seen there). width is 92%/capped rather than a full 100% so
+   it reads as an underline drawn under the title rather than a rule
+   spanning the whole card row. */
 .title-underline {
   position: absolute;
   left: 0;
   bottom: -9px;
   width: 92%;
-  max-width: 320px;
+  max-width: 280px;
   height: auto;
   pointer-events: none;
   opacity: 0;
@@ -1267,4 +1294,20 @@ body {
 }
 .title-underline.active {
   opacity: 1;
+}
+
+/* The underline artwork is black ink on transparent, so it disappears on the
+   dark dimmer stages. Same two stages (and the same invert approach) as
+   .weather-icon above. */
+:root[data-dimmer-stage="charcoal"] .title-underline,
+:root[data-dimmer-stage="near-black"] .title-underline {
+  filter: invert(1);
+}
+
+/* The About button's icon (Elie.tsx, img.elie-trigger-icon) is also black
+   ink on transparent. `img.` keeps this off the emoji fallback circle that
+   Elie.tsx shows if the image fails to load. */
+:root[data-dimmer-stage="charcoal"] img.elie-trigger-icon,
+:root[data-dimmer-stage="near-black"] img.elie-trigger-icon {
+  filter: invert(1);
 }

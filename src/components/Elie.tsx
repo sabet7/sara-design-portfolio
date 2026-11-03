@@ -70,6 +70,129 @@ const MOOD_SLOT_HEIGHT = 96;
 // viewport, not just a tall monitor.
 const CARD_HEIGHT = "min(500px, 62vh)";
 
+// Open/close behaves like a bottom sheet: the panel starts as the exact
+// size and position of the floating nav pill, then grows upward from that
+// anchor to PANEL_WIDTH x CARD_HEIGHT (and shrinks back on close).
+const PANEL_WIDTH = "min(720px, calc(100vw - 2rem))";
+const SHEET_MS = 620; // keep in sync with the transitions in SHEET_CSS
+const DRAG_CLOSE_PX = 90; // drag the handle down this far to close
+
+const SHEET_CSS = `
+.elie-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9490;
+  background: rgba(0, 0, 0, 0.4);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.elie-backdrop[data-expanded="true"] { opacity: 1; }
+
+.elie-sheet-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 9500;
+  box-sizing: border-box;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+.elie-sheet {
+  --sheet-from: rgba(255, 255, 255, 0.86);
+  --sheet-border: rgba(255, 255, 255, 0.65);
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  pointer-events: auto;
+  background: var(--sheet-from);
+  border: 1px solid var(--sheet-border);
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.22), 0 4px 12px rgba(0, 0, 0, 0.16);
+  -webkit-backdrop-filter: blur(34px) saturate(180%);
+  backdrop-filter: blur(34px) saturate(180%);
+  color: var(--color-text);
+  transition:
+    width ${SHEET_MS}ms cubic-bezier(0.32, 0.72, 0, 1),
+    height ${SHEET_MS}ms cubic-bezier(0.32, 0.72, 0, 1),
+    border-radius ${SHEET_MS}ms cubic-bezier(0.32, 0.72, 0, 1),
+    background 0.45s ease,
+    transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+:root[data-dimmer-stage="charcoal"] .elie-sheet,
+:root[data-dimmer-stage="near-black"] .elie-sheet {
+  --sheet-from: rgba(20, 20, 20, 0.86);
+  --sheet-border: rgba(255, 255, 255, 0.2);
+}
+.elie-sheet[data-expanded="true"] { background: #fff; }
+
+/* Content is laid out at its final size and anchored to the bottom, so the
+   growing panel reveals it instead of squeezing it. It fades in once the
+   panel is mostly open and fades out first on close. */
+.elie-sheet-inner {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  width: calc(${PANEL_WIDTH} - 2px);
+  height: calc(${CARD_HEIGHT} - 2px);
+  display: flex;
+  flex-direction: column;
+  padding: 2.25rem 2.25rem 2rem;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.elie-sheet[data-expanded="true"] .elie-sheet-inner {
+  opacity: 1;
+  transition: opacity 0.35s ease 0.24s;
+}
+
+.elie-handle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  touch-action: none;
+  z-index: 2;
+}
+.elie-handle:active { cursor: grabbing; }
+.elie-handle span {
+  display: block;
+  width: 40px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.elie-typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+  display: inline-block;
+  animation: elieTypingBounce 1s infinite ease-in-out;
+}
+@keyframes elieTypingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .elie-sheet, .elie-backdrop, .elie-sheet-inner { transition-duration: 0.01ms !important; transition-delay: 0s !important; }
+}
+`;
+
 // How far the trigger icon can tilt/shift toward the cursor. MAX_DIST is
 // the cursor-to-icon distance (px) at which the icon holds its furthest
 // pose — past that, moving the cursor further away doesn't tilt it any
@@ -219,7 +342,8 @@ function TypingBubble() {
 
 export default function Elie() {
   const [open, setOpen] = useState(false);
-  const [closing, setClosing] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [start, setStart] = useState({ w: 260, h: 48, bottom: 24 });
   const [messages, setMessages] = useState<Message[]>([]);
   const [lastNodeId, setLastNodeId] = useState<string | null>(null);
   const [customQuestion, setCustomQuestion] = useState("");
@@ -239,6 +363,10 @@ export default function Elie() {
   const threadRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const iconImgRef = useRef<HTMLImageElement | null>(null);
+  const sheetRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const dragRef = useRef<{ startY: number; dy: number } | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => setMounted(true), []);
 
@@ -299,6 +427,31 @@ export default function Elie() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  // Page behind the sheet doesn't scroll while it is open.
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
+
+  // Once the sheet has finished opening, focus the question box (skipped on
+  // touch devices so the keyboard doesn't cover the sheet right away).
+  useEffect(() => {
+    if (!expanded) return;
+    if (!window.matchMedia("(hover: hover)").matches) return;
+    const t = setTimeout(() => inputRef.current?.focus({ preventScroll: true }), SHEET_MS - 80);
+    return () => clearTimeout(t);
+  }, [expanded]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    };
+  }, []);
+
   // Mouse-reactive trigger icon: tilts/shifts toward the cursor based on
   // its distance from the button's own center. Written straight to the
   // DOM via refs (same pattern as LiquidNav's cursor-glare handler) rather
@@ -346,14 +499,45 @@ export default function Elie() {
   }
 
   function handleClose() {
-    setClosing(true);
-    setTimeout(() => {
+    if (closeTimer.current) return; // already closing
+    setExpanded(false);
+    closeTimer.current = setTimeout(() => {
+      closeTimer.current = null;
       setOpen(false);
-      setClosing(false);
-    }, 500); // matches elieModalFall's duration
+    }, SHEET_MS);
+  }
+
+  // Drag the handle down to close, like a bottom sheet.
+  function onHandleDown(e: React.PointerEvent<HTMLDivElement>) {
+    dragRef.current = { startY: e.clientY, dy: 0 };
+    e.currentTarget.setPointerCapture(e.pointerId);
+    if (sheetRef.current) sheetRef.current.style.transition = "none";
+  }
+  function onHandleMove(e: React.PointerEvent<HTMLDivElement>) {
+    const drag = dragRef.current;
+    if (!drag || !sheetRef.current) return;
+    drag.dy = Math.max(0, e.clientY - drag.startY);
+    sheetRef.current.style.transform = `translateY(${drag.dy}px)`;
+  }
+  function onHandleUp() {
+    const drag = dragRef.current;
+    dragRef.current = null;
+    const sheet = sheetRef.current;
+    if (!drag || !sheet) return;
+    sheet.style.transition = "";
+    sheet.style.transform = "";
+    if (drag.dy > DRAG_CLOSE_PX) handleClose();
   }
 
   function reset() {
+    // Measure the nav pill so the sheet can start exactly on top of it.
+    const nav = triggerRef.current?.closest(".sara-float-nav") as HTMLElement | null;
+    if (nav) {
+      const r = nav.getBoundingClientRect();
+      setStart({ w: r.width, h: r.height, bottom: Math.max(0, window.innerHeight - r.bottom) });
+    }
+    setExpanded(false);
+    requestAnimationFrame(() => requestAnimationFrame(() => setExpanded(true)));
     setOpen(true);
     setMessages([]);
     setLastNodeId(null);
@@ -555,166 +739,136 @@ export default function Elie() {
   );
 
   const modal = open && (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="About Sara"
-      onClick={handleClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 9500,
-        background: "rgba(0,0,0,0.4)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "flex-end",
-        padding: "1.5rem",
-        // Explicit top padding (was just the 1.5rem shorthand above) so
-        // the mood art always has real clearance from the viewport's top
-        // edge instead of however much happened to be left over after
-        // the card/mood-slot/bottom-padding math below. Combined with
-        // the smaller CARD_HEIGHT/MOOD_SIZE above and the nav's slimmer
-        // padding in globals.css, there's now enough total vertical room
-        // on a typical laptop-height viewport that this doesn't need to
-        // fight for space with everything else.
-        paddingTop: "2.5rem",
-        // Lands the modal's bottom edge above the floating nav. Lowered
-        // from 100 to 70 now that the nav itself is shorter (see
-        // .sara-float-nav/.float-nav-item/.elie-trigger-icon/.dimmer-btn
-        // in globals.css) — nudge this number if the gap looks off.
-        paddingBottom: 70,
-        // Safety net: if a given viewport still can't fit mood slot +
-        // card + both paddings, this scrolls instead of silently
-        // clipping content off the top with no way to reach it.
-        overflowY: "auto",
-        opacity: closing ? 0 : 1,
-        transition: "opacity 0.5s ease",
-        pointerEvents: closing ? "none" : "auto",
-      }}
-    >
-      <style>{`
-        .elie-typing-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: var(--color-text-muted);
-          display: inline-block;
-          animation: elieTypingBounce 1s infinite ease-in-out;
-        }
-        @keyframes elieTypingBounce {
-          0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-          30% { transform: translateY(-5px); opacity: 1; }
-        }
-      `}</style>
-
-      {/* Elie's mood animation — fixed-height slot directly above the card */}
+    <>
+      <style>{SHEET_CSS}</style>
       <div
-        style={{
-          height: MOOD_SLOT_HEIGHT,
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "center",
-          marginBottom: 12,
-          position: "relative",
-          zIndex: 1,
-          pointerEvents: "none",
-          flexShrink: 0,
-        }}
-      >
-        <div key={mood} className="elie-modal-character">
-          <MoodArt
-            mood={mood}
-            size={MOOD_SIZE}
-            failed={failedMoods[mood]}
-            onFail={() => markFailed(mood)}
-          />
-        </div>
-      </div>
-
+        className="elie-backdrop"
+        data-expanded={expanded}
+        onClick={handleClose}
+        aria-hidden="true"
+      />
       <div
-        className={`elie-modal-card${closing ? " elie-modal-closing" : ""}`}
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          position: "relative",
-          background: "#fff",
-          borderRadius: 24,
-          padding: "2.25rem 2.25rem 2rem",
-          maxWidth: 720,
-          width: "100%",
-          height: CARD_HEIGHT,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-          color: "var(--color-text)",
-          flexShrink: 0,
-        }}
+        className="elie-sheet-wrap"
+        role="dialog"
+        aria-modal="true"
+        aria-label="About Sara"
+        style={{ bottom: start.bottom }}
       >
-        <button
-          onClick={handleClose}
-          aria-label="Close"
+        {/* Elie's mood animation — fixed-height slot directly above the sheet.
+            Mounted only once the sheet is opening so its drop-in plays then. */}
+        <div
           style={{
-            position: "absolute",
-            top: 14,
-            right: 18,
-            background: "none",
-            border: "none",
-            fontSize: 22,
-            lineHeight: 1,
-            cursor: "pointer",
-            color: "var(--color-text-muted)",
-            zIndex: 1,
+            height: MOOD_SLOT_HEIGHT,
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "center",
+            marginBottom: 12,
+            pointerEvents: "none",
+            flexShrink: 0,
           }}
         >
-          ×
-        </button>
+          {expanded && (
+            <div key={mood} className="elie-modal-character">
+              <MoodArt
+                mood={mood}
+                size={MOOD_SIZE}
+                failed={failedMoods[mood]}
+                onFail={() => markFailed(mood)}
+              />
+            </div>
+          )}
+        </div>
 
-        {inChat ? chatView : aboutView}
+        <div
+          ref={sheetRef}
+          className="elie-sheet"
+          data-expanded={expanded}
+          style={
+            expanded
+              ? { width: PANEL_WIDTH, height: CARD_HEIGHT, borderRadius: 24 }
+              : { width: start.w, height: start.h, borderRadius: start.h / 2 }
+          }
+        >
+          <div className="elie-sheet-inner">
+            <div
+              className="elie-handle"
+              onPointerDown={onHandleDown}
+              onPointerMove={onHandleMove}
+              onPointerUp={onHandleUp}
+              onPointerCancel={onHandleUp}
+              aria-hidden="true"
+            >
+              <span />
+            </div>
 
-        <form onSubmit={askCustom} style={{ position: "relative", flexShrink: 0 }}>
-          <input
-            type="text"
-            value={customQuestion}
-            onChange={(e) => setCustomQuestion(e.target.value)}
-            placeholder="Ask me about Sara"
-            disabled={loading}
-            aria-label="Ask a question about Sara"
-            style={{
-              width: "100%",
-              padding: "20px 60px 20px 20px",
-              borderRadius: 16,
-              border: "1px solid #9A9A9A",
-              fontSize: 18,
-              color: "var(--color-text)",
-              background: "#fff",
-              outline: "none",
-            }}
-          />
-          <button
-            type="submit"
-            aria-label="Send question"
-            disabled={loading || !customQuestion.trim()}
-            style={{
-              position: "absolute",
-              right: 16,
-              top: "50%",
-              transform: "translateY(-50%)",
-              background: "none",
-              border: "none",
-              padding: 6,
-              display: "flex",
-              cursor: loading || !customQuestion.trim() ? "default" : "pointer",
-              color: customQuestion.trim()
-                ? "var(--color-brand-orange)"
-                : "var(--color-text-muted)",
-              transition: "color 0.2s ease",
-            }}
-          >
-            <SendIcon />
-          </button>
-        </form>
+            <button
+              onClick={handleClose}
+              aria-label="Close"
+              style={{
+                position: "absolute",
+                top: 14,
+                right: 18,
+                background: "none",
+                border: "none",
+                fontSize: 22,
+                lineHeight: 1,
+                cursor: "pointer",
+                color: "var(--color-text-muted)",
+                zIndex: 3,
+              }}
+            >
+              ×
+            </button>
+
+            {inChat ? chatView : aboutView}
+
+            <form onSubmit={askCustom} style={{ position: "relative", flexShrink: 0 }}>
+              <input
+                ref={inputRef}
+                type="text"
+                value={customQuestion}
+                onChange={(e) => setCustomQuestion(e.target.value)}
+                placeholder="Ask me about Sara"
+                disabled={loading}
+                aria-label="Ask a question about Sara"
+                style={{
+                  width: "100%",
+                  padding: "20px 60px 20px 20px",
+                  borderRadius: 16,
+                  border: "1px solid #9A9A9A",
+                  fontSize: 18,
+                  color: "var(--color-text)",
+                  background: "#fff",
+                  outline: "none",
+                }}
+              />
+              <button
+                type="submit"
+                aria-label="Send question"
+                disabled={loading || !customQuestion.trim()}
+                style={{
+                  position: "absolute",
+                  right: 16,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  padding: 6,
+                  display: "flex",
+                  cursor: loading || !customQuestion.trim() ? "default" : "pointer",
+                  color: customQuestion.trim()
+                    ? "var(--color-brand-orange)"
+                    : "var(--color-text-muted)",
+                  transition: "color 0.2s ease",
+                }}
+              >
+                <SendIcon />
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 
   return (
@@ -743,8 +897,7 @@ export default function Elie() {
           flexDirection: "column",
           alignItems: "center",
           opacity: open ? 0 : 1,
-          transform: open ? "translateY(-10px) scale(0.7)" : "translateY(0) scale(1)",
-          transition: "opacity 0.3s ease, transform 0.3s ease",
+          transition: "opacity 0.2s ease",
           pointerEvents: open ? "none" : "auto",
         }}
       >

@@ -30,19 +30,19 @@ export default function Home() {
   ];
 
   return (
-    <main style={{ padding: "0 clamp(1rem, 3vw, 3rem) 3rem" }}>
+    <main style={{ padding: "0 3rem 3rem" }}>
       {/* Portrait removed — it now lives in Elie's "About" modal instead of
           next to this paragraph (see Elie.tsx's ProfileCircle, which reads
           from /media/elie/sara-profile.webp). This is a single-column block
           now, no more flex row / FrostedReveal here. */}
-      <div style={{ marginBottom: "2rem" }}>
+      <div className="home-hero">
         <h1 className="home-intro-heading">
-          Product designer — thinking in systems, designing for connection and fun!
+          Product designer — designing for connection and fun!
         </h1>
         <p className="home-intro">
-          Welcome to my digital archive filled with projects and explorations. I think in systems and design and ship products that connect people and businesses through fun and engaging experiences. 
-          
-          Some of what's archived here is shipped and in use (like a tailor shop's work-order system) or in beta. The rest are the result of curiosity and exploration. Browse at your own pace! 
+          Welcome to my digital archive, a place for projects and explorations. I design products and then build them, working across web and product to connect people and meet business goals.
+
+          Some of what's archived here is shipped and in use (like a tailor shop's work-order system) or in beta. The rest are the result of curiosity and exploration. Browse at your own pace! The weather's fine.
         </p>
       </div>
       <HomeGrid items={items} />

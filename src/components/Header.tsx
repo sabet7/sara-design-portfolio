@@ -35,6 +35,33 @@ function getAvailabilityLabel(now: Date, short = false): string {
   return `Available ${month} ${year}`;
 }
 
+// Time-aware greeting, based on the hour in New York (same zone as the clock
+// on the right). Each entry is [first hour it applies, text]; the last entry
+// whose hour is <= the current hour wins. Edit the words or the hours here.
+const GREETINGS: [number, string][] = [
+  [0, "Hello"],
+  [5, "Good morning"],
+  [12, "Good afternoon"],
+  [17, "Good evening"],
+  [22, "Hello"],
+];
+
+function getGreeting(now: Date): string {
+  const hour = parseInt(
+    new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      hourCycle: "h23",
+      timeZone: "America/New_York",
+    }).format(now),
+    10
+  );
+  let text = GREETINGS[0][1];
+  for (const [from, label] of GREETINGS) {
+    if (hour >= from) text = label;
+  }
+  return text;
+}
+
 // Weather icons live in /public/media/weather/. Each condition lists the file
 // names it will accept, in order (lowercase hyphenated names first, then
 // other spellings), as .png or .webp. If a condition's own icon is missing,
@@ -148,7 +175,7 @@ function WeatherIconImage({ candidates }: { candidates: string[] }) {
 // A phone is ~360px wide and 11px text gives ~32 characters-widths per line,
 // while the header's content is ~70 wide, so phones always reach step 4.
 const REF_FONT_PX = 16;
-const MAX_FONT_PX = 16;
+const MAX_FONT_PX = 14;
 const MIN_FONT_PX = 11;
 
 // At or below this width the header is just "SV" + Connect. Connect opens a
@@ -162,7 +189,7 @@ const HEADER_CSS = `
   box-sizing: border-box;
   width: 100%;
   padding: 0.9em var(--sdv-gutter);
-  font-size: clamp(9px, 0.95vw, 16px);
+  font-size: clamp(9px, 0.82vw, 14px);
   font-weight: 500;
   line-height: 1.2;
   white-space: nowrap;
@@ -188,6 +215,9 @@ const HEADER_CSS = `
   gap: 1.5em;
 }
 .sdv-hdr-name { font-weight: 700; }
+.sdv-hdr-id { display: flex; align-items: baseline; gap: 0.35em; }
+.sdv-greet { font-weight: 400; opacity: 0.55; }
+.sdv-hdr:not([data-compact="0"]) .sdv-greet { display: none; }
 .sdv-name-sv { display: none; }
 .sdv-connect-desktop { display: contents; }
 .sdv-connect-mobile {
@@ -238,7 +268,7 @@ const HEADER_CSS = `
 
 /* Stacked layout — only used when one line can't fit at 11px or larger.
    Each group is its own row: brand, nav, then date/time. */
-.sdv-hdr[data-mode="stack"] { font-size: clamp(11px, 3.3vw, 14px); }
+.sdv-hdr[data-mode="stack"] { font-size: clamp(11px, 3vw, 13px); }
 .sdv-hdr[data-mode="stack"] .sdv-hdr-items {
   flex-wrap: wrap;
   row-gap: 0.8em;
@@ -260,8 +290,9 @@ const HEADER_CSS = `
 
 /* Mobile: only "SV" and the Connect button, always on one line. */
 @media (max-width: 767px) {
-  .sdv-hdr { font-size: clamp(14px, 4vw, 16px) !important; }
+  .sdv-hdr { font-size: clamp(13px, 3.6vw, 15px) !important; }
   .sdv-hdr .sdv-hdr-items { align-items: center; flex-wrap: nowrap; }
+  .sdv-hdr .sdv-greet,
   .sdv-hdr .sdv-hdr-avail,
   .sdv-hdr .sdv-hdr-datetime,
   .sdv-hdr .sdv-hdr-nav-link,
@@ -477,12 +508,15 @@ export default function Header() {
       <header className="sdv-hdr" ref={headerRef} data-mode="line" data-compact="0">
         <div className="sdv-hdr-items" ref={itemsRef}>
           <div className="sdv-hdr-brand">
-            <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
-              <strong className="sdv-hdr-name">
-                <span className="sdv-name-full">Sara Del Villar</span>
-                <span className="sdv-name-sv">SV</span>
-              </strong>
-            </Link>
+            <div className="sdv-hdr-id">
+              {now && <span className="sdv-greet">{getGreeting(now)}, I&apos;m</span>}
+              <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
+                <strong className="sdv-hdr-name">
+                  <span className="sdv-name-full">Sara Del Villar</span>
+                  <span className="sdv-name-sv">SV</span>
+                </strong>
+              </Link>
+            </div>
 
             <div className="sdv-hdr-avail">
               <span
@@ -504,7 +538,7 @@ export default function Header() {
             </a>
             {/* Desktop/tablet: the normal mailto: button. */}
             <span className="sdv-connect-desktop">
-              <Button href="mailto:sedelvillar104@gmail.com" fontSize={14}>
+              <Button href="mailto:sedelvillar104@gmail.com" fontSize={13}>
                 Connect
               </Button>
             </span>
