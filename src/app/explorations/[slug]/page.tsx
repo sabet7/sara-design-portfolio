@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MDXRemote } from "next-mdx-remote/rsc";
 import { getAllExplorations, getExplorationBySlug } from "@/lib/content";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
+import ExplorationDetail from "@/components/ExplorationDetail";
 
 export function generateStaticParams() {
   return getAllExplorations().map((ex) => ({ slug: ex.frontmatter.slug }));
@@ -88,28 +89,20 @@ export default async function ExplorationPage({
       };
 
   return (
-    <main style={{ padding: "3rem", fontFamily: "sans-serif" }}>
-      {jsonLd && (
-        // eslint-disable-next-line react/no-danger
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      )}
-      <p style={{ opacity: 0.6 }}>
-        {frontmatter.explorationYear} · {frontmatter.category}
-      </p>
-      <h1>{frontmatter.name}</h1>
-      <p>{frontmatter.oneLiner}</p>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={frontmatter.mainImage}
-        alt={frontmatter.name}
-        style={{ maxWidth: "100%" }}
-      />
-      <article>
-        <MDXRemote source={content} />
-      </article>
-    </main>
+    <div className="detail-overlay">
+      <div className="detail-card">
+        <Link href="/" className="detail-close" aria-label="Close">
+          ×
+        </Link>
+        {jsonLd && (
+          // eslint-disable-next-line react/no-danger
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
+        <ExplorationDetail frontmatter={frontmatter} content={content} />
+      </div>
+    </div>
   );
 }

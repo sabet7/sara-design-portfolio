@@ -168,10 +168,6 @@ const HEADER_CSS = `
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-/* Mobile: the Services block is hidden to free up room. */
-@media (max-width: 640px) {
-  .sdv-hdr .sdv-hdr-services { display: none; }
-}
 .sdv-hdr[data-compact="0"] .sdv-short { display: none; }
 .sdv-hdr:not([data-compact="0"]) .sdv-full { display: none; }
 .sdv-hdr[data-compact="2"] .sdv-wk { display: none; }
@@ -213,14 +209,12 @@ const HEADER_CSS = `
   border-radius: 50%;
   flex-shrink: 0;
 }
-.sdv-hdr-services { display: flex; flex-direction: column; }
-.sdv-hdr-services-item { color: #777777; font-size: 0.87em; line-height: 1.4; }
 .sdv-hdr-nav {
   display: flex;
   align-items: center;
   gap: 1em;
   /* Pulls the taller Connect button up so Resume/Github/LinkedIn sit on the
-     same line as "Services" and the name. */
+     same line as the name. */
   margin-top: -0.55em;
 }
 .sdv-hdr-nav a { color: inherit; text-decoration: none; }
@@ -243,7 +237,7 @@ const HEADER_CSS = `
 }
 
 /* Stacked layout — only used when one line can't fit at 11px or larger.
-   Each group is its own row: brand, nav, then services + date/time. */
+   Each group is its own row: brand, nav, then date/time. */
 .sdv-hdr[data-mode="stack"] { font-size: clamp(11px, 3.3vw, 14px); }
 .sdv-hdr[data-mode="stack"] .sdv-hdr-items {
   flex-wrap: wrap;
@@ -262,15 +256,13 @@ const HEADER_CSS = `
   justify-content: space-between;
   margin-top: 0;
 }
-.sdv-hdr[data-mode="stack"] .sdv-hdr-services { order: 3; }
-.sdv-hdr[data-mode="stack"] .sdv-hdr-datetime { order: 4; }
+.sdv-hdr[data-mode="stack"] .sdv-hdr-datetime { order: 3; }
 
 /* Mobile: only "SV" and the Connect button, always on one line. */
 @media (max-width: 767px) {
   .sdv-hdr { font-size: clamp(14px, 4vw, 16px) !important; }
   .sdv-hdr .sdv-hdr-items { align-items: center; flex-wrap: nowrap; }
   .sdv-hdr .sdv-hdr-avail,
-  .sdv-hdr .sdv-hdr-services,
   .sdv-hdr .sdv-hdr-datetime,
   .sdv-hdr .sdv-hdr-nav-link,
   .sdv-hdr .sdv-name-full,
@@ -504,13 +496,6 @@ export default function Header() {
               <span className="sdv-full">{now ? getAvailabilityLabel(now) : ""}</span>
               <span className="sdv-short">{now ? getAvailabilityLabel(now, true) : ""}</span>
             </div>
-          </div>
-
-          <div className="sdv-hdr-services">
-            <span>Services</span>
-            <span className="sdv-hdr-services-item">Product design</span>
-            <span className="sdv-hdr-services-item">Web design</span>
-            <span className="sdv-hdr-services-item">Interaction design</span>
           </div>
 
           <nav className="sdv-hdr-nav">
