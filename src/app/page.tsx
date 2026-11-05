@@ -24,6 +24,7 @@ export default function Home() {
       year: ex.frontmatter.explorationYear,
       types: [ex.frontmatter.category],
       thumbnailSrc: ex.frontmatter.mainImage,
+      gifSrc: ex.frontmatter.gifImage,
       variant: "exploration" as const,
       href: `/explorations/${ex.frontmatter.slug}`,
     })),

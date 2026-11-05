@@ -37,11 +37,11 @@ const MAX_TYPES_ON_CARD = 1;
 // (e.g. "Pixel Art") gets a neutral tag that follows the dimmer stage.
 const TAG_COLORS: Array<[string, string]> = [
   ["illustrat", "#F5D64A"],
-  ["ai", "#405AF6"],
-  ["product", "#4A9D39"],
+  ["ai", "#6c82fd"],
+  ["product", "#4ea83c"],
   ["web", "#E94AA8"],
   ["app", "#529FF8"],
-  ["brand", "#A559F6"],
+  ["brand", "#b977ff"],
 ];
 
 function tagStyle(type: string): React.CSSProperties {
@@ -123,6 +123,8 @@ export default function ProjectCard({
   }
 
   function handleMouseEnter() {
+    // Every card gets the hover state (brightness, title underline, "View
+    // more" pill). The GIF only swaps in when gifSrc exists (see showGif).
     setHovering(true);
     restart(underlineRef.current);
   }
@@ -303,7 +305,11 @@ export default function ProjectCard({
       <div style={{ position: "relative" }}>
         <div
           className="project-card-media"
-          style={{ "--accent": ACCENT[variant] } as React.CSSProperties}
+          style={
+            {
+              "--accent": ACCENT[variant],
+            } as React.CSSProperties
+          }
         >
           <div className="project-card-placeholder">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">

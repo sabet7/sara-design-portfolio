@@ -101,6 +101,9 @@ export const ExplorationFrontmatterSchema = z.object({
   clientLogo: z.string().optional(),
   color: z.string().optional(),
   mainImage: z.string().min(1, "mainImage is required"),
+  // Optional. A GIF or image shown on the card while hovering. Leave it out
+  // and the card just keeps showing mainImage.
+  gifImage: z.string().optional(),
   video: z.string().url().optional(),
   images: z.array(z.string()).default([]),
   role: z.array(z.string()).default([]),
