@@ -31,6 +31,43 @@ const ACCENT: Record<ProjectCardProps["variant"], string> = {
 // frontmatter independently rather than through this component.
 const MAX_TYPES_ON_CARD = 1;
 
+// Colored tag for each project type. Matching is on the start of the type
+// text (lowercase), so "Illustration" and "Illustrations", or "Web design"
+// and "Web Design", get the same color. A type that isn't listed here
+// (e.g. "Pixel Art") gets a neutral tag that follows the dimmer stage.
+const TAG_COLORS: Array<[string, string]> = [
+  ["illustrat", "#F5D64A"],
+  ["ai", "#405AF6"],
+  ["product", "#4A9D39"],
+  ["web", "#E94AA8"],
+  ["app", "#529FF8"],
+  ["brand", "#A559F6"],
+];
+
+function tagStyle(type: string): React.CSSProperties {
+  const key = type.trim().toLowerCase();
+  const match = TAG_COLORS.find(([prefix]) =>
+    prefix === "ai" ? key === "ai" || key.startsWith("ai ") : key.startsWith(prefix),
+  );
+  return {
+    display: "inline-flex",
+    alignItems: "center",
+    height: 20,
+    marginTop: -1,
+    padding: "0 9px",
+    borderRadius: 7,
+    fontSize: 12,
+    fontWeight: 500,
+    lineHeight: 1,
+    whiteSpace: "nowrap",
+    maxWidth: "100%",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    background: match ? match[1] : "rgb(var(--fg) / 0.12)",
+    color: match ? "#111111" : "rgb(var(--fg))",
+  };
+}
+
 export default function ProjectCard({
   slug,
   title,
@@ -46,10 +83,33 @@ export default function ProjectCard({
   const [hovering, setHovering] = useState(false);
   const [canHover, setCanHover] = useState(false);
   const underlineRef = useRef<HTMLImageElement | null>(null);
+  const titleRef = useRef<HTMLSpanElement | null>(null);
+  // Distance from the top of the text block to just under the last line of
+  // the title. The title row is a fixed 36px tall (two lines), so a
+  // one-line title would leave a gap if the underline were pinned to the
+  // bottom of the row. The height of the text itself is measured here so
+  // the line sits directly under however many lines the title actually
+  // uses, and re-measured when the card width changes the line count.
+  const [underlineTop, setUnderlineTop] = useState<number | null>(null);
 
   useEffect(() => {
     setCanHover(window.matchMedia("(hover: hover)").matches);
   }, []);
+
+  useEffect(() => {
+    const el = titleRef.current;
+    if (!el) return;
+    const measure = () => {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const textHeight = Math.min(range.getBoundingClientRect().height, el.offsetHeight);
+      setUnderlineTop(Math.round(textHeight) - 1);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [title]);
 
   const showGif = canHover && hovering && Boolean(gifSrc);
 
@@ -106,8 +166,9 @@ export default function ProjectCard({
           />
         )}
 
-        {/* Project information: auto-layout column, 3px between the two
-            rows. position:relative so the hand-drawn underline below can
+        {/* Project information: auto-layout column, 7px between the two
+            rows (was 3px: the extra room is where the hand-drawn underline
+            sits when the title uses both of its lines). position:relative so the hand-drawn underline below can
             anchor to the bottom of THIS block specifically, rather than
             the whole card. */}
         <div
@@ -115,7 +176,7 @@ export default function ProjectCard({
             position: "relative",
             display: "flex",
             flexDirection: "column",
-            gap: 3,
+            gap: 7,
             minWidth: 0,
             flex: "1 1 auto",
           }}
@@ -143,6 +204,7 @@ export default function ProjectCard({
             }}
           >
             <span
+              ref={titleRef}
               style={{
                 overflowWrap: "break-word",
                 minWidth: 0,
@@ -159,14 +221,17 @@ export default function ProjectCard({
               style={{
                 flexShrink: 0,
                 maxWidth: "45%",
-                textAlign: "right",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "flex-start",
+                gap: 6,
               }}
             >
-              {types.slice(0, MAX_TYPES_ON_CARD).join(" · ")}
+              {types.slice(0, MAX_TYPES_ON_CARD).map((type) => (
+                <span key={type} style={tagStyle(type)}>
+                  {type}
+                </span>
+              ))}
             </span>
           </div>
 
@@ -213,11 +278,10 @@ export default function ProjectCard({
               trick as the old circle: resetting the img's src forces the
               animated webp to replay its draw-in from frame one every
               time, instead of staying stuck on whatever frame it last
-              landed on. Sits in the existing 8px gap between this text
-              block and the thumbnail, so it never overlaps the title or
-              timeline text — nudge `bottom` on `.title-underline` in
-              globals.css if you'd rather it hug the title line itself
-              more tightly. */}
+              landed on. Positioned from the top of this block using the
+              measured title height (underlineTop above), so it sits
+              directly under the title's last line. To move it closer or
+              further, change the `- 1` in that measurement. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             ref={underlineRef}
@@ -225,6 +289,11 @@ export default function ProjectCard({
             alt=""
             aria-hidden="true"
             className={`title-underline${hovering ? " active" : ""}`}
+            style={
+              underlineTop === null
+                ? undefined
+                : { top: underlineTop, bottom: "auto" }
+            }
           />
         </div>
       </div>

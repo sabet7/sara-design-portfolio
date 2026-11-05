@@ -79,6 +79,10 @@ export default function DuolingoCharacter({
       setPlaying(false);
     }
     audio.addEventListener("ended", handleEnded);
+    function handleAudioError() {
+      console.error("Duolingo audio could not load. Check this file exists:", audioSrc);
+    }
+    audio.addEventListener("error", handleAudioError);
 
     const rive = new Rive({
       src: rivSrc,
@@ -96,14 +100,19 @@ export default function DuolingoCharacter({
         if (vismae) {
           vismae.value = 0;
           visemeInputRef.current = vismae;
-          setReady(true);
+        } else {
+          console.warn(
+            `Rive input "${VISEME_INPUT}" not found. Audio will play, but the mouth won't move.`,
+          );
         }
+        setReady(true);
       },
       onLoadError: (e) => console.error("Rive load error:", e),
     });
 
     return () => {
       audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("error", handleAudioError);
       audio.pause();
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rive.cleanup();
@@ -137,10 +146,16 @@ export default function DuolingoCharacter({
       setVismae(0);
       setPlaying(false);
     } else {
-      audio.play();
       lipIdxRef.current = 0;
       setPlaying(true);
-      syncLoop();
+      audio
+        .play()
+        .then(() => syncLoop())
+        .catch((err) => {
+          console.error("Duolingo audio could not play:", audioSrc, err);
+          setVismae(0);
+          setPlaying(false);
+        });
     }
   }
 

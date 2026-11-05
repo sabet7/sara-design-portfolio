@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 // Replaces the normal cursor with a small orange dot.
 // Over a project card the dot is replaced by an orange "View more" pill with
@@ -95,7 +95,6 @@ export default function CursorFollower() {
   const curRef = useRef<HTMLDivElement | null>(null);
   const textRef = useRef<HTMLSpanElement | null>(null);
   const iconRef = useRef<HTMLImageElement | null>(null);
-  const [iconOk, setIconOk] = useState(true);
 
   useEffect(() => {
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
@@ -111,6 +110,9 @@ export default function CursorFollower() {
     function restartIcon() {
       const img = iconRef.current;
       if (!img) return;
+      // Shown again on every appearance, so a file added after the page
+      // loaded is picked up without a full reload.
+      img.style.display = "";
       img.src = "";
       requestAnimationFrame(() => {
         img.src = ICON_SRC;
@@ -181,17 +183,22 @@ export default function CursorFollower() {
       <div className="sdv-cur" ref={curRef} aria-hidden="true">
         <div className="sdv-cur-dot" />
         <div className="sdv-cur-pill">
-          {iconOk && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              ref={iconRef}
-              className="sdv-cur-icon"
-              src={ICON_SRC}
-              alt=""
-              draggable={false}
-              onError={() => setIconOk(false)}
-            />
-          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            ref={iconRef}
+            className="sdv-cur-icon"
+            src={ICON_SRC}
+            alt=""
+            draggable={false}
+            onLoad={(e) => {
+              e.currentTarget.style.display = "";
+            }}
+            onError={(e) => {
+              // Ignore the error the browser fires for the empty src used to
+              // restart the animation; hide the icon only if the file is missing.
+              if (e.currentTarget.getAttribute("src")) e.currentTarget.style.display = "none";
+            }}
+          />
           <span ref={textRef}>View more</span>
         </div>
       </div>
