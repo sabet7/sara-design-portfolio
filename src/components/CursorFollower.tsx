@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Replaces the normal cursor with a small orange dot.
-// Over a project card the dot grows into an orange "View" bubble. To show
-// the bubble on anything else, add data-cursor="Label" to that element.
+// Over a project card the dot is replaced by an orange "View more" pill with
+// an animated icon on its left (public/media/cursor/view-icon.webp). If that
+// file doesn't exist yet, the pill shows just the text. To show the pill on
+// anything else, add data-cursor="Label" to that element.
 // The normal cursor stays over text fields, the doodle canvas and the Elie
 // drag handle. Not used on touch screens.
+
+const ICON_SRC = "/media/cursor/view-icon.webp";
+const PILL_COLOR = "var(--color-brand-orange, #f65009)";
 
 const CSS = `
 html[data-sdv-cursor] body,
@@ -30,29 +35,57 @@ html[data-sdv-cursor] [style*="cursor: pointer"] {
 }
 .sdv-cur[data-show="true"] { opacity: 1; }
 .sdv-cur[data-hidden="true"] { opacity: 0; }
-.sdv-cur-in {
+
+.sdv-cur-dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: var(--color-brand-orange, #f65009);
+  transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.15s ease;
+}
+.sdv-cur[data-label="true"] .sdv-cur-dot { transform: scale(0); opacity: 0; }
+
+.sdv-cur-pill {
+  position: absolute;
+  top: 0;
+  left: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 76px;
-  height: 76px;
-  margin: -38px 0 0 -38px;
-  border-radius: 50%;
-  background: var(--color-brand-orange, #e8581c);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-  transform: scale(0.158); /* 12px dot */
-  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-}
-.sdv-cur-text {
+  gap: 10px;
+  width: max-content;
+  height: 37px;
+  padding: 0 14px 0 12px;
+  border-radius: 999px;
+  background: ${PILL_COLOR};
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translate(-50%, -50%) scale(0.3);
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.15s ease;
 }
-.sdv-cur[data-label="true"] .sdv-cur-in { transform: scale(1); }
-.sdv-cur[data-label="true"] .sdv-cur-text { opacity: 1; transition: opacity 0.2s ease 0.12s; }
-.sdv-cur[data-label="true"][data-down="true"] .sdv-cur-in { transform: scale(0.9); }
+.sdv-cur[data-label="true"] .sdv-cur-pill {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+.sdv-cur[data-label="true"][data-down="true"] .sdv-cur-pill {
+  transform: translate(-50%, -50%) scale(0.94);
+}
+.sdv-cur-icon {
+  display: block;
+  width: auto;
+  height: 22px;
+  flex-shrink: 0;
+}
+.sdv-cur-pill span {
+  flex-shrink: 0;
+}
 `;
 
 const NATIVE = 'input, textarea, select, [contenteditable="true"], canvas, .elie-handle';
@@ -61,6 +94,8 @@ const CARD = '.project-card-media, a[href^="/case-studies/"], a[href^="/explorat
 export default function CursorFollower() {
   const curRef = useRef<HTMLDivElement | null>(null);
   const textRef = useRef<HTMLSpanElement | null>(null);
+  const iconRef = useRef<HTMLImageElement | null>(null);
+  const [iconOk, setIconOk] = useState(true);
 
   useEffect(() => {
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
@@ -69,9 +104,29 @@ export default function CursorFollower() {
     if (!cur || !text) return;
     const root = document.documentElement;
     let started = false;
+    let labelOn = false;
+
+    // Restarts the animated icon from its first frame each time the pill
+    // appears (same trick as the title underline on project cards).
+    function restartIcon() {
+      const img = iconRef.current;
+      if (!img) return;
+      img.src = "";
+      requestAnimationFrame(() => {
+        img.src = ICON_SRC;
+      });
+    }
+
+    function setLabel(on: boolean, label?: string) {
+      if (on && label !== undefined && text) text.textContent = label;
+      if (on === labelOn) return;
+      labelOn = on;
+      cur?.setAttribute("data-label", on ? "true" : "false");
+      if (on) restartIcon();
+    }
 
     function onMove(e: MouseEvent) {
-      if (!cur || !text) return;
+      if (!cur) return;
       if (!started) {
         started = true;
         root.setAttribute("data-sdv-cursor", "");
@@ -85,13 +140,11 @@ export default function CursorFollower() {
 
       const labelled = target.closest("[data-cursor]");
       if (labelled) {
-        text.textContent = labelled.getAttribute("data-cursor") || "View";
-        cur.setAttribute("data-label", "true");
+        setLabel(true, labelled.getAttribute("data-cursor") || "View more");
       } else if (target.closest(CARD)) {
-        text.textContent = "View";
-        cur.setAttribute("data-label", "true");
+        setLabel(true, "View more");
       } else {
-        cur.setAttribute("data-label", "false");
+        setLabel(false);
       }
     }
     function onDown() {
@@ -126,10 +179,20 @@ export default function CursorFollower() {
     <>
       <style>{CSS}</style>
       <div className="sdv-cur" ref={curRef} aria-hidden="true">
-        <div className="sdv-cur-in">
-          <span className="sdv-cur-text" ref={textRef}>
-            View
-          </span>
+        <div className="sdv-cur-dot" />
+        <div className="sdv-cur-pill">
+          {iconOk && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              ref={iconRef}
+              className="sdv-cur-icon"
+              src={ICON_SRC}
+              alt=""
+              draggable={false}
+              onError={() => setIconOk(false)}
+            />
+          )}
+          <span ref={textRef}>View more</span>
         </div>
       </div>
     </>
