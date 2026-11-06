@@ -25,6 +25,12 @@ const mdxComponents = {
   p: (props: ComponentProps<"p">) => <p className="exploration-text" {...props} />,
 };
 
+// Files ending in .mp4 / .webm / .mov in `images` play as muted, looping
+// videos instead of showing as images.
+function isVideo(src: string) {
+  return /\.(mp4|webm|mov)(\?.*)?$/i.test(src);
+}
+
 function BulletSection({ title, items }: { title: string; items: string[] }) {
   if (items.length === 0) return null;
   return (
@@ -51,6 +57,23 @@ export default function ExplorationDetail({
     frontmatter.mainImage,
     ...frontmatter.images.filter((src) => src !== frontmatter.mainImage),
   ].filter(Boolean);
+
+  // Images keep the mosaic. A video is shown full width at its own shape
+  // (never cropped), in the same order as the `images` list.
+  type Segment =
+    | { kind: "images"; items: { src: string; i: number }[] }
+    | { kind: "video"; src: string };
+  const segments: Segment[] = [];
+  gallery.forEach((src, i) => {
+    if (isVideo(src)) {
+      segments.push({ kind: "video", src });
+      return;
+    }
+    const last = segments[segments.length - 1];
+    if (last && last.kind === "images") last.items.push({ src, i });
+    else segments.push({ kind: "images", items: [{ src, i }] });
+  });
+  const hasVideo = segments.some((seg) => seg.kind === "video");
 
   const meta = [
     frontmatter.role.length > 0 ? frontmatter.role.join(", ") : null,
@@ -85,16 +108,34 @@ export default function ExplorationDetail({
         <BulletSection title="Learnings" items={frontmatter.learnings} />
       </div>
 
-      <div className="exploration-mosaic" data-count={Math.min(gallery.length, 8)}>
-        {gallery.map((src, i) =>
-          i === 0 ? (
-            <ViewTransition key={src} name={`project-media-${frontmatter.slug}`}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt={frontmatter.name} />
-            </ViewTransition>
+      <div className="exploration-media" data-has-video={hasVideo ? "true" : undefined}>
+        {segments.map((seg, n) =>
+          seg.kind === "video" ? (
+            <video
+              key={`${seg.src}-${n}`}
+              className="exploration-video"
+              src={seg.src}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              aria-label={`${frontmatter.name}, video`}
+            />
           ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img key={src} src={src} alt={`${frontmatter.name}, image ${i + 1}`} loading="lazy" />
+            <div key={n} className="exploration-mosaic" data-count={Math.min(seg.items.length, 8)}>
+              {seg.items.map(({ src, i }) =>
+                i === 0 ? (
+                  <ViewTransition key={src} name={`project-media-${frontmatter.slug}`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt={frontmatter.name} />
+                  </ViewTransition>
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={src} src={src} alt={`${frontmatter.name}, image ${i + 1}`} loading="lazy" />
+                )
+              )}
+            </div>
           )
         )}
       </div>
