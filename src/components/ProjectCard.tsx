@@ -13,9 +13,8 @@ interface ProjectCardProps {
   gifSrc?: string;
   variant: "case-study" | "exploration";
   featured?: boolean;
-  /** Not yet wired from CardData/frontmatter — pass it through once that
-   *  field exists. Row still renders correctly (just without a second
-   *  line) if this is left undefined. */
+  /** No longer shown on the card (it still appears in the project modal).
+   *  Kept as an optional prop so HomeGrid can keep passing it. */
   timeline?: string;
   onClick?: () => void;
 }
@@ -31,31 +30,16 @@ const ACCENT: Record<ProjectCardProps["variant"], string> = {
 // frontmatter independently rather than through this component.
 const MAX_TYPES_ON_CARD = 1;
 
-// Colored tag for each project type. Matching is on the start of the type
-// text (lowercase), so "Illustration" and "Illustrations", or "Web design"
-// and "Web Design", get the same color. A type that isn't listed here
-// (e.g. "Pixel Art") gets a neutral tag that follows the dimmer stage.
-const TAG_COLORS: Array<[string, string]> = [
-  ["illustrat", "#F5D64A"],
-  ["ai", "#6c82fd"],
-  ["product", "#4ea83c"],
-  ["web", "#E94AA8"],
-  ["app", "#529FF8"],
-  ["brand", "#b977ff"],
-];
-
-function tagStyle(type: string): React.CSSProperties {
-  const key = type.trim().toLowerCase();
-  const match = TAG_COLORS.find(([prefix]) =>
-    prefix === "ai" ? key === "ai" || key.startsWith("ai ") : key.startsWith(prefix),
-  );
+// Tag for a project type: a plain outlined pill, no colors. It uses the
+// muted gray (#777777), so it stays readable at every dimmer position.
+function tagStyle(): React.CSSProperties {
   return {
     display: "inline-flex",
     alignItems: "center",
-    height: 20,
-    marginTop: -1,
-    padding: "0 9px",
-    borderRadius: 7,
+    height: 22,
+    padding: "0 10px",
+    borderRadius: 8,
+    border: "1px solid rgb(var(--fg-muted))",
     fontSize: 12,
     fontWeight: 500,
     lineHeight: 1,
@@ -63,8 +47,8 @@ function tagStyle(type: string): React.CSSProperties {
     maxWidth: "100%",
     overflow: "hidden",
     textOverflow: "ellipsis",
-    background: match ? match[1] : "rgb(var(--fg) / 0.12)",
-    color: match ? "#111111" : "rgb(var(--fg))",
+    background: "transparent",
+    color: "rgb(var(--fg-muted))",
   };
 }
 
@@ -77,7 +61,6 @@ export default function ProjectCard({
   gifSrc,
   variant,
   featured,
-  timeline,
   onClick,
 }: ProjectCardProps) {
   const [hovering, setHovering] = useState(false);
@@ -85,7 +68,8 @@ export default function ProjectCard({
   const underlineRef = useRef<HTMLImageElement | null>(null);
   const titleRef = useRef<HTMLSpanElement | null>(null);
   // Distance from the top of the text block to just under the last line of
-  // the title. The title row is a fixed 36px tall (two lines), so a
+  // the title (the tag/year row above it is included via offsetTop). The
+  // title row is a fixed 36px tall (two lines), so a
   // one-line title would leave a gap if the underline were pinned to the
   // bottom of the row. The height of the text itself is measured here so
   // the line sits directly under however many lines the title actually
@@ -103,7 +87,7 @@ export default function ProjectCard({
       const range = document.createRange();
       range.selectNodeContents(el);
       const textHeight = Math.min(range.getBoundingClientRect().height, el.offsetHeight);
-      setUnderlineTop(Math.round(textHeight) - 1);
+      setUnderlineTop(el.offsetTop + Math.round(textHeight) - 1);
     };
     measure();
     const ro = new ResizeObserver(measure);
@@ -141,15 +125,17 @@ export default function ProjectCard({
       style={{ cursor: onClick ? "pointer" : undefined, position: "relative" }}
     >
       {/* Outer horizontal wrapper: featured dot (21x21) on the left, project
-          info (title/type + timeline/year) filling the rest. Dot is centered
-          against the full height of the two-row text stack. */}
+          info (type + year, then title) filling the rest. Dot is centered
+          against the full height of the text stack. */}
       <div
         style={{
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
           gap: 12,
-          marginBottom: 8,
+          // 16px (was 8) so the hand-drawn underline, which hangs about 12px
+          // below the title, clears the image.
+          marginBottom: 16,
         }}
       >
         {featured && (
@@ -183,22 +169,47 @@ export default function ProjectCard({
             flex: "1 1 auto",
           }}
         >
-          {/* Title / Type row — Medium 15px (was 18px: next to the intro
-              paragraph's clamp(14px,1.1vw,20px) and the header's 18px
-              baseline, 18px-bold titles across a whole grid of cards read
-              noticeably heavier than everything around them). Fixed height
-              + 2-line clamp on both sides: titles vary a lot in length
-              ("Nurtur" vs a full sentence), and without this every card's
-              header ends up a different height, which pushes each card's
-              image down by a different amount and breaks the grid's row
-              alignment. Clamping guarantees this row is always exactly the
-              same height, whether the title is one word or four lines'
-              worth. */}
+          {/* Top row: project type tag on the left, year on the right. It
+              sits above the title so the hand-drawn underline can sit
+              directly beneath the title with nothing in between. Fixed
+              height (the tag's own 22px) so every card's header is the same
+              height and the image row stays aligned across the grid. */}
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
+              alignItems: "center",
               gap: 12,
+              height: 22,
+            }}
+          >
+            {types.slice(0, MAX_TYPES_ON_CARD).map((type) => (
+              <span key={type} style={tagStyle()}>
+                {type}
+              </span>
+            ))}
+            <span
+              style={{
+                marginLeft: "auto",
+                flexShrink: 0,
+                whiteSpace: "nowrap",
+                fontWeight: 300,
+                fontSize: 12,
+                lineHeight: 1.2,
+                opacity: 0.6,
+              }}
+            >
+              {year}
+            </span>
+          </div>
+
+          {/* Title: Medium 15px. Fixed height + 2-line clamp, same as before:
+              titles vary a lot in length, and without this every card's header
+              ends up a different height, which pushes each card's image down
+              by a different amount and breaks the grid's row alignment. */}
+          <div
+            style={{
+              display: "flex",
               fontWeight: 500,
               fontSize: 15,
               lineHeight: 1.2,
@@ -219,58 +230,6 @@ export default function ProjectCard({
             >
               {title}
             </span>
-            <span
-              style={{
-                flexShrink: 0,
-                maxWidth: "45%",
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "flex-start",
-                gap: 6,
-              }}
-            >
-              {types.slice(0, MAX_TYPES_ON_CARD).map((type) => (
-                <span key={type} style={tagStyle(type)}>
-                  {type}
-                </span>
-              ))}
-            </span>
-          </div>
-
-          {/* Timeline / Year row — Light 12px (was 16px, for the same
-              reason as the title above — this scales down with it so the
-              two rows keep their relative weight to each other). Same
-              fixed-height + clamp treatment, but single-line: timeline/year
-              text is always short, so a 1-line cap is enough. Timeline only
-              exists for case studies (concepts/explorations never have
-              one), so it's gated on `variant` rather than just truthiness —
-              but the row itself always renders at the same fixed height so
-              the layout never shifts between card types, and Year always
-              sits on the right. */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 12,
-              fontWeight: 300,
-              fontSize: 12,
-              lineHeight: 1.2,
-              height: 15, // 1 line * 12px * 1.2 line-height, rounded up
-              opacity: 0.6,
-            }}
-          >
-            <span
-              style={{
-                minWidth: 0,
-                flex: "1 1 auto",
-                whiteSpace: "nowrap",
-                textOverflow: "ellipsis",
-                overflow: "hidden",
-              }}
-            >
-              {variant === "case-study" ? timeline : null}
-            </span>
-            <span style={{ flexShrink: 0, whiteSpace: "nowrap" }}>{year}</span>
           </div>
 
           {/* Hand-drawn underline reveal — replaces the circle hover cue

@@ -1,8 +1,32 @@
 @import "tailwindcss";
 
+/* Site palette. One set of blacks, grays and whites for the whole site. */
 :root {
-  --background: #FFFCF6;
-  --foreground: #201F1C;
+  --background: #FCFDFF;
+  --foreground: #1F160F;
+
+  --color-cool-white: #FCFDFF;
+  --color-black: #1F160F;
+  --color-gray-dark: #777777;
+  --color-gray-light: #A8A8A8;
+  /* Light gray for placeholder fills, bubbles and image backgrounds. It is
+     --color-gray-light at low strength, so it stays inside the palette. */
+  --color-gray-soft: rgba(168, 168, 168, 0.2);
+
+  --color-brand-orange: #F65009;
+  --color-brand-blue: #7DC4FF;
+  --color-brand-yellow: #FFEF86;
+  --color-brand-purple: #D163FD;
+
+  --color-text: #1F160F;
+  --color-text-muted: #777777;
+  --color-text-light-muted: #A8A8A8;
+  --color-featured: #F65009;
+
+  /* Used until the dimmer loads (same values as the light stage below). */
+  --bg: 252 253 255;
+  --fg: 31 22 15;
+  --fg-muted: 119 119 119;
 }
 
 @theme inline {
@@ -19,30 +43,15 @@
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-clash-grotesk), var(--font-space-grotesk), sans-serif;
-}
-
-:root {
-  --color-text: #191D25;
-  --color-text-muted: #717171;
-  --color-text-light-muted: #898989;
-  --color-brand-orange: #f65009;
-  --color-brand-blue: #63c6ff;
-  --color-featured: #f65009;
-}
-
 :root[data-dimmer-stage="light"] {
-  --bg: 255 255 255;
-  --fg: 25 29 37;
-  --fg-muted: 113 113 113;
+  --bg: 252 253 255;
+  --fg: 31 22 15;
+  --fg-muted: 119 119 119;
 }
 :root[data-dimmer-stage="warm"] {
   --bg: 250 244 235;
-  --fg: 30 26 20;
-  --fg-muted: 120 110 95;
+  --fg: 31 22 15;
+  --fg-muted: 119 119 119;
 }
 :root[data-dimmer-stage="dusk"] {
   --bg: 87 87 87;
@@ -63,6 +72,7 @@ body {
 body {
   background: rgb(var(--bg));
   color: rgb(var(--fg));
+  font-family: var(--font-clash-grotesk), var(--font-space-grotesk), sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -79,7 +89,7 @@ body {
 .project-card-media {
   position: relative;
   aspect-ratio: 4 / 3;
-  background: #ddd;
+  background: var(--color-gray-soft);
   border-radius: 4px;
   overflow: hidden;
   border: 2px solid transparent;
@@ -176,9 +186,9 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  color: #b8b0a0;
+  color: var(--color-gray-light);
   font-size: 11px;
-  background: #efebe0;
+  background: var(--color-gray-soft);
 }
 
 .project-card-placeholder::after {
@@ -188,9 +198,9 @@ body {
   transform: translateX(-100%);
   background: linear-gradient(
     90deg,
-    rgba(239, 235, 224, 0) 0%,
-    rgba(255, 255, 255, 0.8) 50%,
-    rgba(239, 235, 224, 0) 100%
+    rgba(252, 253, 255, 0) 0%,
+    rgba(252, 253, 255, 0.8) 50%,
+    rgba(252, 253, 255, 0) 100%
   );
   animation: skeleton-shimmer 1.6s ease-in-out infinite;
 }
@@ -238,7 +248,7 @@ body {
 }
 
 .detail-card {
-  background: #fff;
+  background: #FCFDFF;
   border-radius: 10px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
   max-width: 85vw;
@@ -293,7 +303,7 @@ body {
 .detail-tag {
   display: inline-block;
   background: var(--color-brand-orange);
-  color: #ffffff;
+  color: var(--color-cool-white);
   font-size: 13px;
   font-weight: 500;
   line-height: 1.2;
@@ -644,7 +654,7 @@ body {
   min-height: 100%;
   object-fit: cover;
   border-radius: 12px;
-  background: #dcdcdc;
+  background: var(--color-gray-soft);
 }
 
 .exploration-mosaic > img:nth-child(7n + 1) { grid-column: 1; grid-row: span 4; }
@@ -693,7 +703,7 @@ body {
   aspect-ratio: 1920 / 1146;
   object-fit: contain;
   border-radius: 12px;
-  background: #fff;
+  background: var(--color-cool-white);
 }
 
 @media (max-width: 900px) {
@@ -767,7 +777,7 @@ body {
 }
 
 .header-services-item {
-  color: #777777;
+  color: var(--color-gray-dark);
   font-size: 0.87em;
   line-height: 1.5;
 }
@@ -867,103 +877,41 @@ body {
   z-index: 9100;
   display: flex;
   align-items: center;
-  gap: 4px;
-  /* Slimmer still: was 6px 12px. Pulled thinner again specifically to
-     free up vertical room above the pill for Elie's About modal, whose
-     mood-art icon was reading as cramped right against the viewport's
-     top edge (see CARD_HEIGHT/MOOD_SLOT_HEIGHT in Elie.tsx and the
-     modal wrapper's own padding, tightened to match). Mobile's own
-     media-query overrides above were tightened in step, so the nav
-     keeps getting progressively thinner at each breakpoint instead of
-     mobile ending up less-thin than this new desktop base. */
-  padding: 4px 10px;
-  border-radius: 999px;
+  gap: 18px; /* plus 16px padding on each item = 50px between the words */
+  /* Nav spec (from the Figma "NEW NAV" frame): 10px padding, 10px corner
+     radius, 10% white glass. The gap above plus each item's own 16px side
+     padding gives the 50px between words. */
+  padding: 10px;
+  border-radius: 10px;
   /* Was "wrap" — at a narrow enough width this let the pill break onto a
      second line instead of shrinking. nowrap plus the 1024px/640px/400px
      breakpoints above/below mean it only ever gets thinner, never taller. */
   flex-wrap: nowrap;
   justify-content: center;
   max-width: calc(100vw - 160px);
-  /* Fourth pass on frost density: 0.14 -> 0.55 -> 0.68 -> 0.74. Each
-     round the actual lever has been base opacity, not blur — blur
-     softens edges but doesn't reduce how much of the backdrop's own
-     contrast survives through a mostly-transparent tint. A denser base
-     tint is also just more correct for "glass with depth": true frosted
-     glass you can set a cup down on reads far more opaque than a light
-     film. */
+  /* Frost: the same level as the previous nav. A vertical white gradient at
+     80-90% strength plus a heavy blur. */
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(244, 244, 244, 0.8) 100%);
-  /* "Splay" — how spread/dissolved the text underneath reads — is the
-     blur radius, not the opacity above: blur(11px -> 18px -> 26px ->
-     34px). Saturate/contrast bumped alongside it again so the extra
-     blur doesn't start looking flat/gray as it thickens. */
   backdrop-filter: blur(44px) saturate(220%) contrast(120%);
   -webkit-backdrop-filter: blur(44px) saturate(220%) contrast(120%);
   border: 1px solid rgba(255, 255, 255, 0.7);
   transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
     border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  /* Layered for actual depth instead of one flat drop-shadow: an ambient
-     lift shadow (soft/wide, like the pill is floating a little off the
-     page), a tight contact shadow right under it (grounds it so it
-     doesn't look like it's hovering too far away), a bright inset rim
-     along the top (light catching the curved top bevel of the glass),
-     a soft inset glow just under that rim (the "thickness" of the glass
-     material itself, not just its edge), a dark inset shadow along the
-     bottom inside edge (the underside of that same thickness), a second,
-     tighter inner shadow further in (reads as a thicker slab of glass —
-     one inset shadow alone reads as a thin rim, two nested ones read as
-     real depth), and the chromatic fringe at the left/right edges
-     (subtle red/blue split, like light bending through a curved edge). */
+  /* Depth: a soft drop shadow so the nav lifts off the page, plus an even
+     inner glow all the way around (no bright top rim or dark bottom rim, the
+     chrome edges are gone). */
   box-shadow:
-    0 34px 80px rgba(0, 0, 0, 0.26),
-    0 12px 28px rgba(0, 0, 0, 0.18),
-    0 3px 6px rgba(0, 0, 0, 0.16),
-    0 1.5px 0 rgba(255, 255, 255, 0.95) inset,
-    0 16px 24px -14px rgba(255, 255, 255, 0.7) inset,
-    0 -16px 22px -12px rgba(0, 0, 0, 0.16) inset,
-    0 0 0 1px rgba(255, 255, 255, 0.4) inset,
-    -1px 0 0 rgba(255, 0, 60, 0.1),
-    1px 0 0 rgba(0, 140, 255, 0.1);
-}
-
-/* Curved-glass sheen — a soft diagonal highlight standing in for real
-   refraction, so the pill reads as glass rather than flat frosted
-   plastic. Without this the backdrop-filter/box-shadow alone still
-   look correct on paper but flatter in practice. border-radius:
-   inherit clips it to the pill's own shape automatically.
-
-   Animated (sv-sheen-sweep) so the glass isn't dead when nobody's
-   touching it — a slow, ambient drift standing in for light moving
-   across the room. It backs off (paused + dimmed) below whenever the
-   real cursor-tracked highlight (.sara-float-nav-glare, from
-   LiquidNav.tsx's pointermove handler) is active, so the two lights
-   don't visually fight each other — idle ambience when untouched,
-   real reactivity when you're actually on it. */
-.sara-float-nav::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(115deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.55) 45%, rgba(255, 255, 255, 0) 70%);
-  background-size: 260% 100%;
-  mix-blend-mode: overlay;
-  opacity: var(--sv-sheen-o, 1);
-  pointer-events: none;
-  z-index: 2;
-  animation: sv-sheen-sweep 7s ease-in-out infinite;
-}
-
-@keyframes sv-sheen-sweep {
-  0%, 100% { background-position: 120% 0; }
-  50% { background-position: -60% 0; }
+    0 14px 36px rgba(0, 0, 0, 0.18),
+    0 3px 10px rgba(0, 0, 0, 0.1),
+    inset 0 0 22px rgba(255, 255, 255, 0.28);
 }
 
 /* The real cursor-tracked highlight, driven by --glare-x/--glare-y (set on
    .sara-float-nav itself, in %, from LiquidNav.tsx's onPointerMove) and
    shown/hidden via the data-glare attribute the same component toggles on
    enter/leave. This is an actual DOM child (see LiquidNav.tsx), not a
-   third pseudo-element — .sara-float-nav already spends its ::before/
-   ::after budget on the ambient sheen and the noise texture above.
+   third pseudo-element.
 
    soft-light instead of overlay: overlay's math is multiply-leaning on a
    dark backdrop, which would make a white highlight nearly invisible on
@@ -988,14 +936,6 @@ body {
 
 .sara-float-nav[data-glare="on"] .sara-float-nav-glare {
   opacity: var(--sv-glare-o, 1);
-}
-
-/* Pause + dim the idle ambient sweep while the real cursor-driven glare
-   is active, so the two lights read as one coherent surface reacting to
-   you, rather than two separate highlights crossing each other. */
-.sara-float-nav[data-glare="on"]::before {
-  animation-play-state: paused;
-  opacity: calc(var(--sv-sheen-o, 1) * 0.3);
 }
 
 /* Frosted grain texture — a fine SVG feTurbulence noise tile, blended
@@ -1032,17 +972,7 @@ body {
      reads as a faint glow instead of visible shapes. */
   background: linear-gradient(180deg, rgba(38, 38, 38, 0.95) 0%, rgba(10, 10, 10, 0.97) 100%);
   border-color: rgba(255, 255, 255, 0.16);
-  box-shadow:
-    0 34px 80px rgba(0, 0, 0, 0.75),
-    0 12px 28px rgba(0, 0, 0, 0.6),
-    0 3px 6px rgba(0, 0, 0, 0.5),
-    0 1.5px 0 rgba(255, 255, 255, 0.24) inset,
-    0 18px 28px -16px rgba(255, 255, 255, 0.14) inset,
-    0 -18px 26px -10px rgba(0, 0, 0, 0.7) inset,
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
-    -1px 0 0 rgba(255, 0, 60, 0.14),
-    1px 0 0 rgba(0, 140, 255, 0.14);
-  --sv-sheen-o: 0.35;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.4);
   --sv-noise-o: 0.5;
   --sv-glare-o: 0.8;
 }
@@ -1053,41 +983,11 @@ body {
 :root[data-dimmer-stage="near-black"] .sara-float-nav::after {
   mix-blend-mode: soft-light;
 }
-/* The sliding active-filter pill: brighter glass with a soft feathered glow
-   on the dark stages, so it reads as a lit surface sitting in the nav. */
-:root[data-dimmer-stage="charcoal"] .float-nav-pill,
-:root[data-dimmer-stage="near-black"] .float-nav-pill {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.4);
-  box-shadow:
-    0 0 22px rgba(255, 255, 255, 0.14),
-    0 2px 8px rgba(0, 0, 0, 0.5),
-    0 1px 0 rgba(255, 255, 255, 0.35) inset,
-    0 -6px 10px -4px rgba(0, 0, 0, 0.35) inset;
-}
-
-/* Sliding "liquid glass" active-filter pill — travels between buttons and
-   supplies the glass background/blur/shadow that used to live directly on
-   .float-nav-item.active (see below). left/width/top/height are all set
-   inline from LiquidNav.tsx as real box values (measured from the active
-   button's actual rect), not a scaleX transform — scaleX stretches
-   border-radius along with everything else, turning the pill's rounded
-   caps into flat, barely-curved edges at any real width. The earlier
-   "hop" bug wasn't actually caused by animating width directly; it was
-   the old per-button nav-bounce animation firing alongside this pill
-   (see .float-nav-item.active below, now stripped of it). */
+/* The sliding glass pill behind the active link is removed. LiquidNav.tsx
+   still renders the element, so it is hidden here. The active link now
+   bounces instead (see .float-nav-item.active below). */
 .float-nav-pill {
-  position: absolute;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(6px) saturate(160%);
-  -webkit-backdrop-filter: blur(6px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
-  pointer-events: none;
-  z-index: 1;
-  transition: left 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
-    width 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: none;
 }
 
 .float-nav-item {
@@ -1095,7 +995,7 @@ body {
   z-index: 3;
   display: flex;
   align-items: center;
-  border-radius: 999px;
+  border-radius: 10px;
   background: none;
   border: none;
   cursor: pointer;
@@ -1115,20 +1015,18 @@ body {
    dark at charcoal/near-black, but dusk's text color (--fg) is near-white,
    which vanished on the light glass. Dark text there instead. */
 :root[data-dimmer-stage="dusk"] .float-nav-item:not(.active) {
-  color: #191d25;
+  color: var(--color-text);
 }
 .float-nav-item:hover:not(.active) {
   background: rgba(0, 0, 0, 0.07);
   font-weight: 500;
 }
-/* Background/blur/shadow/bounce moved to .float-nav-pill above, which now
-   travels between buttons instead of each button popping its own glass
-   treatment in and out — that per-button snap-plus-bounce was the "hop"
-   half of "hop and bounce". This rule now only carries the active label's
-   text styling. */
+/* The active link: bold orange text that bounces (nav-bounce keyframes near
+   the top of this file) each time a link becomes active. */
 .float-nav-item.active {
   font-weight: 600;
-  color: #f65009;
+  color: var(--color-brand-orange);
+  animation: nav-bounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* Dimmer button and Elie's trigger icon — these sat inside .sara-float-nav
@@ -1146,6 +1044,10 @@ body {
 .dimmer-btn {
   width: 38px;
   height: 38px;
+  /* Lifts the button above the nav's grain layer and cursor glare (z-index 1
+     and 2). Without this they paint over the button and shift its orange. */
+  position: relative;
+  z-index: 3;
 }
 .dimmer-btn-icon {
   width: 26px;
@@ -1244,7 +1146,7 @@ body {
   border-radius: 3.2px;
   font-size: 10.24px;
   font-weight: 600;
-  color: #201F1C;
+  color: var(--color-text);
   white-space: nowrap;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1258,14 +1160,14 @@ body {
    before the project grid. Change the middle number in each clamp() to
    tune it (it's a percentage of the window height). */
 .home-hero {
-  margin-bottom: clamp(5rem, 16vh, 11rem);
+  margin-bottom: clamp(3.5rem, 11vh, 8rem);
 }
 .home-intro-heading {
   max-width: 710px;
   font-size: clamp(22px, 2.1vw, 32px);
   font-weight: 700;
   line-height: 1.25;
-  margin: clamp(3.5rem, 12vh, 8.5rem) 0 1.5rem;
+  margin: clamp(3.5rem, 12vh, 8.5rem) 0 1.25rem;
 }
 
 .home-intro {
@@ -1273,11 +1175,11 @@ body {
   font-size: clamp(14px, 1.1vw, 20px);
   font-weight: 500;
   line-height: 1.5;
-  color: #777777;
+  color: var(--color-gray-dark);
   padding: 0;
 }
 
-/* The paragraph's gray (#777) disappears on the darker dimmer stages, so
+/* The paragraph's gray disappears on the darker dimmer stages, so
    from dusk on it follows the stage's text color at a slightly lower
    strength. Raise the 0.9 / 0.82 / 0.75 to make it whiter. */
 :root[data-dimmer-stage="dusk"] .home-intro { color: rgb(var(--fg) / 0.9); }
@@ -1380,7 +1282,7 @@ body {
   line-height: 1.3;
   margin-top: 1.75rem;
   margin-bottom: 0.6rem;
-  color: var(--color-text);
+  color: var(--color-gray-dark);
 }
 .detail-content h4 {
   font-size: 1.125rem;
@@ -1388,7 +1290,7 @@ body {
   line-height: 1.35;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
-  color: var(--color-text);
+  color: var(--color-gray-dark);
 }
 .detail-content h5 {
   font-size: 1rem;
@@ -1396,5 +1298,13 @@ body {
   line-height: 1.4;
   margin-top: 1.25rem;
   margin-bottom: 0.4rem;
-  color: var(--color-text);
+  color: var(--color-gray-dark);
+}
+.detail-content h6 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 1.25rem;
+  margin-bottom: 0.4rem;
+  color: var(--color-gray-light);
 }

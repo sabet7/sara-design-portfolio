@@ -551,9 +551,7 @@ export default function Header() {
           </div>
 
           <nav className="sdv-hdr-nav">
-            <a href="/resume.pdf" className="sdv-hdr-nav-link">
-              Resume
-            </a>
+            {/* Order: Connect, Resume, LinkedIn, Github. */}
             {/* Desktop/tablet: the normal mailto: button. */}
             <span className="sdv-connect-desktop">
               <Button href="mailto:sedelvillar104@gmail.com" fontSize={13}>
@@ -569,13 +567,8 @@ export default function Header() {
             >
               Connect
             </button>
-            <a
-              href="https://github.com/sabet7"
-              target="_blank"
-              rel="noreferrer"
-              className="sdv-hdr-nav-link"
-            >
-              Github
+            <a href="/resume.pdf" className="sdv-hdr-nav-link">
+              Resume
             </a>
             <a
               href="https://www.linkedin.com/in/saradelvillar/"
@@ -584,6 +577,14 @@ export default function Header() {
               className="sdv-hdr-nav-link"
             >
               LinkedIn
+            </a>
+            <a
+              href="https://github.com/sabet7"
+              target="_blank"
+              rel="noreferrer"
+              className="sdv-hdr-nav-link"
+            >
+              Github
             </a>
           </nav>
 

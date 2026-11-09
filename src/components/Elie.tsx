@@ -52,19 +52,20 @@ const ERROR_TEXT = "Something went wrong on my end — try again in a moment.";
 const ELIE_BUBBLE_BG = "#F2F2F2";
 const AVATAR_SIZE = 120;
 
-// Elie's mood animation now sits INSIDE the card, in its top-left corner.
-// MOOD_SIZE is its width/height in px; MOOD_POS is its distance from the
-// card's top and left edges. The chat thread starts below it (see
-// CHAT_TOP_PADDING) so messages never sit underneath it at first.
+// Elie's mood animation sits at the top of the scrolling content, centered
+// above the photo (About view) or above the first message (chat view). It is
+// part of the content, so it scrolls with it and is not pinned.
+// MOOD_SIZE is its width/height in px; MOOD_PHOTO_GAP is the space in px
+// between it and what is under it (raise it for more space).
 const MOOD_SIZE = 56;
-const MOOD_POS = { top: 18, left: 22 };
-const CHAT_TOP_PADDING = "2.4rem";
+const MOOD_PHOTO_GAP = 8;
+const CHAT_TOP_PADDING = "0";
 
 // Fixed card height — identical in the About view and the chat view.
-// Was min(560px, 70vh) — smaller cap so there's guaranteed room left over
+// Was min(540px, 67vh), min(500px, 62vh) before that, and min(560px, 70vh) before that — smaller cap so there's guaranteed room left over
 // above it for the mood slot + top padding on a typical laptop-height
 // viewport, not just a tall monitor.
-const CARD_HEIGHT = "min(500px, 62vh)";
+const CARD_HEIGHT = "min(600px, 74vh)";
 
 // Open/close behaves like a bottom sheet: the panel starts as the exact
 // size and position of the floating nav pill, then grows upward from that
@@ -139,7 +140,7 @@ const SHEET_CSS = `
   height: calc(${CARD_HEIGHT} - 2px);
   display: flex;
   flex-direction: column;
-  padding: 2.25rem 2.25rem 2rem;
+  padding: 1.75rem 2.25rem 2rem;
   opacity: 0;
   transition: opacity 0.18s ease;
 }
@@ -556,6 +557,37 @@ export default function Elie() {
     paddingRight: 4,
   };
 
+  // Mood animation, in the content flow (see MOOD_SIZE above). Mounted once
+  // the sheet is opening so its drop-in plays then.
+  const moodArt = (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignSelf: "center",
+        flexShrink: 0,
+        height: MOOD_SIZE,
+        marginBottom: MOOD_PHOTO_GAP,
+        pointerEvents: "none",
+      }}
+    >
+      {expanded && (
+        <div
+          key={mood}
+          className="elie-modal-character"
+          style={{ animationDelay: "0.25s", animationFillMode: "both" }}
+        >
+          <MoodArt
+            mood={mood}
+            size={MOOD_SIZE}
+            failed={failedMoods[mood]}
+            onFail={() => markFailed(mood)}
+          />
+        </div>
+      )}
+    </div>
+  );
+
   const aboutView = (
     <div style={scrollAreaStyle}>
       <div
@@ -563,11 +595,12 @@ export default function Elie() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          // Space above the photo circle (change this to adjust it).
-          paddingTop: "1.75rem",
-          marginBottom: "1.75rem",
+          paddingTop: 0,
+          // Space between the "About Me" label and the headline below it.
+          marginBottom: "0.5rem",
         }}
       >
+        {moodArt}
         <ProfileCircle
           size={AVATAR_SIZE}
           failed={profileFailed}
@@ -641,6 +674,7 @@ export default function Elie() {
         paddingTop: CHAT_TOP_PADDING,
       }}
     >
+      {moodArt}
       {messages.map((msg) => {
         const isUser = msg.role === "user";
         const text =
@@ -728,31 +762,6 @@ export default function Elie() {
             >
               <span />
             </div>
-
-            {/* Elie's mood animation, inside the card (top-left). Mounted
-                once the sheet is opening so its drop-in plays then. */}
-            {expanded && (
-              <div
-                key={mood}
-                className="elie-modal-character"
-                style={{
-                  position: "absolute",
-                  top: MOOD_POS.top,
-                  left: MOOD_POS.left,
-                  zIndex: 2,
-                  pointerEvents: "none",
-                  animationDelay: "0.25s",
-                  animationFillMode: "both",
-                }}
-              >
-                <MoodArt
-                  mood={mood}
-                  size={MOOD_SIZE}
-                  failed={failedMoods[mood]}
-                  onFail={() => markFailed(mood)}
-                />
-              </div>
-            )}
 
             <button
               onClick={handleClose}
