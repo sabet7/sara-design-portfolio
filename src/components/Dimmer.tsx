@@ -7,7 +7,17 @@ const STAGES = ["light", "warm", "dusk", "charcoal", "near-black"] as const;
 type Stage = (typeof STAGES)[number];
 
 const STORAGE_KEY = "dimmer-stage";
+// Remembers whether the computer was in dark or light mode when the dimmer
+// button was last clicked. A saved choice only counts while the computer is
+// still in that same mode; once the computer switches (for example at
+// sunset), the site follows it again.
+const OS_KEY = "dimmer-os";
 const DARK_STAGES: Stage[] = ["charcoal", "near-black"];
+
+// Stage used when the computer is in dark mode / light mode and no button
+// choice is in effect. Change either to any stage name above.
+const AUTO_DARK_STAGE: Stage = "near-black";
+const AUTO_LIGHT_STAGE: Stage = "light";
 
 // Icon was hardcoded at 24px inside a 44px button — noticeably small next
 // to the button's own footprint (20px of empty padding around it). 30px
@@ -30,11 +40,45 @@ export default function Dimmer() {
   const [iconFailed, setIconFailed] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Stage | null;
-    const initial = stored && STAGES.includes(stored) ? stored : "light";
-    setStage(initial);
-    document.documentElement.setAttribute("data-dimmer-stage", initial);
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+
+    function osMode() {
+      return media.matches ? "dark" : "light";
+    }
+
+    function apply(next: Stage) {
+      setStage(next);
+      document.documentElement.setAttribute("data-dimmer-stage", next);
+    }
+
+    function autoStage(): Stage {
+      return media.matches ? AUTO_DARK_STAGE : AUTO_LIGHT_STAGE;
+    }
+
+    let initial = autoStage();
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY) as Stage | null;
+      const storedOs = localStorage.getItem(OS_KEY);
+      if (stored && STAGES.includes(stored) && storedOs === osMode()) {
+        initial = stored;
+      }
+    } catch {
+      // Storage can be blocked; the automatic stage is used.
+    }
+    apply(initial);
     setMounted(true);
+
+    // The computer switched between light and dark while the site is open:
+    // follow it, and drop any button choice made in the previous mode.
+    function onOsChange() {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(OS_KEY);
+      } catch {}
+      apply(autoStage());
+    }
+    media.addEventListener("change", onOsChange);
+    return () => media.removeEventListener("change", onOsChange);
   }, []);
 
   function cycle() {
@@ -42,7 +86,13 @@ export default function Dimmer() {
     const next = STAGES[(currentIndex + 1) % STAGES.length];
     setStage(next);
     document.documentElement.setAttribute("data-dimmer-stage", next);
-    localStorage.setItem(STORAGE_KEY, next);
+    try {
+      localStorage.setItem(STORAGE_KEY, next);
+      localStorage.setItem(
+        OS_KEY,
+        window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+      );
+    } catch {}
     // Sun and moon are two different files that can fail independently,
     // so this resets on every cycle rather than sticking once tripped —
     // a broken sun icon shouldn't permanently hide a working moon icon.

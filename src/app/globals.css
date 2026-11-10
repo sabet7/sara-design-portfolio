@@ -76,33 +76,6 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Paper texture for the light stages. A fixed, fine noise tile that sits
-   behind the page content (z-index -1) so text and images stay crisp. It is
-   drawn in a warm dark brown at very low strength: about 3% lighter and
-   darker specks, so the cool white still reads as white.
-   - Strength: change --paper-o per stage below (1 = as drawn, 0 = off; the
-     light stage uses the 0.7 in the opacity line above), or
-     change the "0.3" and "-0.115" in the tile's feColorMatrix (higher first
-     number = more contrast, lower second number = lighter overall).
-   - Grain size: baseFrequency 0.4 in the tile (lower = coarser grain).
-   It fades out on the dark stages, where the grain canvas below already
-   adds texture. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='p' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.4' numOctaves='3' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.31 0 0 0 0 0.29 0 0 0 0 0.27 0.3 0 0 0 -0.115'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
-  background-size: 256px 256px;
-  opacity: var(--paper-o, 0.7);
-  transition: opacity 0.3s ease;
-}
-:root[data-dimmer-stage="warm"] { --paper-o: 0.6; }
-:root[data-dimmer-stage="dusk"] { --paper-o: 0.35; }
-:root[data-dimmer-stage="charcoal"],
-:root[data-dimmer-stage="near-black"] { --paper-o: 0; }
-
 #grainCanvas {
   position: fixed;
   top: 0;
@@ -311,12 +284,13 @@ body::before {
 
 .detail-title {
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 800;
   margin: 0 0 4px;
   color: var(--color-text);
 }
 
 .detail-subtitle {
+  font-weight: 300;
   color: var(--color-text-muted);
   margin: 0 0 12px;
 }
@@ -460,15 +434,20 @@ body::before {
 .detail-sidebar-hover-circle.hover-circle-dark {
   display: none;
 }
+/* The case-study modal is cool white in every dimmer stage, so the black
+   hand-drawn oval (hover-circle-light) is used in all of them and the white
+   "hover-circle-dark" image stays hidden. The sidebar images also carry the
+   generic .hover-circle-light / .hover-circle-dark classes, whose dark-stage
+   rules (further down this file) swap them, so these rules are written to
+   win over those. */
 :root[data-dimmer-stage="charcoal"] .detail-sidebar-hover-circle.hover-circle-light,
 :root[data-dimmer-stage="near-black"] .detail-sidebar-hover-circle.hover-circle-light {
-  display: none;
+  display: block;
 }
 :root[data-dimmer-stage="charcoal"] .detail-sidebar-hover-circle.hover-circle-dark,
 :root[data-dimmer-stage="near-black"] .detail-sidebar-hover-circle.hover-circle-dark {
-  display: block;
+  display: none;
 }
-
 .detail-content {
   min-width: 0;
 }
@@ -485,7 +464,7 @@ body::before {
 
 .detail-section-heading {
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--color-text-light-muted);
@@ -508,6 +487,7 @@ body::before {
 }
 
 .detail-paragraph {
+  font-weight: 400;
   line-height: 1.6;
   color: var(--color-text);
   margin: 0 0 1rem;
@@ -573,7 +553,7 @@ body::before {
 
 .exploration-title {
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.15;
   margin: 0 0 4px;
   color: var(--color-text);
@@ -593,7 +573,7 @@ body::before {
 
 .exploration-oneliner {
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 300;
   line-height: 1.3;
   color: var(--color-text-muted);
   margin: 0 0 12px;
@@ -609,6 +589,7 @@ body::before {
 }
 
 .exploration-text {
+  font-weight: 400;
   font-size: 15px;
   line-height: 1.5;
   color: var(--color-text);
@@ -1222,7 +1203,7 @@ body::before {
 .home-intro-heading {
   max-width: 710px;
   font-size: clamp(22px, 2.1vw, 32px);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.25;
   margin: clamp(3.5rem, 12vh, 8.5rem) 0 1.25rem;
 }
@@ -1230,7 +1211,7 @@ body::before {
 .home-intro {
   max-width: 710px;
   font-size: clamp(14px, 1.1vw, 20px);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.5;
   color: var(--color-gray-dark);
   padding: 0;
@@ -1325,9 +1306,12 @@ body::before {
   filter: invert(1);
 }
 /* Headings written inside a case study's MDX body. */
+.detail-content h1 {
+  font-weight: 700;
+}
 .detail-content h2 {
   font-size: 1.75rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.25;
   margin-top: 2rem;
   margin-bottom: 0.75rem;
@@ -1335,7 +1319,7 @@ body::before {
 }
 .detail-content h3 {
   font-size: 1.375rem;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.3;
   margin-top: 1.75rem;
   margin-bottom: 0.6rem;
@@ -1343,7 +1327,7 @@ body::before {
 }
 .detail-content h4 {
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.35;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
@@ -1351,7 +1335,7 @@ body::before {
 }
 .detail-content h5 {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.4;
   margin-top: 1.25rem;
   margin-bottom: 0.4rem;
@@ -1359,9 +1343,111 @@ body::before {
 }
 .detail-content h6 {
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.4;
   margin-top: 1.25rem;
   margin-bottom: 0.4rem;
   color: var(--color-gray-light);
 }
+
+/* Lists written in a case study's MDX body (- item / 1. item). Tailwind's
+   reset removes bullets and indent, and a list with no color of its own takes
+   the page text color, which is near-white on the dark stages. This gives
+   lists bullets, an indent, and the same black as paragraphs. */
+.detail-content ul,
+.detail-content ol {
+  margin: 0 0 1rem;
+  padding-left: 1.25rem;
+  line-height: 1.6;
+  color: var(--color-text);
+}
+.detail-content ul { list-style: disc; }
+.detail-content ol { list-style: decimal; }
+.detail-content li {
+  margin: 0 0 0.35rem;
+  padding-left: 0.25rem;
+  color: var(--color-text);
+}
+.detail-content li > p { margin: 0; }
+
+/* Block quotes written in a case study's MDX body (> "quote"). */
+.detail-content blockquote {
+  margin: 1.5rem 0;
+  padding: 0.25rem 0 0.25rem 1.25rem;
+  border-left: 3px solid var(--color-brand-orange);
+  color: var(--color-text);
+}
+.detail-content blockquote p {
+  margin: 0;
+}
+
+/* Case-study and exploration modals only (.detail-modal-backdrop is the
+   shared modal shell from Modal.tsx; the full-page routes are unaffected).
+
+   1. Fade in when a card is clicked, fade out when the modal is closed
+      (X, Escape or a click outside). The fade-out time here (0.2s) must
+      match FADE_OUT_MS in Modal.tsx.
+   2. A soft fade at the bottom edge of the visible card, so content seems
+      to dissolve toward the bottom. It switches off once the reader has
+      scrolled to the very end (Modal.tsx sets data-at-end), so the last
+      lines are never covered. */
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modalFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+.detail-modal-backdrop {
+  animation: modalFadeIn 0.25s ease both;
+}
+.detail-modal-backdrop.is-closing {
+  animation: modalFadeOut 0.2s ease both;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .detail-modal-backdrop,
+  .detail-modal-backdrop.is-closing {
+    animation: none;
+  }
+}
+
+.detail-modal-backdrop .detail-card {
+  --ombre-pad: 3rem;   /* matches the card's side padding */
+  --ombre-height: 64px; /* how tall the fade is */
+}
+@media (max-width: 640px) {
+  .detail-modal-backdrop .detail-card { --ombre-pad: 1.5rem; }
+}
+.detail-modal-backdrop .detail-card::after {
+  content: "";
+  display: block;
+  position: sticky;
+  /* Chrome measures "sticky" from inside the card's padding, so the
+     padding is added back to reach the card's true bottom edge. */
+  bottom: calc(var(--ombre-pad) * -1);
+  height: var(--ombre-height);
+  margin: calc(var(--ombre-height) * -1) calc(var(--ombre-pad) * -1) 0;
+  pointer-events: none;
+  /* Strength: change the 0.9 at the bottom (1 = content fully hidden at the
+     very edge, lower = softer). */
+  background: linear-gradient(to bottom, rgba(252, 253, 255, 0) 0%, rgba(252, 253, 255, 0.9) 100%);
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+.detail-modal-backdrop .detail-card[data-at-end="true"]::after {
+  opacity: 0;
+}
+
+/* Heading weights in design explorations. Every MDX heading level shares
+   .exploration-heading (size, margins); this sets the weight per level, from
+   the type ladder: h1 bold, h2 semi-bold, h3 and h4 medium, h5 regular,
+   h6 bold. */
+.exploration-heading { font-weight: 600; }
+h1.exploration-heading { font-weight: 700; }
+h2.exploration-heading { font-weight: 600; }
+h3.exploration-heading,
+h4.exploration-heading { font-weight: 500; }
+h5.exploration-heading { font-weight: 400; }
+h6.exploration-heading { font-weight: 700; }

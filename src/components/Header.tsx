@@ -214,7 +214,7 @@ const HEADER_CSS = `
   align-items: center;
   gap: 1.5em;
 }
-.sdv-hdr-name { font-weight: 700; }
+.sdv-hdr-name { font-weight: 800; }
 .sdv-greet { font-weight: 400; opacity: 0.55; }
 .sdv-hdr:not([data-compact="0"]) .sdv-greet { display: none; }
 .sdv-name-sv { display: none; }
