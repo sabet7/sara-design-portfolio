@@ -15,7 +15,7 @@ export const bricolageGrotesque = Bricolage_Grotesque({
 
 import localFont from "next/font/local";
 
-export const clashGrotesk = localFont({
+/* export const clashGrotesk = localFont({
   src: [
     { path: "../fonts/ClashGrotesk-Extralight.woff2", weight: "200", style: "normal" },
     { path: "../fonts/ClashGrotesk-Light.woff2", weight: "300", style: "normal" },
@@ -25,6 +25,17 @@ export const clashGrotesk = localFont({
     { path: "../fonts/ClashGrotesk-Bold.woff2", weight: "700", style: "normal" },
   ],
   variable: "--font-clash-grotesk",
+});
+*/ 
+
+// New font- Cabinet Grotesk Variable. Subbing Clash
+export const cabinetGrotesk = localFont({
+  src: "../fonts/CabinetGrotesk-Variable.woff2",
+  weight: "100 900",
+  style: "normal",
+  variable: "--font-cabinet-grotesk",
+  display: "swap",
+  fallback: ["system-ui", "sans-serif"],
 });
 
 // Once you have the Clash Grotesk Variable .woff2 file:

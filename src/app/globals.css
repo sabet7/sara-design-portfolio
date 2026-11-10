@@ -72,9 +72,36 @@
 body {
   background: rgb(var(--bg));
   color: rgb(var(--fg));
-  font-family: var(--font-clash-grotesk), var(--font-space-grotesk), sans-serif;
+  font-family: var(--font-cabinet-grotesk), system-ui, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* Paper texture for the light stages. A fixed, fine noise tile that sits
+   behind the page content (z-index -1) so text and images stay crisp. It is
+   drawn in a warm dark brown at very low strength: about 3% lighter and
+   darker specks, so the cool white still reads as white.
+   - Strength: change --paper-o per stage below (1 = as drawn, 0 = off; the
+     light stage uses the 0.7 in the opacity line above), or
+     change the "0.3" and "-0.115" in the tile's feColorMatrix (higher first
+     number = more contrast, lower second number = lighter overall).
+   - Grain size: baseFrequency 0.4 in the tile (lower = coarser grain).
+   It fades out on the dark stages, where the grain canvas below already
+   adds texture. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='p' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.4' numOctaves='3' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.31 0 0 0 0 0.29 0 0 0 0 0.27 0.3 0 0 0 -0.115'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+  opacity: var(--paper-o, 0.7);
+  transition: opacity 0.3s ease;
+}
+:root[data-dimmer-stage="warm"] { --paper-o: 0.6; }
+:root[data-dimmer-stage="dusk"] { --paper-o: 0.35; }
+:root[data-dimmer-stage="charcoal"],
+:root[data-dimmer-stage="near-black"] { --paper-o: 0; }
 
 #grainCanvas {
   position: fixed;
@@ -877,10 +904,11 @@ body {
   z-index: 9100;
   display: flex;
   align-items: center;
-  gap: 18px; /* plus 16px padding on each item = 50px between the words */
+  gap: 4px; /* plus 14px padding on each item = 32px between the words */
   /* Nav spec (from the Figma "NEW NAV" frame): 10px padding, 10px corner
-     radius, 10% white glass. The gap above plus each item's own 16px side
-     padding gives the 50px between words. */
+     radius, 10% white glass. The gap above plus each item's own 14px side
+     padding gives the 32px between words. To widen or tighten the space
+     between links, change that padding (the .float-nav-item rule). */
   padding: 10px;
   border-radius: 10px;
   /* Was "wrap" — at a narrow enough width this let the pill break onto a
@@ -1008,8 +1036,20 @@ body {
      down further (horizontal untouched) — same "free up room above the
      nav for Elie's modal" reasoning as .sara-float-nav's own padding
      above. */
-  padding: 6px 16px;
+  padding: 6px 14px;
+  /* Starting color of the wave (see nav-wave): the normal link color. */
+  --nav-from: rgb(var(--fg));
   transition: background 0.2s ease, color 0.2s ease, font-weight 0.2s ease;
+}
+:root[data-dimmer-stage="dusk"] .float-nav-item {
+  --nav-from: var(--color-text);
+}
+/* An empty divider element sits between Fun and About in LiquidNav.tsx. It
+   has no width, but the nav's gap was still applied on both sides of it,
+   which made Fun to About wider than Works to Fun. Hidden so every link is
+   spaced the same. */
+.float-nav-divider {
+  display: none;
 }
 /* The nav glass stays light through the gray (dusk) stage and only turns
    dark at charcoal/near-black, but dusk's text color (--fg) is near-white,
@@ -1021,12 +1061,29 @@ body {
   background: rgba(0, 0, 0, 0.07);
   font-weight: 500;
 }
-/* The active link: bold orange text that bounces (nav-bounce keyframes near
-   the top of this file) each time a link becomes active. */
+/* The active link: bold orange text. Each time a link becomes active its
+   letters play a wave, one after another: each swells forward and turns
+   from the normal link color to orange. --i is the letter's position (set
+   in LiquidNav.tsx); 55ms between letters, 0.7s per letter. */
 .float-nav-item.active {
   font-weight: 600;
   color: var(--color-brand-orange);
-  animation: nav-bounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.nav-letter {
+  display: inline-block;
+}
+.float-nav-item.active .nav-letter {
+  animation: nav-wave 0.7s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+  animation-delay: calc(var(--i) * 55ms);
+}
+@keyframes nav-wave {
+  0% { transform: scale(1); color: var(--nav-from); }
+  35% { transform: scale(1.22); color: var(--color-brand-orange); }
+  60% { transform: scale(0.97); color: var(--color-brand-orange); }
+  100% { transform: scale(1); color: var(--color-brand-orange); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .float-nav-item.active .nav-letter { animation: none; }
 }
 
 /* Dimmer button and Elie's trigger icon — these sat inside .sara-float-nav
