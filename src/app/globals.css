@@ -1451,3 +1451,91 @@ h3.exploration-heading,
 h4.exploration-heading { font-weight: 500; }
 h5.exploration-heading { font-weight: 400; }
 h6.exploration-heading { font-weight: 700; }
+
+/* Password gate inside the case-study modal. PasswordGate's own styles pin
+   its blur, white scrim and form to the whole viewport (position: fixed),
+   which is right for the full-page route but wrong inside a modal: the
+   scrim washed out the dark backdrop, and the form covered the area
+   outside the card, so clicking outside never reached the backdrop to close
+   it. Here the gate is contained inside the card instead, so the modal
+   opens, dims and closes like the others. The full-page route is untouched
+   because these rules only apply inside .detail-modal-backdrop. */
+.detail-modal-backdrop .detail-card:has([data-password-gate]) {
+  padding: 0;
+  overflow: hidden;
+  height: 85vh;
+}
+.detail-modal-backdrop .detail-card:has([data-password-gate])::after {
+  display: none;
+}
+.detail-modal-backdrop [data-password-gate] {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+}
+.detail-modal-backdrop [data-gate-backdrop] {
+  height: 100%;
+  max-height: 100%;
+}
+.detail-modal-backdrop [data-gate-scrim] {
+  position: absolute;
+  z-index: 0;
+}
+.detail-modal-backdrop [data-gate-content] {
+  position: absolute;
+  z-index: 1;
+}
+/* Keeps the close button above the gate so it stays visible and clickable. */
+.detail-modal-backdrop .detail-close {
+  z-index: 5;
+}
+
+/* Password gate sizing inside the modal. The card is only 85vh tall, and the
+   gate's content (link, headline, animation, password frame, hint) is taller
+   than that on a short window, so everything was being squeezed to fit. Here
+   nothing shrinks: the animation scales with the window height, the password
+   frame keeps its full size, and the gate scrolls inside the card as a
+   fallback on very short windows. The 94px bottom padding is dropped because
+   the card already ends above the nav in the modal. */
+.detail-modal-backdrop [data-gate-content] {
+  padding: 3.5rem 2rem 2rem;
+  gap: 1.25rem;
+  justify-content: safe center;
+}
+.detail-modal-backdrop [data-gate-content] > * {
+  flex-shrink: 0;
+}
+.detail-modal-backdrop [data-gate-animation] {
+  width: auto;
+  height: clamp(120px, 26vh, 360px);
+  aspect-ratio: 360 / 493;
+}
+
+/* Images in the MDX body of a design exploration. Case studies already have
+   this rule (.detail-content img); explorations had none, so body images ran
+   at their full file size. */
+.exploration-body img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+}
+
+/* Optional caption under a body image, written as
+   ![alt](/path.png "Caption text") in the MDX. Only images given a caption
+   get one. Used by case studies and design explorations. */
+.media-figure {
+  display: block;
+  margin: 1.5rem 0;
+}
+.media-figure img {
+  margin: 0 0 0.6rem;
+}
+.media-caption {
+  display: block;
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 400;
+  color: var(--color-text-light-muted);
+}

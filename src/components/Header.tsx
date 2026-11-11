@@ -25,14 +25,15 @@ const CURRENT_EMPLOYER: string | null = null;
 function getAvailabilityLabel(now: Date, short = false): string {
   if (CURRENT_EMPLOYER) return `Currently at ${CURRENT_EMPLOYER}`;
   const month = now.toLocaleDateString("en-US", {
-    month: short ? "short" : "long",
+    month : "short",
+   // month: short ? "short" : "long",
     timeZone: "America/New_York",
   });
   const year = now.toLocaleDateString("en-US", {
     year: "numeric",
     timeZone: "America/New_York",
   });
-  return `Available ${month} ${year}`;
+  return `Available to start ${month} ${year}`;
 }
 
 // Time-aware greeting, based on the hour in New York (same zone as the clock

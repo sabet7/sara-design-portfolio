@@ -108,7 +108,7 @@ export default function PasswordGate({
   if (unlocked) return <>{children}</>;
 
   return (
-    <div className={styles.gate}>
+    <div className={styles.gate} data-password-gate>
       {/* The real content, blurred behind the gate. `inert` (a real HTML
           attribute, not just ARIA) drops it from tab order and screen
           readers in one shot — aria-hidden alone would still let a
@@ -119,12 +119,12 @@ export default function PasswordGate({
           supports it natively, so the empty-string spread was actually
           triggering a console warning ("received an empty string for a
           boolean attribute") instead of doing anything useful. */}
-      <div className={styles.gateBackdrop} aria-hidden="true" inert={true}>
+      <div className={styles.gateBackdrop} data-gate-backdrop aria-hidden="true" inert={true}>
         {children}
       </div>
-      <div className={styles.gateScrim} aria-hidden="true" />
+      <div className={styles.gateScrim} data-gate-scrim aria-hidden="true" />
 
-      <div className={styles.gateContent}>
+      <div className={styles.gateContent} data-gate-content>
         <a href="/" className={styles.homeLink}>
           Made a wrong turn, take me back to home
         </a>
@@ -136,6 +136,7 @@ export default function PasswordGate({
 
         <div
           className={styles.animation}
+          data-gate-animation
           style={animationFailed ? { background: "#d9d9d9" } : undefined}
         >
           {!animationFailed && (
@@ -152,6 +153,7 @@ export default function PasswordGate({
 
         <div
           className={styles.frame}
+          data-gate-frame
           style={frameFailed ? undefined : { backgroundImage: `url(${resolvedFrame})` }}
         >
           {/* Hidden probe image, not displayed — its only job is to fire

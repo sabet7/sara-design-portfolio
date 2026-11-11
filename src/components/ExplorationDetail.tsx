@@ -15,6 +15,22 @@ function heading(Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "h6") {
   };
 }
 
+// Images in the MDX body. Write ![alt text](/media/...) for a plain image, or
+// add a caption in quotes after the path for ONLY the images that should have
+// one: ![alt text](/media/... "Caption shown under the image"). The alt text
+// is never shown; it stays hidden for screen readers.
+function MdxImage({ title, alt, ...rest }: ComponentProps<"img">) {
+  // eslint-disable-next-line @next/next/no-img-element
+  const image = <img alt={alt ?? ""} {...rest} />;
+  if (!title) return image;
+  return (
+    <span className="media-figure">
+      {image}
+      <span className="media-caption">{title}</span>
+    </span>
+  );
+}
+
 const mdxComponents = {
   h1: heading("h1"),
   h2: heading("h2"),
@@ -23,6 +39,7 @@ const mdxComponents = {
   h5: heading("h5"),
   h6: heading("h6"),
   p: (props: ComponentProps<"p">) => <p className="exploration-text" {...props} />,
+  img: MdxImage,
 };
 
 // Files ending in .mp4 / .webm / .mov in `images` play as muted, looping

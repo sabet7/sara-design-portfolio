@@ -29,6 +29,22 @@ function getText(children: ReactNode): string {
 // content should read as a section headline, not compete with it for
 // "biggest text on the page." h2 and h6 already had classes; h3/h4/h5 are
 // new — see the matching .detail-heading-3/4/5 rules in globals.css.
+// Images in the MDX body. Write ![alt text](/media/...) for a plain image, or
+// add a caption in quotes after the path for ONLY the images that should have
+// one: ![alt text](/media/... "Caption shown under the image"). The alt text
+// is never shown; it stays hidden for screen readers.
+function MdxImage({ title, alt, ...rest }: React.ComponentProps<"img">) {
+  // eslint-disable-next-line @next/next/no-img-element
+  const image = <img alt={alt ?? ""} {...rest} />;
+  if (!title) return image;
+  return (
+    <span className="media-figure">
+      {image}
+      <span className="media-caption">{title}</span>
+    </span>
+  );
+}
+
 const mdxComponents = {
   h1: (props: React.ComponentProps<"h1">) => (
     <h1 className="detail-subheading" {...props} />
@@ -51,6 +67,7 @@ const mdxComponents = {
   },
 
   p: (props: React.ComponentProps<"p">) => <p className="detail-paragraph" {...props} />,
+  img: MdxImage,
   VoiceNote,
   DuolingoCharacter,
 };
