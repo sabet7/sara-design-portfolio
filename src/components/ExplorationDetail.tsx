@@ -43,7 +43,8 @@ const mdxComponents = {
 };
 
 // Files ending in .mp4 / .webm / .mov in `images` play as muted, looping
-// videos instead of showing as images.
+// videos instead of showing as images. A note can be shown under each video
+// with `imageCaptions` in the frontmatter (see types.ts).
 function isVideo(src: string) {
   return /\.(mp4|webm|mov)(\?.*)?$/i.test(src);
 }
@@ -128,17 +129,23 @@ export default function ExplorationDetail({
       <div className="exploration-media" data-has-video={hasVideo ? "true" : undefined}>
         {segments.map((seg, n) =>
           seg.kind === "video" ? (
-            <video
-              key={`${seg.src}-${n}`}
-              className="exploration-video"
-              src={seg.src}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              aria-label={`${frontmatter.name}, video`}
-            />
+            <figure key={`${seg.src}-${n}`} className="exploration-figure">
+              <video
+                className="exploration-video"
+                src={seg.src}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                aria-label={`${frontmatter.name}, video`}
+              />
+              {frontmatter.imageCaptions[seg.src] && (
+                <figcaption className="exploration-caption">
+                  {frontmatter.imageCaptions[seg.src]}
+                </figcaption>
+              )}
+            </figure>
           ) : (
             <div key={n} className="exploration-mosaic" data-count={Math.min(seg.items.length, 8)}>
               {seg.items.map(({ src, i }) =>

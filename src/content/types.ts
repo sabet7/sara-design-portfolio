@@ -108,6 +108,13 @@ export const ExplorationFrontmatterSchema = z.object({
   gifImage: z.string().optional(),
   video: z.string().url().optional(),
   images: z.array(z.string()).default([]),
+  // Optional notes shown under videos in the gallery. Each key is a video's
+  // path exactly as written in `images`, each value is the note under it.
+  // Left empty or deleted, it simply means no notes.
+  imageCaptions: z
+    .record(z.string(), z.string())
+    .nullish()
+    .transform((value) => value ?? {}),
   role: z.array(z.string()).default([]),
   skills: z.array(z.string()).default([]),
   collaborators: z.string().optional(),

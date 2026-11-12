@@ -118,7 +118,12 @@ function ComingSoon({ frontmatter }: { frontmatter: CaseStudy["frontmatter"] }) 
           )}
         </div>
       </div>
-      <div className="coming-soon-art" aria-hidden="true" />
+      <div className="coming-soon-art" aria-hidden={frontmatter.gifImage ? undefined : true}>
+        {frontmatter.gifImage && (
+          // Plain <img>: next/image would turn the GIF into a still image.
+          <img src={frontmatter.gifImage} alt="" />
+        )}
+      </div>
     </div>
   );
 }

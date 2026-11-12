@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 
-// The 404 page's animation. Save it as public/media/footer/error-page.webp.
+// The 404 page's animation. Save it as public/media/error/error-page.webp.
 // If the file isn't there yet, nothing is drawn (no broken-image icon).
-const SRC = "/media/footer/error-page.webp";
+const SRC = "/media/error/error-page.webp";
 
 export default function ErrorAnimation({ className }: { className?: string }) {
   const [failed, setFailed] = useState(false);

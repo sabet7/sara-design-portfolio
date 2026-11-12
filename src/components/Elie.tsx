@@ -54,9 +54,10 @@ const AVATAR_SIZE = 120;
 // Elie's mood animation sits at the top of the scrolling content, centered
 // above the photo (About view) or above the first message (chat view). It is
 // part of the content, so it scrolls with it and is not pinned.
-// MOOD_SIZE is its width/height in px; MOOD_PHOTO_GAP is the space in px
-// between it and what is under it (raise it for more space).
-const MOOD_SIZE = 56;
+// MOOD_SIZE is its height in px (its width follows the shape of the animation
+// file); MOOD_PHOTO_GAP is the space in px between it and what is under it
+// (raise it for more space).
+const MOOD_SIZE = 110;
 const MOOD_PHOTO_GAP = 8;
 const CHAT_TOP_PADDING = "0";
 
@@ -64,11 +65,13 @@ const CHAT_TOP_PADDING = "0";
 // while Elie works on an answer, waiting once it is done), left-aligned like
 // Elie's replies. CHAT_MOOD_HEIGHT is its height in px; its width follows the
 // shape of the animation file.
-const CHAT_MOOD_HEIGHT = 72;
+const CHAT_MOOD_HEIGHT = 130;
 
 // Elie's reply fades in one letter at a time. REPLY_CHAR_MS is the pause
-// between letters (raise it to slow the reveal down).
-const REPLY_CHAR_MS = 14;
+// between letters (raise it to slow the reveal down). REPLY_FADE_MS is how
+// long each letter takes to fade in (raise it for a softer fade).
+const REPLY_CHAR_MS = 25;
+const REPLY_FADE_MS = 1000;
 
 // Fixed card height — identical in the About view and the chat view.
 // Was min(540px, 67vh), min(500px, 62vh) before that, and min(560px, 70vh) before that — smaller cap so there's guaranteed room left over
@@ -205,7 +208,7 @@ const SHEET_CSS = `
    reflows while it appears) and fades in as it is revealed. */
 .elie-char {
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity ${REPLY_FADE_MS}ms ease-out;
 }
 .elie-char[data-on="true"] { opacity: 1; }
 
@@ -236,14 +239,14 @@ function MoodArt({
       <div
         aria-hidden="true"
         style={{
-          width: size,
-          height: size,
+          width: Math.min(size, 72),
+          height: Math.min(size, 72),
           borderRadius: "50%",
           background: "var(--color-brand-orange)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: size * 0.45,
+          fontSize: Math.min(size, 72) * 0.45,
           flexShrink: 0,
         }}
       >
@@ -412,7 +415,7 @@ export default function Elie() {
       if (i >= total) {
         clearInterval(interval);
         // Let the last letters finish fading in before the layout changes.
-        setTimeout(() => setTypingId(null), 450);
+        setTimeout(() => setTypingId(null), REPLY_FADE_MS + 50);
       }
     }, REPLY_CHAR_MS);
     return () => clearInterval(interval);
@@ -615,6 +618,7 @@ export default function Elie() {
           <MoodArt
             mood={mood}
             size={MOOD_SIZE}
+            wide
             failed={failedMoods[mood]}
             onFail={() => markFailed(mood)}
           />
