@@ -1,9 +1,15 @@
 .wrap {
-  display: inline-flex;
+  /* flex (not inline-flex) so the widget is its own line in the text column
+     and its spacing is exactly the margin below, with no extra line-height
+     space around it. fit-content keeps it only as wide as its content. */
+  display: flex;
+  width: fit-content;
   align-items: center;
   gap: 10px;
-  margin: 4px 6px;
-  vertical-align: middle;
+  /* The "auto" on the left pushes the whole voice note (label + button) to
+     the right edge of the text column. Change it to 0 to put it back on the
+     left. */
+  margin: 0 0 var(--sp-paragraph) auto;
 }
 
 .idleButton {

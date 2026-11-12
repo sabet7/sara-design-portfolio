@@ -134,6 +134,9 @@ export default function VoiceNote({ src, label, barCount = 32 }: VoiceNoteProps)
     <span className={styles.wrap}>
       <audio ref={audioRef} src={src} preload="metadata" />
 
+      {/* Label first, so the play button sits on its right. */}
+      {label && <span className={styles.label}>{label}</span>}
+
       {!isOpen ? (
         <button
           type="button"
@@ -177,7 +180,6 @@ export default function VoiceNote({ src, label, barCount = 32 }: VoiceNoteProps)
         </span>
       )}
 
-      {label && <span className={styles.label}>{label}</span>}
     </span>
   );
 }

@@ -159,6 +159,50 @@ function WeatherIconImage({ candidates }: { candidates: string[] }) {
   );
 }
 
+// Resume, LinkedIn and GitHub. On desktop (a screen 768px or wider that has a
+// mouse) each one is shown as its hand-drawn icon, and its name appears in a
+// small black label under the icon on hover or keyboard focus. On phones and on
+// touch screens without hover, the full name is shown as text instead. If an
+// icon file is missing, the text is shown too, so a link never disappears.
+// Icons live in /public/media/icons/: document.png, linkedin.png, github.png.
+function NavIconLink({
+  href,
+  label,
+  icon,
+  external,
+}: {
+  href: string;
+  label: string;
+  icon: string;
+  external?: boolean;
+}) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <a
+      href={href}
+      {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
+      className={`sdv-hdr-nav-link sdv-icon-link${failed ? " sdv-icon-failed" : ""}`}
+      aria-label={label}
+    >
+      {!failed && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={icon}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="sdv-nav-icon"
+          onError={() => setFailed(true)}
+        />
+      )}
+      <span className="sdv-nav-text">{label}</span>
+      <span className="sdv-tip" aria-hidden="true">
+        {label}
+      </span>
+    </a>
+  );
+}
+
 // All header layout rules live HERE (not in globals.css) so the header can
 // never depend on which copy of globals.css is loaded.
 //
@@ -272,6 +316,78 @@ const HEADER_CSS = `
   padding: 0.55em 1.3em !important;
   gap: 0.4em !important;
   color: #ffffff;
+}
+/* Icon links (see NavIconLink). Text by default; icon + hover label on
+   desktop with a mouse. */
+.sdv-icon-link {
+  --sdv-tip-bg: var(--color-black, #1F160F);
+  --sdv-tip-fg: var(--color-cool-white, #FCFDFF);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.sdv-icon-link .sdv-nav-icon,
+.sdv-icon-link .sdv-tip { display: none; }
+@media (min-width: 768px) and (hover: hover) {
+  /* The text stays in the page for screen readers, just not visible. */
+  .sdv-icon-link:not(.sdv-icon-failed) .sdv-nav-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  /* Icon size: change the two 1.9em values. */
+  .sdv-icon-link:not(.sdv-icon-failed) .sdv-nav-icon {
+    display: block;
+    width: 1.9em;
+    height: 1.9em;
+    margin: -0.35em 0;
+  }
+  .sdv-icon-link:not(.sdv-icon-failed) .sdv-tip {
+    display: block;
+    position: absolute;
+    top: calc(100% + 0.9em);
+    left: 50%;
+    transform: translateX(-50%) translateY(-0.25em);
+    z-index: 40;
+    padding: 0.5em 0.9em;
+    border-radius: 0.7em;
+    background: var(--sdv-tip-bg);
+    color: var(--sdv-tip-fg);
+    font-size: 1em;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+  .sdv-icon-link:not(.sdv-icon-failed) .sdv-tip::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 0.6em solid transparent;
+    border-right: 0.6em solid transparent;
+    border-bottom: 0.7em solid var(--sdv-tip-bg);
+  }
+  .sdv-icon-link:hover .sdv-tip,
+  .sdv-icon-link:focus-visible .sdv-tip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+/* The icons are black ink, so they are inverted on the dark dimmer stages
+   (same as the weather icon), and the label flips to white with black text. */
+:root[data-dimmer-stage="charcoal"] .sdv-nav-icon,
+:root[data-dimmer-stage="near-black"] .sdv-nav-icon { filter: invert(1); }
+:root[data-dimmer-stage="charcoal"] .sdv-icon-link,
+:root[data-dimmer-stage="near-black"] .sdv-icon-link {
+  --sdv-tip-bg: var(--color-cool-white, #FCFDFF);
+  --sdv-tip-fg: var(--color-black, #1F160F);
 }
 .sdv-hdr-datetime {
   display: inline-flex;
@@ -568,25 +684,19 @@ export default function Header() {
             >
               Connect
             </button>
-            <a href="/resume.pdf" className="sdv-hdr-nav-link">
-              Resume
-            </a>
-            <a
+            <NavIconLink href="/resume.pdf" label="Resume" icon="/media/icons/document.png" />
+            <NavIconLink
               href="https://www.linkedin.com/in/saradelvillar/"
-              target="_blank"
-              rel="noreferrer"
-              className="sdv-hdr-nav-link"
-            >
-              LinkedIn
-            </a>
-            <a
+              label="LinkedIn"
+              icon="/media/icons/linkedin.png"
+              external
+            />
+            <NavIconLink
               href="https://github.com/sabet7"
-              target="_blank"
-              rel="noreferrer"
-              className="sdv-hdr-nav-link"
-            >
-              Github
-            </a>
+              label="GitHub"
+              icon="/media/icons/github.png"
+              external
+            />
           </nav>
 
           {now && (

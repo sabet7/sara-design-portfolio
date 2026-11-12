@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { ViewTransition } from "react";
 import { MDXRemote } from "next-mdx-remote/rsc";
-import { REQUIRED_CASE_STUDY_SECTIONS } from "@/content/types";
 import type { CaseStudy } from "@/lib/content";
 import DetailSidebar from "@/components/DetailSidebar";
 import VoiceNote from "@/components/voice-note/VoiceNote";
@@ -14,6 +13,15 @@ function slugify(text: string): string {
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+}
+
+// The sidebar lists every "###### Heading" found in this case study's own
+// MDX, in the order they appear. So a case study with "###### Process" shows
+// Process, one with "###### Engineering and Design" shows that instead, with
+// no code change.
+function getSectionHeadings(content: string): { label: string; id: string }[] {
+  const labels = Array.from(content.matchAll(/^######\s+(.+?)\s*$/gm), (m) => m[1]);
+  return labels.map((label) => ({ label, id: slugify(label) }));
 }
 
 function getText(children: ReactNode): string {
@@ -72,8 +80,55 @@ const mdxComponents = {
   DuolingoCharacter,
 };
 
+// "Coming soon" layout, used when a project's frontmatter has
+// `comingSoon: true`. Shows the client name, design type, one-liner,
+// role / year / skills and `comingSoonSummary`, with a placeholder block on
+// the right for work to come. The MDX body is not shown. Styles are the
+// .coming-soon-* rules in globals.css.
+function ComingSoon({ frontmatter }: { frontmatter: CaseStudy["frontmatter"] }) {
+  const meta = [
+    frontmatter.role.length > 0 ? frontmatter.role.join(", ") : null,
+    frontmatter.year,
+    frontmatter.skills.length > 0 ? frontmatter.skills.join(", ") : null,
+  ].filter((v): v is string => Boolean(v));
+
+  return (
+    <div className="coming-soon">
+      <div className="coming-soon-main">
+        <p className="coming-soon-label">Coming soon</p>
+        <div className="coming-soon-info">
+          <div className="coming-soon-head">
+            <h1 className="coming-soon-name">{frontmatter.client}</h1>
+            <div className="coming-soon-tags">
+              {frontmatter.designType.map((type) => (
+                <span key={type} className="coming-soon-tag">
+                  {type}
+                </span>
+              ))}
+            </div>
+          </div>
+          <p className="coming-soon-oneliner">{frontmatter.oneLiner}</p>
+          <div className="coming-soon-meta">
+            {meta.map((m) => (
+              <span key={m}>{m}</span>
+            ))}
+          </div>
+          {frontmatter.comingSoonSummary && (
+            <p className="detail-paragraph">{frontmatter.comingSoonSummary}</p>
+          )}
+        </div>
+      </div>
+      <div className="coming-soon-art" aria-hidden="true" />
+    </div>
+  );
+}
+
 export default function CaseStudyDetail({ caseStudy }: { caseStudy: CaseStudy }) {
   const { frontmatter, content } = caseStudy;
+
+  // `comingSoon: true` takes priority over the password gate and the full
+  // case study: the project shows only the short "Coming soon" page.
+  if (frontmatter.comingSoon) return <ComingSoon frontmatter={frontmatter} />;
 
   const detail = (
     <>
@@ -104,10 +159,7 @@ export default function CaseStudyDetail({ caseStudy }: { caseStudy: CaseStudy })
 
       <div className="detail-body">
         <DetailSidebar
-          sections={REQUIRED_CASE_STUDY_SECTIONS.map((section) => ({
-            label: section,
-            id: slugify(section),
-          }))}
+          sections={getSectionHeadings(content)}
         />
         <article className="detail-content">
           <MDXRemote source={content} components={mdxComponents} />

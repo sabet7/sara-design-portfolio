@@ -9,6 +9,7 @@ export default function Home() {
     ...caseStudies.map((cs) => ({
       slug: cs.frontmatter.slug,
       title: cs.frontmatter.projectTitle,
+      subtitle: cs.frontmatter.oneLiner,
       year: cs.frontmatter.year,
       types: cs.frontmatter.designType,
       thumbnailSrc: cs.frontmatter.thumbnailImage,
@@ -21,6 +22,7 @@ export default function Home() {
     ...explorations.map((ex) => ({
       slug: ex.frontmatter.slug,
       title: ex.frontmatter.name,
+      subtitle: ex.frontmatter.oneLiner,
       year: ex.frontmatter.explorationYear,
       types: [ex.frontmatter.category],
       thumbnailSrc: ex.frontmatter.mainImage,

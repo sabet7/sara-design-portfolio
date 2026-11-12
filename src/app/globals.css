@@ -7,7 +7,7 @@
 
   --color-cool-white: #FCFDFF;
   --color-black: #1F160F;
-  --color-gray-dark: #777777;
+  --color-gray-dark: #4a4a4a;
   --color-gray-light: #A8A8A8;
   /* Light gray for placeholder fills, bubbles and image backgrounds. It is
      --color-gray-light at low strength, so it stays inside the palette. */
@@ -19,14 +19,38 @@
   --color-brand-purple: #D163FD;
 
   --color-text: #1F160F;
-  --color-text-muted: #777777;
+  --color-text-muted: #4a4a4a;
   --color-text-light-muted: #A8A8A8;
   --color-featured: #F65009;
 
   /* Used until the dimmer loads (same values as the light stage below). */
   --bg: 252 253 255;
   --fg: 31 22 15;
-  --fg-muted: 119 119 119;
+  --fg-muted: 74 74 74;
+}
+
+/* ------------------------------------------------------------------
+   SPACING. Every gap inside the project modals is set here, in one place.
+   Change a number and every modal follows. (The gaps on the home page
+   cards are in HomeGrid.tsx, in the block marked CARD SPACING.)
+
+   Project modal, top to bottom:
+     title -> one-liner -> role tags -> big image -> sections below
+   Inside a section:
+     SECTION LABEL -> headline -> paragraph -> sub-heading -> paragraph
+   ------------------------------------------------------------------ */
+:root {
+  --sp-title-sub: 2px;        /* project title -> one-liner */
+  --sp-sub-tags: 10px;        /* one-liner -> role tags */
+  --sp-header-hero: 16px;     /* header block -> big image */
+  --sp-hero-body: 24px;       /* big image -> first section */
+  --sp-sidebar-link: 25px;    /* distance from one sidebar link to the next */
+  --sp-section: 2rem;         /* end of one section -> next SECTION LABEL */
+  --sp-label-heading: 15px;   /* SECTION LABEL -> the headline under it */
+  --sp-subhead: 1.5rem;       /* paragraph -> sub-heading (Solution, Outcomes) */
+  --sp-heading-text: 0.5rem;  /* any heading -> the text under it */
+  --sp-paragraph: 0.875rem;   /* paragraph -> paragraph, list, voice note */
+  --sp-media: 1.25rem;        /* above and below an image */
 }
 
 @theme inline {
@@ -46,12 +70,12 @@
 :root[data-dimmer-stage="light"] {
   --bg: 252 253 255;
   --fg: 31 22 15;
-  --fg-muted: 119 119 119;
+  --fg-muted: 74 74 74;
 }
 :root[data-dimmer-stage="warm"] {
   --bg: 250 244 235;
   --fg: 31 22 15;
-  --fg-muted: 119 119 119;
+  --fg-muted: 74 74 74;
 }
 :root[data-dimmer-stage="dusk"] {
   --bg: 87 87 87;
@@ -279,20 +303,20 @@ body {
   align-items: flex-start;
   gap: 1rem;
   padding-right: 3rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--sp-header-hero);
 }
 
 .detail-title {
   font-size: 28px;
   font-weight: 800;
-  margin: 0 0 4px;
+  margin: 0 0 var(--sp-title-sub);
   color: var(--color-text);
 }
 
 .detail-subtitle {
   font-weight: 300;
   color: var(--color-text-muted);
-  margin: 0 0 12px;
+  margin: 0 0 var(--sp-sub-tags);
 }
 
 .detail-tags-row {
@@ -335,7 +359,7 @@ body {
 .detail-hero {
   width: 100%;
   border-radius: 12px;
-  margin-bottom: 2rem;
+  margin-bottom: var(--sp-hero-body);
   display: block;
 }
 
@@ -348,7 +372,7 @@ body {
 .detail-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
   position: sticky;
   top: 2rem;
   align-self: start;
@@ -379,12 +403,16 @@ body {
    above/below it. */
 .detail-sidebar-item {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  /* Each link is exactly --sp-sidebar-link tall, so that number is the
+     distance from one link to the next. */
+  height: var(--sp-sidebar-link);
   /* A flex item stretches to the full column width unless told otherwise,
      which put the hover oval's centre in the middle of the column instead
      of the middle of the label. */
   align-self: flex-start;
-  padding: 6px 4px;
+  padding: 0 4px;
 }
 
 .detail-sidebar-item a {
@@ -459,7 +487,7 @@ body {
   max-width: 100%;
   height: auto;
   border-radius: 12px;
-  margin: 1.5rem 0;
+  margin: var(--sp-media) 0;
 }
 
 .detail-section-heading {
@@ -468,8 +496,8 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--color-text-light-muted);
-  margin-top: 3rem;
-  margin-bottom: 0.75rem;
+  margin-top: var(--sp-section);
+  margin-bottom: var(--sp-label-heading);
   scroll-margin-top: 2rem;
 }
 
@@ -481,8 +509,8 @@ body {
   font-size: 1.75rem;
   font-weight: 700;
   line-height: 1.25;
-  margin-top: 2rem;
-  margin-bottom: 0.75rem;
+  margin-top: var(--sp-subhead);
+  margin-bottom: var(--sp-heading-text);
   color: var(--color-text);
 }
 
@@ -490,7 +518,7 @@ body {
   font-weight: 400;
   line-height: 1.6;
   color: var(--color-text);
-  margin: 0 0 1rem;
+  margin: 0 0 var(--sp-paragraph);
 }
 
 .detail-list-section {
@@ -555,7 +583,7 @@ body {
   font-size: 28px;
   font-weight: 800;
   line-height: 1.15;
-  margin: 0 0 4px;
+  margin: 0 0 var(--sp-title-sub);
   color: var(--color-text);
 }
 
@@ -576,7 +604,7 @@ body {
   font-weight: 300;
   line-height: 1.3;
   color: var(--color-text-muted);
-  margin: 0 0 12px;
+  margin: 0 0 var(--sp-sub-tags);
 }
 
 .exploration-meta {
@@ -593,7 +621,7 @@ body {
   font-size: 15px;
   line-height: 1.5;
   color: var(--color-text);
-  margin: 0 0 1rem;
+  margin: 0 0 var(--sp-paragraph);
 }
 
 .exploration-heading {
@@ -601,7 +629,7 @@ body {
   font-weight: 700;
   line-height: 1.3;
   color: var(--color-text);
-  margin: 1.75rem 0 0.5rem;
+  margin: var(--sp-subhead) 0 var(--sp-heading-text);
 }
 
 .exploration-body > .exploration-heading:first-child {
@@ -612,7 +640,7 @@ body {
 .exploration-list ul {
   list-style: disc;
   padding-left: 1.25rem;
-  margin: 0 0 1rem;
+  margin: 0 0 var(--sp-paragraph);
   font-size: 15px;
   line-height: 1.6;
   color: var(--color-text);
@@ -1205,7 +1233,8 @@ body {
   font-size: clamp(22px, 2.1vw, 32px);
   font-weight: 800;
   line-height: 1.25;
-  margin: clamp(3.5rem, 12vh, 8.5rem) 0 1.25rem;
+  /* Last number = space between this heading and the paragraph below it. */
+  margin: clamp(3.5rem, 12vh, 8.5rem) 0 0.5rem;
 }
 
 .home-intro {
@@ -1268,17 +1297,19 @@ body {
 /* Project-card title underline — the hand-drawn line-draw reveal that
    replaces .hover-circle on the card itself (that rule and its assets
    above are untouched, just no longer referenced from ProjectCard, so
-   they're free to reuse somewhere else later). ProjectCard.tsx measures
-   the title's height and sets `top` inline so the line sits directly under
-   the title's last line; the `bottom` below is only the fallback used
-   before that measurement runs (the line is invisible until hover, so
-   it is never seen there). width is 92%/capped rather than a full 100% so
-   it reads as an underline drawn under the title rather than a rule
+   they're free to reuse somewhere else later). The line is positioned by CSS
+   alone: ProjectCard.tsx puts it inside the title + one-liner block, and
+   `top: 100%` places it just under the last line of that block (the
+   one-liner, or the title when a card has no one-liner), so it never
+   crosses the text. To move it closer or further, change the
+   margin-top below. width is 92%/capped rather than a full 100% so
+   it reads as an underline drawn under the text rather than a rule
    spanning the whole card row. */
 .title-underline {
   position: absolute;
   left: 0;
-  bottom: -9px;
+  top: 100%;
+  margin-top: 0;
   width: 92%;
   max-width: 280px;
   height: auto;
@@ -1313,41 +1344,46 @@ body {
   font-size: 1.75rem;
   font-weight: 600;
   line-height: 1.25;
-  margin-top: 2rem;
-  margin-bottom: 0.75rem;
+  margin-top: var(--sp-subhead);
+  margin-bottom: var(--sp-heading-text);
   color: var(--color-text);
 }
 .detail-content h3 {
   font-size: 1.375rem;
   font-weight: 500;
   line-height: 1.3;
-  margin-top: 1.75rem;
-  margin-bottom: 0.6rem;
+  margin-top: var(--sp-subhead);
+  margin-bottom: var(--sp-heading-text);
   color: var(--color-gray-dark);
 }
 .detail-content h4 {
   font-size: 1.125rem;
   font-weight: 500;
   line-height: 1.35;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
+  margin-top: calc(var(--sp-subhead) * 0.85);
+  margin-bottom: var(--sp-heading-text);
   color: var(--color-gray-dark);
 }
 .detail-content h5 {
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.4;
-  margin-top: 1.25rem;
-  margin-bottom: 0.4rem;
+  margin-top: calc(var(--sp-subhead) * 0.7);
+  margin-bottom: var(--sp-heading-text);
   color: var(--color-gray-dark);
 }
 .detail-content h6 {
   font-size: 0.875rem;
   font-weight: 700;
   line-height: 1.4;
-  margin-top: 1.25rem;
-  margin-bottom: 0.4rem;
+  margin-top: var(--sp-section);
+  margin-bottom: var(--sp-label-heading);
   color: var(--color-gray-light);
+}
+/* Whatever comes straight after a SECTION LABEL sits --sp-label-heading
+   below it, not the larger gap that headings normally get. */
+.detail-content .detail-section-heading + * {
+  margin-top: 0;
 }
 
 /* Lists written in a case study's MDX body (- item / 1. item). Tailwind's
@@ -1356,7 +1392,7 @@ body {
    lists bullets, an indent, and the same black as paragraphs. */
 .detail-content ul,
 .detail-content ol {
-  margin: 0 0 1rem;
+  margin: 0 0 var(--sp-paragraph);
   padding-left: 1.25rem;
   line-height: 1.6;
   color: var(--color-text);
@@ -1519,7 +1555,7 @@ h6.exploration-heading { font-weight: 700; }
   max-width: 100%;
   height: auto;
   border-radius: 8px;
-  margin: 1.5rem 0;
+  margin: var(--sp-media) 0;
 }
 
 /* Optional caption under a body image, written as
@@ -1527,7 +1563,7 @@ h6.exploration-heading { font-weight: 700; }
    get one. Used by case studies and design explorations. */
 .media-figure {
   display: block;
-  margin: 1.5rem 0;
+  margin: var(--sp-media) 0;
 }
 .media-figure img {
   margin: 0 0 0.6rem;
@@ -1538,4 +1574,106 @@ h6.exploration-heading { font-weight: 700; }
   line-height: 1.4;
   font-weight: 400;
   color: var(--color-text-light-muted);
+}
+
+/* "Coming soon" modal (ComingSoon in CaseStudyDetail.tsx), shown when a
+   case study's frontmatter has comingSoon: true. Text on the left, a
+   placeholder block on the right for work to come. */
+.detail-card:has(.coming-soon) {
+  /* Clears the close button so it never overlaps the placeholder block. */
+  padding-top: 4rem;
+  width: min(1000px, 85vw);
+  max-width: none;
+}
+/* No bottom fade on this card: it doesn't scroll. */
+.detail-modal-backdrop .detail-card:has(.coming-soon)::after {
+  display: none;
+}
+.coming-soon {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4.5rem;
+  align-items: stretch;
+}
+.coming-soon-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6rem;
+  min-width: 0;
+}
+.coming-soon-label {
+  margin: 0;
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+.coming-soon-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.coming-soon-name {
+  margin: 0;
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+.coming-soon-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+/* Outlined pill, no fill (the filled .detail-tag is for the role tags in the
+   full case study header). */
+.coming-soon-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 12px;
+  border: 1px solid var(--color-text);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--color-text);
+}
+.coming-soon-oneliner {
+  margin: 0.5rem 0 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-text-muted);
+}
+.coming-soon-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: var(--color-text-light-muted);
+}
+.coming-soon-art {
+  min-height: 26rem;
+  border-radius: 10px;
+  background: rgba(168, 168, 168, 0.4);
+}
+@media (max-width: 760px) {
+  .coming-soon {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .coming-soon-main {
+    gap: 2.5rem;
+  }
+  .coming-soon-art {
+    min-height: 14rem;
+  }
 }

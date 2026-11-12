@@ -4,7 +4,6 @@ import matter from "gray-matter";
 import {
   CaseStudyFrontmatterSchema,
   ExplorationFrontmatterSchema,
-  REQUIRED_CASE_STUDY_SECTIONS,
   type CaseStudyFrontmatter,
   type ExplorationFrontmatter,
 } from "@/content/types";
@@ -54,14 +53,10 @@ export function getAllCaseStudies(): CaseStudy[] {
       );
     }
 
-    for (const section of REQUIRED_CASE_STUDY_SECTIONS) {
-      if (!content.includes(`###### ${section}`)) {
-        throw new Error(
-          `Case study "${file}" is missing the "###### ${section}" section heading. ` +
-            `Every case study needs all six: ${REQUIRED_CASE_STUDY_SECTIONS.join(", ")}.`
-        );
-      }
-    }
+    // No section headings are required. The sidebar lists whichever
+    // "###### Heading" lines this case study's MDX contains (see
+    // CaseStudyDetail.tsx), so a case study can leave out Research, or any
+    // other section, or name its sections anything it likes.
 
     return { frontmatter: result.data, content };
   });

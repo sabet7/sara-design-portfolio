@@ -16,7 +16,9 @@ import { z } from "zod";
  *   Project thumbnail/GIF/hero image -> thumbnailImage / gifImage / heroImage
  *   Role, Year, Status, Skills -> same names
  *   Section 2-7 (rich text) -> written directly in the MDX body as
- *     ## Overview / ## Discovery / ## Research / ## Process / ## Final Design / ## Reflection
+ *     ###### Heading lines, any names (e.g. Overview, Discovery, Process or
+ *     Engineering and Design, Reflection). None are required; the sidebar lists
+ *     the ones present.
  */
 export const CaseStudyFrontmatterSchema = z.object({
   type: z.literal("case-study"),
@@ -63,18 +65,18 @@ export const CaseStudyFrontmatterSchema = z.object({
   // specific project needs a different image than the shared default.
   passwordFrameImage: z.string().optional(),
   passwordAnimation: z.string().optional(),
+  // "Coming soon" modal. `comingSoon: true` -> the project opens as a short
+  // "Coming soon" page (client name, design type, one-liner, role/year/skills
+  // and comingSoonSummary) instead of the full case study. The MDX body is
+  // left alone and not shown. Set it to false
+  // (or delete the line) to publish the full case study.
+  comingSoon: z.boolean().default(false),
+  // The short paragraph on the "Coming soon" page: what the project is and
+  // what stage it is in. Only used when comingSoon is true.
+  comingSoonSummary: z.string().optional(),
 });
 
 export type CaseStudyFrontmatter = z.infer<typeof CaseStudyFrontmatterSchema>;
-
-export const REQUIRED_CASE_STUDY_SECTIONS = [
-  "Overview",
-  "Discovery",
-  "Research",
-  "Process",
-  "Final Design",
-  "Reflection",
-] as const;
 
 /**
  * DESIGN EXPLORATION — maps to the old "Design Explorations" Webflow

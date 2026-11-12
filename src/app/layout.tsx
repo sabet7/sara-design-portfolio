@@ -5,7 +5,6 @@ import "./globals.css";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 import Header from "@/components/Header";
 import GrainOverlay from "@/components/GrainOverlay";
-import Preloader from "@/components/Preloader";
 import { spaceGrotesk, bricolageGrotesque, cabinetGrotesk } from "@/lib/fonts";
 import DoodleLayer from '@/components/doodle-layer/DoodleLayer';
 import CursorFollower from "@/components/CursorFollower";
@@ -41,7 +40,6 @@ export default function RootLayout({
     className={`h-full antialiased ${spaceGrotesk.variable} ${bricolageGrotesque.variable} ${cabinetGrotesk.variable}`}
     >
       <body className="min-h-full flex flex-col">
-        <Preloader />
         <GrainOverlay />
         <DoodleLayer />
         <CursorFollower />

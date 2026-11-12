@@ -49,7 +49,6 @@ const ABOUT_INTERESTS = ["helping small businesses", "indoor gardening", "baking
 const SHOW_FOLLOW_UPS = true;
 
 const ERROR_TEXT = "Something went wrong on my end — try again in a moment.";
-const ELIE_BUBBLE_BG = "#F2F2F2";
 const AVATAR_SIZE = 120;
 
 // Elie's mood animation sits at the top of the scrolling content, centered
@@ -60,6 +59,16 @@ const AVATAR_SIZE = 120;
 const MOOD_SIZE = 56;
 const MOOD_PHOTO_GAP = 8;
 const CHAT_TOP_PADDING = "0";
+
+// In the chat view the mood animation sits under the latest message (thinking
+// while Elie works on an answer, waiting once it is done), left-aligned like
+// Elie's replies. CHAT_MOOD_HEIGHT is its height in px; its width follows the
+// shape of the animation file.
+const CHAT_MOOD_HEIGHT = 72;
+
+// Elie's reply fades in one letter at a time. REPLY_CHAR_MS is the pause
+// between letters (raise it to slow the reveal down).
+const REPLY_CHAR_MS = 14;
 
 // Fixed card height — identical in the About view and the chat view.
 // Was min(540px, 67vh), min(500px, 62vh) before that, and min(560px, 70vh) before that — smaller cap so there's guaranteed room left over
@@ -185,7 +194,24 @@ const SHEET_CSS = `
   30% { transform: translateY(-5px); opacity: 1; }
 }
 
+/* Chat view animation: fades in each time the mood changes. */
+.elie-chat-mood { animation: elieChatMoodFade 0.35s ease both; }
+@keyframes elieChatMoodFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Elie's reply: every letter is laid out right away (so the text never
+   reflows while it appears) and fades in as it is revealed. */
+.elie-char {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.elie-char[data-on="true"] { opacity: 1; }
+
 @media (prefers-reduced-motion: reduce) {
+  .elie-char { transition: none; }
+  .elie-chat-mood { animation: none; }
   .elie-sheet, .elie-backdrop, .elie-sheet-inner { transition-duration: 0.01ms !important; transition-delay: 0s !important; }
 }
 `;
@@ -195,11 +221,15 @@ function MoodArt({
   size,
   failed,
   onFail,
+  wide = false,
 }: {
   mood: Mood;
   size: number;
   failed: boolean;
   onFail: () => void;
+  /** true: `size` is the height only and the width follows the file's own
+   *  shape (used in the chat view). false: a square, as in the About view. */
+  wide?: boolean;
 }) {
   if (failed) {
     return (
@@ -228,9 +258,9 @@ function MoodArt({
       alt=""
       className="elie-mood-art-img"
       style={{
-        width: size,
+        width: wide ? "auto" : size,
         height: size,
-        maxWidth: size,
+        maxWidth: wide ? "100%" : size,
         maxHeight: size,
         objectFit: "contain",
         display: "block",
@@ -307,27 +337,6 @@ function SendIcon() {
   );
 }
 
-function TypingBubble() {
-  return (
-    <div
-      aria-label="Elie is typing"
-      style={{
-        alignSelf: "flex-start",
-        background: ELIE_BUBBLE_BG,
-        borderRadius: 14,
-        padding: "16px 20px",
-        display: "flex",
-        gap: 6,
-        flexShrink: 0,
-      }}
-    >
-      {[0, 1, 2].map((i) => (
-        <span key={i} className="elie-typing-dot" style={{ animationDelay: `${i * 0.15}s` }} />
-      ))}
-    </div>
-  );
-}
-
 export default function Elie() {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -339,7 +348,7 @@ export default function Elie() {
   const [mounted, setMounted] = useState(false);
   const [profileFailed, setProfileFailed] = useState(false);
   const [typingId, setTypingId] = useState<number | null>(null);
-  const [visibleWordCount, setVisibleWordCount] = useState(0);
+  const [visibleCharCount, setVisibleCharCount] = useState(0);
   const [failedMoods, setFailedMoods] = useState<Record<Mood, boolean>>({
     waiting: false,
     thinking: false,
@@ -348,6 +357,7 @@ export default function Elie() {
 
   const nextId = useRef(0);
   const threadRef = useRef<HTMLDivElement>(null);
+  const replyRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -358,7 +368,15 @@ export default function Elie() {
 
   const inChat = messages.length > 0;
   const lastMessage = messages[messages.length - 1];
-  const mood: Mood = loading ? "thinking" : lastMessage?.role === "elie" ? "answered" : "waiting";
+  // About view: always waiting. Chat view: thinking while Elie works on an
+  // answer, answered while the reply fades in, waiting after that.
+  const mood: Mood = !inChat
+    ? "waiting"
+    : loading
+      ? "thinking"
+      : typingId !== null
+        ? "answered"
+        : "waiting";
 
   function markFailed(m: Mood) {
     setFailedMoods((prev) => ({ ...prev, [m]: true }));
@@ -375,32 +393,49 @@ export default function Elie() {
     setTypingId(id);
   }
 
-  // Word-by-word reveal for the newest Elie message only.
+  // Letter-by-letter reveal for the newest Elie message only.
   useEffect(() => {
     if (typingId === null) return;
     const msg = messages.find((m) => m.id === typingId);
     if (!msg) return;
-    const total = msg.text.split(" ").length;
+    // Reduced motion: show the whole reply at once.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setTypingId(null);
+      return;
+    }
+    const total = Array.from(msg.text).length;
     let i = 0;
-    setVisibleWordCount(0);
+    setVisibleCharCount(0);
     const interval = setInterval(() => {
       i++;
-      setVisibleWordCount(i);
+      setVisibleCharCount(i);
       if (i >= total) {
         clearInterval(interval);
-        setTypingId(null);
+        // Let the last letters finish fading in before the layout changes.
+        setTimeout(() => setTypingId(null), 450);
       }
-    }, 70);
+    }, REPLY_CHAR_MS);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [typingId]);
 
-  // Keep the thread scrolled to the newest message. Scrolls ONLY the
-  // thread container, never the card or the page.
+  // Scrolls ONLY the thread container, never the card or the page. While Elie
+  // is thinking, the thread follows the animation at the bottom. When a reply
+  // arrives, the start of the reply is brought into view so it can be read
+  // from the first word as it fades in.
   useEffect(() => {
     const el = threadRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [messages, loading, visibleWordCount]);
+    if (!el) return;
+    const reply = replyRef.current;
+    if (reply && lastMessage?.role === "elie") {
+      const top =
+        el.scrollTop + (reply.getBoundingClientRect().top - el.getBoundingClientRect().top) - 8;
+      el.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    } else {
+      el.scrollTop = el.scrollHeight;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, loading]);
 
   // Close on Escape while the modal is open.
   useEffect(() => {
@@ -496,7 +531,7 @@ export default function Elie() {
     setCustomQuestion("");
     setLoading(false);
     setTypingId(null);
-    setVisibleWordCount(0);
+    setVisibleCharCount(0);
   }
 
   async function askCustom(e: React.FormEvent) {
@@ -663,6 +698,24 @@ export default function Elie() {
     </div>
   );
 
+  // Chat view animation: under the latest message, left-aligned. Keyed by
+  // mood so it drops in again each time the mood changes.
+  const chatMoodArt = (
+    <div style={{ alignSelf: "flex-start", flexShrink: 0, pointerEvents: "none" }}>
+      {expanded && (
+        <div key={mood} className="elie-chat-mood">
+          <MoodArt
+            mood={mood}
+            size={CHAT_MOOD_HEIGHT}
+            wide
+            failed={failedMoods[mood]}
+            onFail={() => markFailed(mood)}
+          />
+        </div>
+      )}
+    </div>
+  );
+
   const chatView = (
     <div
       ref={threadRef}
@@ -674,36 +727,40 @@ export default function Elie() {
         paddingTop: CHAT_TOP_PADDING,
       }}
     >
-      {moodArt}
-      {messages.map((msg) => {
+      {messages.map((msg, index) => {
         const isUser = msg.role === "user";
-        const text =
-          msg.id === typingId
-            ? msg.text.split(" ").slice(0, visibleWordCount).join(" ")
-            : msg.text;
+        const isTyping = msg.id === typingId;
+        const isLastElie = !isUser && index === messages.length - 1;
         return (
           <div
             key={msg.id}
+            ref={isLastElie ? replyRef : undefined}
             style={{
               alignSelf: isUser ? "flex-end" : "flex-start",
-              maxWidth: isUser ? "75%" : "70%",
+              maxWidth: isUser ? "75%" : "85%",
               flexShrink: 0,
-              background: isUser ? "var(--color-brand-orange)" : ELIE_BUBBLE_BG,
-              color: "var(--color-text)",
+              // Plain text, no bubbles: the visitor's question in orange on
+              // the right, Elie's reply in the regular text color on the left.
+              color: isUser ? "var(--color-brand-orange)" : "var(--color-text)",
               fontWeight: isUser ? 500 : 400,
               fontSize: 17,
               lineHeight: 1.5,
-              borderRadius: 14,
-              padding: isUser ? "12px 20px" : "14px 20px",
+              textAlign: isUser ? "right" : "left",
               whiteSpace: "pre-wrap",
             }}
           >
-            {text}
+            {isTyping
+              ? Array.from(msg.text).map((char, i) => (
+                  <span key={i} className="elie-char" data-on={i < visibleCharCount}>
+                    {char}
+                  </span>
+                ))
+              : msg.text}
           </div>
         );
       })}
 
-      {loading && <TypingBubble />}
+      {chatMoodArt}
 
       {followUps.length > 0 && (
         <div
@@ -711,7 +768,6 @@ export default function Elie() {
             display: "flex",
             flexDirection: "column",
             gap: 10,
-            paddingLeft: "0.25rem",
             flexShrink: 0,
           }}
         >
