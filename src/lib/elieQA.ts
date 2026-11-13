@@ -9,7 +9,7 @@ export const QA_TREE: Record<string, QANode> = {
   "design-process": {
     id: "design-process",
     question: "Tell me about your design process.",
-    answer: "Over the years, as a freelance designer, I have learned that no design lives in a vacuum. Therefore, I begin by understanding: what am I trying to solve, for whom, and in what system? After I have scoped out the project, I begin ideating and testing, refining the design with each round to arrive at the best design solution possible.",
+    answer: "Over the years, as a freelance designer, I have learned that no design lives in a vacuum. Therefore, I begin by understanding: what am I trying to solve, for whom, and in what system. After I have scoped out the project, I begin ideating and testing, refining the design with each round to arrive at the best design solution possible.",
     followUps: ["design-thinking", "product-strategy", "new-projects"],
   },
   "design-thinking": {
