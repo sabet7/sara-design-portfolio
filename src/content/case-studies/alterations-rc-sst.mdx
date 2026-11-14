@@ -20,31 +20,29 @@ private: false
 ###### Overview
 ## An analog system causing bottlenecks and mishaps throughout employee daily workflows. 
 {/* Alterations by R.C.’s analog system created miscommunication and organizational issues that affected the employee’s daily workflows and ultimately customers. */} 
-A small garment business was growing, which meant more incoming orders. However, it's current system could not keep up with the growing demand. Employees and clients faced unnecessary friction, bottlenecks and delays. Backed-up, delayed, or misplaced orders began to affect the store’s reputation and  newfound momentum. Here's how I rebuilt that system,and what happened when it got tested by conditions we didn't plan for.
+The business was growing, but its current system could not keep up. Employees and clients faced unnecessary friction, bottlenecks, and delays. Backed and delayed orders affected the store’s reputation and newfound momentum. Here is how I rebuilt that system and how I worked around unexpected constraints. 
 
 ##### SOLUTION
 ## A self-service kiosk working in tandem with a work management system 
 {/* An all in one work management order system that works with a customer facing kiosk to streamline daily operations and provides sales data so that the owner can monitor business growth. */} 
-Alteration’s new system is a unified platform that handles front-end customer service interactions and daily operations and management. The process begins with the customer-facing kiosk. A customer drops off their garment, generating a unique garment ticket. 
+Alteration’s new system is a unified platform that handles front-end customer service interactions, daily operations, and management. The process begins with the customer-facing kiosk. A customer drops off their garment, generating a unique garment ticket. 
 
-After the ticket enters the system, it gets organized by pick up date, prioritizing earlier picks on the operation pipeline to ensure timely completion of orders. After the tailor finishes his or her job, the ticket is marked off for review by the head tailor or seamstress, and only get marked as done after approval.  
+The ticket is organized and prioritized by pick-up date as soon as it enters the system.   Once the tailor finishes the job, the head tailor or seamstress reviews it. Without the tailor’s approval, the garment cannot be marked as finished. 
 
-On the business management side, completed orders translate into sales. The business owner can track his sales by month or quarter, seeing where he could improve marketing or different areas of his buiness. 
+On the business management side, completed orders translate into sales. The business owner can see quarterly growth and sales. 
 
 ###### Discovery
-## Backed-up orders started to get in the way of business.
-While I was working on Alterations website, I worked at the store for two weeks. During those two weeks, I noticed that it's growth was outpacing it's current operating system. 
+## Backedlogged orders started to get in the way of business.
+While redesigning Alteration’s website, I worked at the store for two weeks. During those two weeks, I noticed that its growth was outpacing its current operating system. 
 
-At the time, the store relied heavily on ticket stubs because that is how it has always been done. However, the heavy reliance on paper tickets caused back ups and mishaps. 
-
-Additionally, there was a small staff who were being stretched thin.  
+The store relied heavily on ticket stubs because of their mental model. Many alteration shops around New York rely on ticketbooks; that is how it has always been done. For a growing business, this system created backlogged orders, which indirectly affected customers.   
 
 ![Service blueprint of operations](/media/case-studies/alterations-rc-sst/content/alterations-service-blueprint.png)
 
-Based on my observations, I created a service blueprint to see areas where front facing operations and backend operations could improve. Employees had to take on many tasks, thus limiting their time to work on garments and the ticket stubs were unreliable. 
+The service blueprint shed light on improvement areas between front-facing and back-end operations.  Employees took on too many tasks, limiting their time to work on garments, and ticket stubs got lost easily.  
 
 ##### Pain Points
-- Cognitive overload: The tailors occupied two roles at once, tailors and sales associates. 
+-  Cognitive overload: The tailors occupied two roles at once: tailors and sales associates. 
 - Unstructured legacy system: Additionally, the system in place was outdated and relied heavily on analog artifacts, which did not leave room for automation or organization.‍ 
 
 Key Insight: Daily operations heavily relied on data provided by the customer; however, the current system did not utilize this information well. ‍
@@ -52,22 +50,22 @@ Key Insight: Daily operations heavily relied on data provided by the customer; h
 ###### Research
 ##### Competitive analysis
 ![Competitive analysis](/media/case-studies/alterations-rc-sst/content/alterations-competitive-a.png)
-Although there are many business management and work management software available, they were incompatible for a tailoring business. They were best suited for projects and IT related tasks, not for handling or managing garments. 
+Although there are many business management and work management software available, they were incompatible for a tailoring business. They were best suited for projects and IT-related tasks, not for handling or managing garments. 
 
-After more research,  I came across Geelus, a software  specifically for tailoring and dry cleaning businesses. 
+After more research,  I came across various platforms (i.e., Orderry, Atelierware, etc.). The one that appeared to be suited for tailoring and dry cleaning businesses was  Geelus. 
 
 ![Geelus UI is too complicated for employees](/media/case-studies/alterations-rc-sst/content/geelus-2.png)
 
-However, the interface of this softwares was better suited for dry cleaning businesses. Additionally, it did now prioritize tickets, which was necessary to ease the workflow of employees at Alterations by R.C. 
+However, the interface of this software required fixed prices and ran more like a POS system instead of an organizational and management tool. Alterations needed a tool that could create customizable tickets, bridge between operations and customer-facing interactions, accept payments, but above all ease the workflow of employees at Alterations by R.C. 
 
 ###### Process
-## How might I bridge customer facing experiences and daily operations into a streamlined system while maintaining human interactions?
+## How might I bridge customer-facing experiences and daily operations into a streamlined system while maintaining human interactions?
 
 <VoiceNote src="/media/case-studies/alterations-rc-sst/content/voice-note-alterations-process.mp3" label="Maintaining human connections in the design"/>
 
-I needed to create a system that would ease the workload of tailors but also keep personal interactions between customers and staff. By talking to the business owners and staff, I came to understand that this system need to mimics a mental model that tailors are used to. 
+I needed to create a system that would ease the workload of tailors but also keep personal interactions between customers and staff. By observing and talking to the business owners and staff, I realized that this system needed to integrate into their daily life, serving as a work companion. 
 
-On the customer-facing side, I wanted to make sure that human interaction was kept. 
+On the customer-facing side, I wanted to keep human interactions between customers and staff. 
 
 The first access point for this system was the self-service kiosk. The kiosk would serve as an aid to tailors who might be busy doing fittings or working on large orders. The self-service kiosk would handle simple interactions— drop offs for adding buttons or zippers, scheduling fittings, or picking up items. Thus, eliminating customer wait times and work for tailors. 
 
@@ -76,41 +74,50 @@ The first access point for this system was the self-service kiosk. The kiosk wou
 ###### Engineering + Design
 ## The engineering side of designing this system
 ### Linking the self-service kiosk to operations.
-The kiosk now allowed for customer pick-ups, another task that tailors needed to attend to. Creating the pick-up flow was tricky.  How can I create something that keeps a history of picked-up items for the business owner, but clears out every week? 
+Now, the kiosk allowed for customer pick-ups, taking the workload tailors sometimes needed to do.  However, the creation of the pick-up flow was tricky.  
 
-After asking the tailors and owner a few questions and bouncing a ideas around in Claude, figured that a clean array every week would work. It was a risky move, but it made the new digitized work order system feasible to manage given that there was no compliance or data officers among the staff. 
+How can I create something that keeps a history of picked-up items for the business owner, but clears out every week? 
+
+A design decision informed by engineering helped finish the pick-up flow. A ticket enters and receives a randomized number. However, at the end of the lifecycle, that specific garment is assigned a number from 1-10. These numbers (1-10) correspond to digital lockers, represented as cubicles in the store. When the customer receives the notification that their item is complete, they also receive a number. 
+
+The challenge was then determining how the program knew when to “clear out” the locker to add a newly finished garment. The owner needed to keep a history of payments and completed orders, but customers needed to make sure that their personal information was safe. 
+
+Storing payment completion info, dates, and emails only in encrypted backups that are only accessible to specific people eliminated the worry of handling data. 
 
 <VoiceNote src="/media/case-studies/alterations-rc-sst/content/voice-note-alterations-engineering-process.mp3" label="On engineering"/>
 
 ### Co-creating the MVP with Claude and publishing on Vercel to stress test new system 
-In order to test the effectiveness of my design, I wanted to create a working prototype (well, a bit more than a prototype) that employees and customers could use. This MVP was to see how this new system would impact business operations and test customer use in real time. 
+To test the effectiveness of my design, I wanted to create a working prototype that employees and customers could use. The objective was to see if this new system could impact business operations and test customer use in real time. 
 
 ### Technical limitations and considerations
-One technical limitation was connecting the current payment system to the kiosk.  Clients pay via a Verifone. The receipt issued after payment was typically attached to the the garment ticket. However, it was not always a reliable way to confirm payments. I needed to connect the current system to the device in store and ensure that payments made were reflected in the system.
+One technical limitation was connecting the current payment system to the kiosk.  Customers pay via a Verifone,  and the receipt is typically attached to the garment. 
 
-After designing the main screens, I hopped on Github and set up my code space and set up a staging layer in Supabase with SQL tables that would store login credentials for employees, and ticket information for the garments.
+My system should do something similar, connecting the current system to the device in store.
+
+After designing the main screens, I hopped on GitHub, set up my code space, and set up a staging layer in Supabase with SQL tables to store payments, login credentials, and ticket information.
 
 ![Supabase workflow](/media/case-studies/alterations-rc-sst/content/supabase-set-up.png)
 
-However, in desiging and building this system, one question persisted: how would I handle data storage? Not only was I introducing a new system to how the tailors worked but I also had to consider the data system working behind the scenes. 
+### Co-creating the MVP with Claude and publishing on Vercel to stress test new system 
+To test the effectiveness of my design, I wanted to create a working prototype that employees and customers could use. The objective was to see if this new system could impact business operations and test customer use in real time. 
 
 ###### Current designs
-To reduce employee’s cognitive load, I designed a dashboard that kept track of all the tickets and prioritized them according to pick up dates. The sections on the dashboards were inspired by "In" and "Out" trays, creating a clear and understandable hierarchy.
+To reduce employees’ cognitive load, I designed a simple dashboard with two sections. The sections are inspired by "In" and "Out" trays, creating a clear and understandable hierarchy. Each ticket is organized and color-coded by priority. 
 
 ![Employee dashboards](/media/case-studies/alterations-rc-sst/content/alterations-sst-employee-dashboards.png)
 
-### Self service kiosk
-On the customer facing side, customers could easily pick up and drop off items, without interrupting the employee’s workflow.
+### Self-service kiosk
+On the customer-facing side, customers could easily pick up and drop off items without interrupting the employee’s workflow.
 
 ![Kiosk flow](/media/case-studies/alterations-rc-sst/content/alterations-sst-customer-service.png)
 
 ## Visually tying it all together.
-Although the experiences for the frontend and backend were different, they needed to feel part of the same business. I wanted to achieve this through a visual guideline. It wasn’t just for aesthetics, but rather to inform future design. 
+The visuals for both the frontend and backend needed to feel cohesive.  I wanted to achieve this through a visual guideline, leaving a guide for future designs. 
 
 ![Visual identity](/media/case-studies/alterations-rc-sst/content/alterations-sst-visuals.png)
 
 ### Roadblocks during MVP stage
-A few days before testing the MVP design, I learned that the shop no longer had WiFi connection. The new paper system was created, not as an afterthought, but as conscious fallback system for when things don't work. 
+A few days before testing the MVP design, I learned that the shop no longer had a WiFi connection. Luckily, I had created a paper-based system that still functioned the same as the MVP. This came about as a training foundation that could get employees accustomed to the new system before the digital one was in place. 
 
 ![MVP stage](/media/case-studies/alterations-rc-sst/content/mvp-stage-1.png)
 
@@ -118,16 +125,16 @@ With these new constraints, I had to pivot and test the system in a different wa
 
 ![Store setup](/media/case-studies/alterations-rc-sst/content/store-setup.png)
 
-The re-design consisted of a manual for daily operations, a new receipts booklet that allowed the sales associate to detail the type of alteration the garment needed, color code stickers, a big binder and visual identity guideline.
+The redesign consisted of a manual for daily operations, a new receipts booklet that allowed the sales associate to detail the type of alteration the garment needed, color-coded stickers, a big binder, and visual identity guidelines.
 
 The analog MVP has worked and held on so far. Once the WiFi issues are resolved, the owners are eager to implement the digital system I created.
 
 {/* Block quote:*/} 
- > "This new way of organizing clothes has helped up work faster. The designated areas too. Everything is organized and easy to find." - Aida (Head Seamstress)
+ > "This new way of organizing clothes has helped us work faster. The designated areas too. Everything is organized and easy to find." - Aida (Head Seamstress)
 
 {/*###### Final Design once the sytem is up and running in the store */} 
 
 ###### Reflection
-## UIs doesn't only live in digital spaces.
+## UIs don't only live in digital spaces.
 <VoiceNote src="/media/case-studies/alterations-rc-sst/content/voice-note-alterations-learnings.mp3" label="On what I learned in the process"/>
-As a designer, I've always believed that user interfaces exist on digital surfaces and that designing for digital experiences is sole job of a UX or product designer.  However, when I had to adapt my design and revert back to an analog format, I realized that it was still design. I was still creating an experience informed by user needs and feedback that was aimed at solving a specific problem. 
+As a designer, I've always believed that user interfaces exist on digital surfaces and that designing for digital experiences is the sole job of a UX or product designer.  However, when I had to adapt my design and revert to an analog format, I realized that it was still design. I was still creating an experience informed by user needs and feedback that was aimed at solving a specific problem.
