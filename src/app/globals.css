@@ -51,6 +51,7 @@
   --sp-heading-text: 0.5rem;  /* any heading -> the text under it */
   --sp-paragraph: 0.875rem;   /* paragraph -> paragraph, list, voice note */
   --sp-media: 1.25rem;        /* above and below an image */
+  --sp-media-height: 27.5rem; /* tallest any image or clip in a case study can be (about a 16:9 image at full text width) */
 }
 
 @theme inline {
@@ -483,11 +484,20 @@ body {
   min-width: 0;
 }
 
-/* Images written in a case study's MDX body (![alt](/media/...)) — keeps
-   them inside the text column at any width instead of running past it. */
-.detail-content img {
+/* Images and clips written in a case study's MDX body (![alt](/media/...)).
+   They stay inside the text column at any width, and are never taller than
+   --sp-media-height (set at the top of this file), so a tall phone recording
+   or a square image can't take over the page. Nothing is stretched or
+   cropped: the browser shrinks the whole picture in proportion, so a wide
+   image ends up a little narrower than the column and a tall phone clip much
+   narrower. Anything already shorter than the limit is left alone. They sit
+   at the left edge; to center them, add margin-inline: auto below. */
+.detail-content img,
+.detail-content video {
   display: block;
+  width: auto;
   max-width: 100%;
+  max-height: var(--sp-media-height);
   height: auto;
   border-radius: 12px;
   margin: var(--sp-media) 0;
