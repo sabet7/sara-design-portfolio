@@ -30,6 +30,7 @@ export const QA_TREE: Record<string, QANode> = {
     answer: "When starting a new project, I like to start with research and discovery. I want to understand the problem space, the users, and the business goals. From there, I can start to ideate and prototype solutions, always keeping the user at the center of the process.",
     followUps: ["design-process", "design-thinking", "product-strategy"],
   },
+  
 };
 
 export const ROOT_QUESTIONS = [
