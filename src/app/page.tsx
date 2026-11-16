@@ -40,7 +40,7 @@ export default function Home() {
           now, no more flex row / FrostedReveal here. */}
       <div className="home-hero">
         <h1 className="home-intro-heading">
-          I'm a product designer that designs and builds for connection and fun.
+          I'm a product designer that loves unboggling complex problems and designs for connection and fun.
         </h1>
         <p className="home-intro">
           Welcome to my digital archive, a place for projects and explorations. I design products and then build them, working across web and product to connect people and meet business goals.
