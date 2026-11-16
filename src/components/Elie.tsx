@@ -645,21 +645,9 @@ export default function Elie() {
           failed={profileFailed}
           onFail={() => setProfileFailed(true)}
         />
-        <span
-          style={{
-            marginTop: -22,
-            position: "relative",
-            background: "#fff",
-            borderRadius: 999,
-            padding: "8px 20px",
-            fontSize: 17,
-            fontWeight: 500,
-            color: "var(--color-text)",
-            boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
-          }}
-        >
-          About Me
-        </span>
+        {/* Same frosted glass as the bottom nav — see .elie-about-tag in
+            globals.css. */}
+        <span className="elie-about-tag">About Me</span>
       </div>
 
       <div style={{ marginBottom: "2rem" }}>

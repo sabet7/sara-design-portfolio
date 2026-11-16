@@ -1096,6 +1096,41 @@ body {
 .float-nav-divider {
   display: none;
 }
+
+/* "About Me" tag in Elie's modal. Same glass recipe as .sara-float-nav
+   above: white gradient, heavy blur, soft white border, drop shadow with an
+   inner glow, and the frosted grain. It overlaps the bottom of the profile
+   photo, so the blur shows the photo through the glass. The shape stays a
+   pill (the nav uses a 10px radius; change border-radius here to match). */
+.elie-about-tag {
+  position: relative;
+  margin-top: -22px;
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--color-text);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(244, 244, 244, 0.8) 100%);
+  backdrop-filter: blur(44px) saturate(220%) contrast(120%);
+  -webkit-backdrop-filter: blur(44px) saturate(220%) contrast(120%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.18),
+    0 3px 10px rgba(0, 0, 0, 0.1),
+    inset 0 0 22px rgba(255, 255, 255, 0.28);
+  isolation: isolate;
+}
+.elie-about-tag::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 60px 60px;
+  mix-blend-mode: overlay;
+  opacity: 0.35;
+  pointer-events: none;
+}
 /* The nav glass stays light through the gray (dusk) stage and only turns
    dark at charcoal/near-black, but dusk's text color (--fg) is near-white,
    which vanished on the light glass. Dark text there instead. */
