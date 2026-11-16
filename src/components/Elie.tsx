@@ -122,8 +122,6 @@ const SHEET_CSS = `
   background: var(--sheet-from);
   border: 1px solid var(--sheet-border);
   box-shadow: 0 22px 55px rgba(0, 0, 0, 0.22), 0 4px 12px rgba(0, 0, 0, 0.16);
-  -webkit-backdrop-filter: blur(34px) saturate(180%);
-  backdrop-filter: blur(34px) saturate(180%);
   color: var(--color-text);
   transition:
     width ${SHEET_MS}ms cubic-bezier(0.32, 0.72, 0, 1),
