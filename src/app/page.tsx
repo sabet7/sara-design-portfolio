@@ -40,12 +40,10 @@ export default function Home() {
           now, no more flex row / FrostedReveal here. */}
       <div className="home-hero">
         <h1 className="home-intro-heading">
-          I'm a product designer that loves unboggling complex problems and designs for connection + fun.
+          I'm a product designer who loves untangling complex problems.
         </h1>
         <p className="home-intro">
-          Welcome to my digital archive, a place for projects and explorations. I design products and then build them, working across web and product to connect people and meet business goals.
-
-          Some of what's archived here is shipped and in use (like a tailor shop's work-order system) or in beta. The rest are the result of curiosity and exploration. Browse at your own pace! The weather's fine.
+          Welcome to my digital archive, a place for projects and explorations. I design products and then build them, working across web and product to connect people and meet business goals. I'm a system thinker and a problem solver, and I love to explore new ideas and technologies. Some of what's archived here is shipped and in use (like a tailor shop's work-order system) or in beta. The rest are the result of curiosity and exploration. Browse at your own pace! The weather's fine.
         </p>
       </div>
       <HomeGrid items={items} />
