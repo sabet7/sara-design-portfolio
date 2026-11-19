@@ -48,6 +48,13 @@ export default function RootLayout({
           {children}
           {modal}
         </ViewTransition>
+        {/* Copyright line. mt-auto pushes it to the bottom of short pages.
+            The large bottom padding keeps it clear of the floating nav that
+            is fixed to the bottom of the screen. Text color is inherited, so
+            it follows the dimmer stages. */}
+        <footer className="mt-auto px-6 pt-16 pb-28 text-center text-xs opacity-60">
+          CC 2026. Sara Del Villar
+        </footer>
         <Analytics />
       </body>
     </html>
