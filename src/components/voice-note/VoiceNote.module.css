@@ -57,9 +57,9 @@
   height: 28px;
   flex-shrink: 0;
   border-radius: 999px;
-  border: 2px solid #f06a1a;
+  border: 2px solid var(--color-brand-orange, #FF540A);
   background: transparent;
-  color: #f06a1a;
+  color: var(--color-brand-orange, #FF540A);
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -83,7 +83,7 @@
 }
 
 .barPlayed {
-  background: #f06a1a;
+  background: var(--color-brand-orange, #FF540A);
 }
 
 .playToggle {

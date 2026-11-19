@@ -13,7 +13,7 @@
      --color-gray-light at low strength, so it stays inside the palette. */
   --color-gray-soft: rgba(168, 168, 168, 0.2);
 
-  --color-brand-orange: #F65009;
+  --color-brand-orange: #FF540A;
   --color-brand-blue: #7DC4FF;
   --color-brand-yellow: #FFEF86;
   --color-brand-purple: #D163FD;
@@ -21,7 +21,7 @@
   --color-text: #1F160F;
   --color-text-muted: #4a4a4a;
   --color-text-light-muted: #A8A8A8;
-  --color-featured: #F65009;
+  --color-featured: #FF540A;
 
   /* Used until the dimmer loads (same values as the light stage below). */
   --bg: 252 253 255;

@@ -170,18 +170,20 @@ function NavIconLink({
   label,
   icon,
   external,
+  className,
 }: {
   href: string;
   label: string;
   icon: string;
   external?: boolean;
+  className?: string;
 }) {
   const [failed, setFailed] = useState(false);
   return (
     <a
       href={href}
       {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
-      className={`sdv-hdr-nav-link sdv-icon-link${failed ? " sdv-icon-failed" : ""}`}
+      className={`sdv-hdr-nav-link sdv-icon-link${failed ? " sdv-icon-failed" : ""}${className ? ` ${className}` : ""}`}
       aria-label={label}
     >
       {!failed && (
@@ -200,6 +202,146 @@ function NavIconLink({
         {label}
       </span>
     </a>
+  );
+}
+
+// The message that fades in one letter at a time, as if it were being said.
+// Words are kept together so a line never breaks in the middle of a word. The
+// animated copy is hidden from screen readers, which get the plain sentence.
+function SpokenText({ text }: { text: string }) {
+  let index = 0;
+  const words = text.split(" ");
+  // A space counts as one step of the timing, like a letter.
+  const spaceAfter = () => {
+    index++;
+    return " ";
+  };
+  return (
+    <p className="sdv-vm-text">
+      <span className="sdv-vm-sr">{text}</span>
+      <span aria-hidden="true">
+        {words.map((word, w) => (
+          <span key={w}>
+            <span className="sdv-vm-word">
+              {Array.from(word).map((ch, c) => (
+                <span
+                  key={c}
+                  className="sdv-vm-ch"
+                  style={{ animationDelay: `${VM_START_MS + index++ * VM_CHAR_MS}ms` }}
+                >
+                  {ch}
+                </span>
+              ))}
+            </span>
+            {w < words.length - 1 && spaceAfter()}
+          </span>
+        ))}
+      </span>
+    </p>
+  );
+}
+
+// Mobile and tablet "Connect" card, styled as a voicemail box. There is no
+// server behind the form: Leave message opens the visitor's email app with
+// everything filled in.
+function VoicemailCard({ onClose }: { onClose: () => void }) {
+  const [phoneFailed, setPhoneFailed] = useState(false);
+  const [name, setName] = useState("");
+  const [contact, setContact] = useState("");
+  const [message, setMessage] = useState("");
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const subject = `Message from ${name.trim()}`;
+    const body = `${message.trim()}\n\nName: ${name.trim()}\nContact: ${contact.trim()}`;
+    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+  }
+
+  return (
+    <div
+      className="sdv-connect-card sdv-vm-card"
+      style={
+        {
+          "--vm-beep": `${VM_BEEP_MS}ms`,
+          "--vm-form": `${VM_FORM_MS}ms`,
+        } as React.CSSProperties
+      }
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button type="button" className="sdv-connect-close" aria-label="Close" onClick={onClose}>
+        ×
+      </button>
+
+      {/* Hand-drawn landline phone. Drop the file at
+          public/media/contact/landline-phone.webp (or change the path). If
+          it is missing the space simply stays empty. */}
+      {!phoneFailed && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src="/media/contact/landline-phone.webp"
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="sdv-vm-phone"
+          onError={() => setPhoneFailed(true)}
+        />
+      )}
+
+      <SpokenText text={VOICEMAIL_MESSAGE} />
+
+      <div className="sdv-vm-dots" aria-hidden="true">
+        <span className="sdv-vm-dot" />
+        <span className="sdv-vm-dot" />
+        <span className="sdv-vm-dot" />
+      </div>
+
+      <form className="sdv-vm-form sdv-vm-reveal" onSubmit={handleSubmit}>
+        <input
+          className="sdv-vm-field"
+          type="text"
+          name="name"
+          placeholder="Full name"
+          aria-label="Full name"
+          autoComplete="name"
+          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          className="sdv-vm-field sdv-vm-field-b"
+          type="email"
+          name="email"
+          placeholder="Email"
+          aria-label="Email"
+          autoComplete="email"
+          required
+          value={contact}
+          onChange={(e) => setContact(e.target.value)}
+        />
+        <textarea
+          className="sdv-vm-field sdv-vm-field-c"
+          name="message"
+          rows={4}
+          placeholder="Message"
+          aria-label="Message"
+          required
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
+        <button type="submit" className="sdv-vm-send">
+          Leave message
+        </button>
+      </form>
+
+      <p className="sdv-vm-foot sdv-vm-reveal">
+        You can also reach out via{" "}
+        <a href="https://www.linkedin.com/in/saradelvillar/" target="_blank" rel="noreferrer">
+          LinkedIn
+        </a>
+      </p>
+    </div>
   );
 }
 
@@ -227,6 +369,26 @@ const MIN_FONT_PX = 11;
 // small modal with Resume / Email / LinkedIn instead of linking straight to
 // mailto:. Keep this in sync with the max-width in HEADER_CSS below.
 const MOBILE_QUERY = "(max-width: 767px)";
+
+// Mobile and tablet: at or below this width Connect opens the voicemail card
+// instead of linking straight to mailto:. On phones the header is just
+// "SV" + Resume icon + Connect (see MOBILE_QUERY); on tablets the header keeps
+// its desktop layout but Connect still opens the card. Keep in sync with
+// nothing else, this is only read in JavaScript below.
+const MODAL_QUERY = "(max-width: 1024px)";
+
+const CONTACT_EMAIL = "sedelvillar104@gmail.com";
+
+// Voicemail card copy. Edit here.
+const VOICEMAIL_MESSAGE =
+  "This is Sara's inbox. I'm probably designing or working on other projects, but leave your name, contact info, and a reason for contacting me and I'll get back to you as soon as I can.";
+// Timing of the card's animation, in ms. The message fades in one letter at a
+// time (VM_CHAR_MS per letter), then the "beep" dots play, then the form
+// fades in.
+const VM_START_MS = 450;
+const VM_CHAR_MS = 28;
+const VM_BEEP_MS = VM_START_MS + VOICEMAIL_MESSAGE.length * VM_CHAR_MS + 250;
+const VM_FORM_MS = VM_BEEP_MS + 800;
 
 const HEADER_CSS = `
 .sdv-hdr {
@@ -267,7 +429,7 @@ const HEADER_CSS = `
 .sdv-connect-mobile {
   display: none;
   align-items: center;
-  background: var(--color-brand-orange, #e8581c);
+  background: var(--color-brand-orange, #FF540A);
   color: #ffffff;
   font: inherit;
   font-weight: 700;
@@ -436,6 +598,28 @@ const HEADER_CSS = `
   .sdv-hdr .sdv-name-sv { display: inline; }
   .sdv-hdr .sdv-connect-mobile { display: inline-flex; }
   .sdv-hdr .sdv-hdr-nav { margin-top: 0; }
+  /* The Resume icon stays visible on mobile, to the left of Connect. The
+     rest of the nav links stay hidden. Without the icon file, the word
+     "Resume" is shown instead. */
+  .sdv-hdr .sdv-hdr-nav .sdv-resume-link {
+    display: inline-flex;
+    order: -1;
+    padding: 0.3em;
+  }
+  .sdv-hdr .sdv-hdr-nav .sdv-resume-link:not(.sdv-icon-failed) .sdv-nav-icon {
+    display: block;
+    width: 2.4em;
+    height: 2.4em;
+    margin: 0;
+  }
+  .sdv-hdr .sdv-hdr-nav .sdv-resume-link:not(.sdv-icon-failed) .sdv-nav-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
 }
 
 /* Connect modal (mobile). */
@@ -459,12 +643,14 @@ const HEADER_CSS = `
   position: relative;
   box-sizing: border-box;
   width: 100%;
-  max-width: 340px;
+  max-width: 400px;
+  max-height: calc(100dvh - 3rem);
+  overflow-y: auto;
   background: #ffffff;
   color: var(--color-text);
   border-radius: 24px;
   padding: 2.75rem 1.75rem 1.75rem;
-  animation: sdvConnectRise 0.25s ease;
+  animation: sdvConnectRise 0.3s ease;
 }
 .sdv-connect-close {
   position: absolute;
@@ -477,28 +663,130 @@ const HEADER_CSS = `
   cursor: pointer;
   color: var(--color-text-muted);
 }
-.sdv-connect-links {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0 0.5rem;
-  margin-bottom: 1.25rem;
-  font-size: 18px;
-  font-weight: 500;
+
+/* Voicemail card. The order of events (timings are set in Header.tsx):
+   the phone fades in, the message fades in one letter at a time, the "beep"
+   dots play, then the form and the LinkedIn line fade in. */
+@keyframes sdvVmFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-.sdv-connect-links a { color: inherit; text-decoration: none; }
-.sdv-connect-email {
+@keyframes sdvVmBeep {
+  0% { opacity: 0; transform: scale(0.5); }
+  45% { opacity: 1; transform: scale(1.3); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes sdvVmReveal {
+  from { opacity: 0; visibility: hidden; transform: translateY(6px); }
+  to { opacity: 1; visibility: visible; transform: translateY(0); }
+}
+.sdv-vm-phone {
   display: block;
+  width: auto;
+  height: auto;
+  max-width: 45%;
+  max-height: 150px;
+  margin: 0 auto 1.25rem;
+  animation: sdvVmFade 0.5s ease 0.15s both;
+}
+.sdv-vm-text {
+  margin: 0 0 1.25rem;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.sdv-vm-word { display: inline-block; }
+.sdv-vm-ch {
+  opacity: 0;
+  animation: sdvVmFade 0.5s ease-out forwards;
+}
+.sdv-vm-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.sdv-vm-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 0 0 1.5rem;
+}
+.sdv-vm-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-brand-orange, #FF540A);
+  opacity: 0;
+  animation: sdvVmBeep 0.45s ease-out both;
+  animation-delay: var(--vm-beep, 0ms);
+}
+.sdv-vm-dot:nth-child(2) { animation-delay: calc(var(--vm-beep, 0ms) + 160ms); }
+.sdv-vm-dot:nth-child(3) { animation-delay: calc(var(--vm-beep, 0ms) + 320ms); }
+.sdv-vm-reveal {
+  animation: sdvVmReveal 0.6s ease both;
+  animation-delay: var(--vm-form, 0ms);
+}
+.sdv-vm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+/* Hand-drawn boxes: a slightly different, uneven corner on every box, so the
+   outlines read as drawn rather than machine-straight. To use real
+   hand-drawn outlines instead, the border can be swapped for an SVG
+   background. */
+.sdv-vm-field {
   box-sizing: border-box;
   width: 100%;
-  text-align: center;
-  background: var(--color-brand-orange, #e8581c);
+  font: inherit;
+  /* 16px or larger keeps iPhones from zooming in when a field is tapped. */
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--color-text);
+  background: #ffffff;
+  border: 1.5px solid var(--color-text, #1F160F);
+  border-radius: 14px 18px 12px 17px / 17px 12px 18px 13px;
+  padding: 0.7em 0.9em;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.sdv-vm-field-b { border-radius: 17px 12px 18px 13px / 13px 18px 12px 16px; }
+.sdv-vm-field-c {
+  border-radius: 16px 13px 18px 14px / 13px 17px 14px 18px;
+  resize: none;
+}
+.sdv-vm-field::placeholder { color: var(--color-text-muted, #4a4a4a); opacity: 0.7; }
+.sdv-vm-field:focus { border-color: var(--color-brand-orange, #FF540A); }
+.sdv-vm-send {
+  align-self: stretch;
+  background: var(--color-brand-orange, #FF540A);
   color: #ffffff;
-  font-size: 18px;
+  font: inherit;
+  font-size: 16px;
   font-weight: 700;
-  padding: 1rem;
+  padding: 0.85em 1em;
+  border: none;
   border-radius: 999px;
-  text-decoration: none;
+  cursor: pointer;
+}
+.sdv-vm-foot {
+  margin: 1.5rem 0 0;
+  font-size: 12px;
+  color: var(--color-text-muted, #4a4a4a);
+}
+.sdv-vm-foot a { color: inherit; text-decoration: underline; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sdv-connect-card, .sdv-connect-backdrop { animation: none; }
+  .sdv-vm-phone, .sdv-vm-ch, .sdv-vm-dot, .sdv-vm-reveal {
+    animation: none;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
 }
 `;
 
@@ -544,10 +832,16 @@ export default function Header() {
       if (e.key === "Escape") setConnectOpen(false);
     }
     window.addEventListener("keydown", onKey);
+    const mq = window.matchMedia(MODAL_QUERY);
+    function onResize() {
+      if (!mq.matches) setConnectOpen(false);
+    }
+    mq.addEventListener("change", onResize);
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", onKey);
+      mq.removeEventListener("change", onResize);
       document.body.style.overflow = previousOverflow;
     };
   }, [connectOpen]);
@@ -670,7 +964,17 @@ export default function Header() {
           <nav className="sdv-hdr-nav">
             {/* Order: Connect, Resume, LinkedIn, Github. */}
             {/* Desktop/tablet: the normal mailto: button. */}
-            <span className="sdv-connect-desktop">
+            <span
+              className="sdv-connect-desktop"
+              onClickCapture={(e) => {
+                // Tablet: same button as desktop, but it opens the voicemail
+                // card instead of the mail app.
+                if (window.matchMedia(MODAL_QUERY).matches) {
+                  e.preventDefault();
+                  setConnectOpen(true);
+                }
+              }}
+            >
               <Button href="mailto:sedelvillar104@gmail.com" fontSize={13}>
                 Connect
               </Button>
@@ -684,7 +988,12 @@ export default function Header() {
             >
               Connect
             </button>
-            <NavIconLink href="/resume.pdf" label="Resume" icon="/media/icons/document.png" />
+            <NavIconLink
+              href="/resume.pdf"
+              label="Resume"
+              icon="/media/icons/document.png"
+              className="sdv-resume-link"
+            />
             <NavIconLink
               href="https://www.linkedin.com/in/saradelvillar/"
               label="LinkedIn"
@@ -728,31 +1037,7 @@ export default function Header() {
             aria-label="Connect"
             onClick={() => setConnectOpen(false)}
           >
-            <div className="sdv-connect-card" onClick={(e) => e.stopPropagation()}>
-              <button
-                type="button"
-                className="sdv-connect-close"
-                aria-label="Close"
-                onClick={() => setConnectOpen(false)}
-              >
-                ×
-              </button>
-              <div className="sdv-connect-links">
-                <a href="/resume.pdf" target="_blank" rel="noreferrer">
-                  Resume
-                </a>
-                <a
-                  href="https://www.linkedin.com/in/saradelvillar/"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  LinkedIn
-                </a>
-              </div>
-              <a className="sdv-connect-email" href="mailto:sedelvillar104@gmail.com">
-                Email
-              </a>
-            </div>
+            <VoicemailCard onClose={() => setConnectOpen(false)} />
           </div>,
           document.body
         )}
