@@ -33,7 +33,9 @@ export default function Home() {
   ];
 
   return (
-    <main style={{ padding: "0 3rem 3rem" }}>
+    // No bottom padding: the footer (see Footer.tsx) supplies the space under
+    // the last row of cards.
+    <main style={{ padding: "0 3rem" }}>
       {/* Portrait removed — it now lives in Elie's "About" modal instead of
           next to this paragraph (see Elie.tsx's ProfileCircle, which reads
           from /media/elie/sara-profile.webp). This is a single-column block

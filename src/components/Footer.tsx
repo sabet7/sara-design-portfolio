@@ -20,7 +20,7 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="mt-auto flex items-baseline justify-between px-[clamp(1rem,3vw,3rem)] pt-4 pb-20 text-xs opacity-60">
+    <footer className="mt-auto flex items-baseline justify-between px-[clamp(1rem,3vw,3rem)] pt-6 pb-20 text-xs opacity-60">
       <span>© {year}</span>
       <span>Sara Del Villar</span>
     </footer>

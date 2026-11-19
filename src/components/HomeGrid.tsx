@@ -103,7 +103,10 @@ const GRID_CSS = `
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
   column-gap: var(--gap);
   row-gap: 0;
-  padding-bottom: 3rem;
+  /* Each card keeps --card-row-gap under its image, which also lands under
+     the last row. The negative margin cancels that, so the footer sits right
+     under the last row of cards at any number of projects. */
+  margin-bottom: calc(var(--card-row-gap) * -1);
 }
 .sdv-home-card {
   display: grid;
