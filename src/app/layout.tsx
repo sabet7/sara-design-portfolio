@@ -4,6 +4,7 @@ import { ViewTransition } from "react";
 import "./globals.css";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import GrainOverlay from "@/components/GrainOverlay";
 import { spaceGrotesk, bricolageGrotesque, cabinetGrotesk } from "@/lib/fonts";
 import DoodleLayer from '@/components/doodle-layer/DoodleLayer';
@@ -48,13 +49,7 @@ export default function RootLayout({
           {children}
           {modal}
         </ViewTransition>
-        {/* Copyright line. mt-auto pushes it to the bottom of short pages.
-            The large bottom padding keeps it clear of the floating nav that
-            is fixed to the bottom of the screen. Text color is inherited, so
-            it follows the dimmer stages. */}
-        <footer className="mt-auto px-6 pt-16 pb-28 text-center text-xs opacity-60">
-          CC 2026. Sara Del Villar
-        </footer>
+        <Footer />
         <Analytics />
       </body>
     </html>
